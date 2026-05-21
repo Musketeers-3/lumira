@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SkillPassportRouteImport } from './routes/skill-passport'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as EngineRouteImport } from './routes/engine'
+import { Route as ArchitectureLogRouteImport } from './routes/architecture-log'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SkillPassportRoute = SkillPassportRouteImport.update({
+  id: '/skill-passport',
+  path: '/skill-passport',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EngineRoute = EngineRouteImport.update({
+  id: '/engine',
+  path: '/engine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchitectureLogRoute = ArchitectureLogRouteImport.update({
+  id: '/architecture-log',
+  path: '/architecture-log',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,83 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/architecture-log': typeof ArchitectureLogRoute
+  '/engine': typeof EngineRoute
+  '/settings': typeof SettingsRoute
+  '/skill-passport': typeof SkillPassportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/architecture-log': typeof ArchitectureLogRoute
+  '/engine': typeof EngineRoute
+  '/settings': typeof SettingsRoute
+  '/skill-passport': typeof SkillPassportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/architecture-log': typeof ArchitectureLogRoute
+  '/engine': typeof EngineRoute
+  '/settings': typeof SettingsRoute
+  '/skill-passport': typeof SkillPassportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/architecture-log'
+    | '/engine'
+    | '/settings'
+    | '/skill-passport'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/architecture-log' | '/engine' | '/settings' | '/skill-passport'
+  id:
+    | '__root__'
+    | '/'
+    | '/architecture-log'
+    | '/engine'
+    | '/settings'
+    | '/skill-passport'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArchitectureLogRoute: typeof ArchitectureLogRoute
+  EngineRoute: typeof EngineRoute
+  SettingsRoute: typeof SettingsRoute
+  SkillPassportRoute: typeof SkillPassportRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/skill-passport': {
+      id: '/skill-passport'
+      path: '/skill-passport'
+      fullPath: '/skill-passport'
+      preLoaderRoute: typeof SkillPassportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/engine': {
+      id: '/engine'
+      path: '/engine'
+      fullPath: '/engine'
+      preLoaderRoute: typeof EngineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/architecture-log': {
+      id: '/architecture-log'
+      path: '/architecture-log'
+      fullPath: '/architecture-log'
+      preLoaderRoute: typeof ArchitectureLogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +132,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArchitectureLogRoute: ArchitectureLogRoute,
+  EngineRoute: EngineRoute,
+  SettingsRoute: SettingsRoute,
+  SkillPassportRoute: SkillPassportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
