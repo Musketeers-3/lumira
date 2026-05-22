@@ -5,13 +5,19 @@ import type { Message } from '../types';
 import { StepperBar } from './StepperBar';
 import { MentorCanvas } from './MentorCanvas';
 import { DebateTerminal } from './DebateTerminal';
+import { InteractiveDebateTerminal } from './InteractiveDebateTerminal';
 import { CelebrationOverlay } from './CelebrationOverlay';
 
-export function SocraticEngine() {
+interface SocraticEngineProps {
+  enableAI?: boolean; // Set to true to use real AI-powered dialogue
+}
+
+export function SocraticEngine({ enableAI = false }: SocraticEngineProps) {
   const { state, setState, isSpeaking, setIsSpeaking } = useLearningState();
   const [stepIndex, setStepIndex] = useState(-1); // -1 = not started
   const [messages, setMessages] = useState<Message[]>([]);
   const [celebrate, setCelebrate] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const speakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const total = demoScript.length;
@@ -72,12 +78,34 @@ export function SocraticEngine() {
       />
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
         <MentorCanvas state={state} isSpeaking={isSpeaking} />
-        <DebateTerminal
-          messages={messages}
-          stepIndex={Math.max(0, stepIndex)}
-          totalSteps={total}
-          isSpeaking={isSpeaking}
-        />
+        {enableAI ? (
+          <InteractiveDebateTerminal
+            messages={messages}
+            stepIndex={Math.max(0, stepIndex)}
+            totalSteps={total}
+            isSpeaking={isSpeaking}
+            isLoading={aiLoading}
+            enableAI={enableAI}
+            onSubmitAnswer={async (answer) => {
+              // TODO: Integrate with AI mentor when API is configured
+              setAiLoading(true);
+              try {
+                // Simulated AI response for now
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                console.log('[AI Mentor] Student answered:', answer);
+              } finally {
+                setAiLoading(false);
+              }
+            }}
+          />
+        ) : (
+          <DebateTerminal
+            messages={messages}
+            stepIndex={Math.max(0, stepIndex)}
+            totalSteps={total}
+            isSpeaking={isSpeaking}
+          />
+        )}
       </div>
       {celebrate && <CelebrationOverlay onClose={() => setCelebrate(false)} />}
     </div>
