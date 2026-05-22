@@ -1,11 +1,12 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Compass, Swords, Sparkles, ScrollText, Settings } from 'lucide-react';
+import { Compass, Swords, Sparkles, ScrollText, Settings, BookOpen } from 'lucide-react';
 import { useLearningState } from '@/lib/learning-state-context';
 
 const items = [
   { to: '/', label: 'Your Path', icon: Compass },
   { to: '/engine', label: 'The Dojo', icon: Swords },
   { to: '/skill-passport', label: 'Your Light', icon: Sparkles },
+  { to: '/lesson-builder', label: 'Create Lesson', icon: BookOpen },
   { to: '/architecture-log', label: 'Journey Log', icon: ScrollText },
   { to: '/settings', label: 'Settings', icon: Settings },
 ] as const;
