@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Message } from '../types';
 import { TerminalMessage } from './TerminalMessage';
 import { MicButton } from './MicButton';
@@ -17,9 +17,20 @@ interface Props {
 
 export function DebateTerminal({ messages, stepIndex, totalSteps, isSpeaking }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLDivElement>(null);
+  const [inputActive, setInputActive] = useState(false);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages.length]);
+
+  useEffect(() => {
+    // Auto-focus input when messages arrive and not speaking
+    if (messages.length > 0 && !isSpeaking && inputRef.current) {
+      inputRef.current.focus();
+      setInputActive(true);
+    }
+  }, [messages.length, isSpeaking]);
 
   return (
     <div className="flex h-full min-h-[520px] flex-col gap-4">
@@ -85,12 +96,26 @@ export function DebateTerminal({ messages, stepIndex, totalSteps, isSpeaking }: 
       </div>
 
       {/* Input dock */}
-      <div className="flex items-center gap-3 rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl transition-colors duration-700">
+      <div className="flex items-center gap-3 rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl transition-all duration-500"
+        style={{
+          boxShadow: inputActive ? '0 0 24px var(--state-glow)' : 'none',
+          borderColor: inputActive ? 'var(--state-accent)' : 'var(--border-glass)',
+        }}
+      >
         <MicButton active={isSpeaking} />
-        <div className="flex flex-1 items-center gap-2 rounded-xl bg-white/[0.04] px-4 py-3 font-mono text-sm text-muted-foreground">
+        <div
+          ref={inputRef}
+          onClick={() => setInputActive(true)}
+          onBlur={() => setInputActive(false)}
+          tabIndex={0}
+          className="flex flex-1 items-center gap-2 rounded-xl bg-white/[0.04] px-4 py-3 font-mono text-sm text-muted-foreground transition-all duration-500 cursor-text"
+          style={{
+            backgroundColor: inputActive ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
+          }}
+        >
           <span className="text-state-accent transition-colors duration-700">{'>'}</span>
-          <span>type or speak your reasoning_</span>
-          <span className="ml-auto text-[10px] uppercase tracking-widest opacity-50">demo</span>
+          <span className={inputActive ? 'text-foreground' : ''}>type or speak your reasoning_</span>
+          <span className="ml-auto text-[10px] uppercase tracking-widest opacity-50 animate-pulse">ready</span>
         </div>
       </div>
     </div>

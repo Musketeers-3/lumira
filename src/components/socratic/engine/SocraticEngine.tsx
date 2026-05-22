@@ -42,8 +42,15 @@ export function SocraticEngine() {
     });
     setIsSpeaking(true);
     if (speakTimer.current) clearTimeout(speakTimer.current);
-    speakTimer.current = setTimeout(() => setIsSpeaking(false), 1800);
-    if (step.celebrate) setCelebrate(true);
+    
+    // Adjust speaking duration based on state for more natural feel
+    const speakDuration = step.state === 'CHALLENGE' ? 2200 : step.state === 'CELEBRATE' ? 2800 : 1800;
+    speakTimer.current = setTimeout(() => setIsSpeaking(false), speakDuration);
+    
+    if (step.celebrate) {
+      // Delay celebration to sync with speaking animation
+      setTimeout(() => setCelebrate(true), 500);
+    }
   };
 
   const onNext = () => {

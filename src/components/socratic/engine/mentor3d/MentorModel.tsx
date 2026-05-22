@@ -33,9 +33,9 @@ export function MentorModel({ state, isSpeaking }: Props) {
     if (!root.current) return;
 
     // Posture targets per state
-    const targetLean = state === 'FOCUS' ? -0.12 : state === 'CHALLENGE' ? 0.04 : 0;
+    const targetLean = state === 'FOCUS' ? -0.12 : state === 'CHALLENGE' ? 0.04 : state === 'CELEBRATE' ? -0.06 : 0;
     const targetHeadTilt = state === 'CHALLENGE' ? -0.18 : state === 'CELEBRATE' ? 0.15 : 0;
-    const targetHeadY = state === 'CHALLENGE' ? -0.05 : 0;
+    const targetHeadY = state === 'CHALLENGE' ? -0.05 : state === 'CELEBRATE' ? 0.08 : 0;
 
     // Arm poses
     // IDLE/FOCUS: hands down. CHALLENGE: crossed. CELEBRATE: raised.
@@ -64,25 +64,35 @@ export function MentorModel({ state, isSpeaking }: Props) {
     leftArm.current.rotation.x = damp(leftArm.current.rotation.x, lArmX);
     rightArm.current.rotation.x = damp(rightArm.current.rotation.x, rArmX);
 
-    // Breathing
-    const breath = 1 + Math.sin(t * 1.2) * 0.012;
+    // Breathing — enhanced with state awareness
+    const breatheFreq = state === 'CHALLENGE' ? 2.2 : state === 'CELEBRATE' ? 1.8 : 1.2;
+    const breatheAmp = state === 'CELEBRATE' ? 0.018 : 0.012;
+    const breath = 1 + Math.sin(t * breatheFreq) * breatheAmp;
     torso.current.scale.y = breath;
 
-    // Eye narrow on CHALLENGE
-    const eyeScale = state === 'CHALLENGE' ? 0.45 : 1;
+    // Eye narrow on CHALLENGE, warm gaze on CELEBRATE
+    const eyeScale = state === 'CHALLENGE' ? 0.45 : state === 'CELEBRATE' ? 1.1 : 1;
     eyeL.current.scale.y = damp(eyeL.current.scale.y, eyeScale, 3);
     eyeR.current.scale.y = damp(eyeR.current.scale.y, eyeScale, 3);
 
-    // Speaking — jaw + head bob
+    // Eye contact shift — slight tracking
+    const eyeContactX = state === 'FOCUS' ? 0.02 : state === 'CHALLENGE' ? -0.008 : 0.01;
+    eyeL.current.position.x = damp(eyeL.current.position.x, -0.11 + eyeContactX, 2.5);
+    eyeR.current.position.x = damp(eyeR.current.position.x, 0.11 + eyeContactX, 2.5);
+
+    // Speaking — jaw + head bob with energy variation
     if (isSpeaking) {
-      head.current.position.y += Math.sin(t * 7) * 0.008;
-      jaw.current.scale.y = 1 + (Math.sin(t * 10) + 1) * 0.15;
+      const speakFreq = state === 'CHALLENGE' ? 12 : 10;
+      const bobAmp = state === 'CHALLENGE' ? 0.012 : 0.008;
+      head.current.position.y += Math.sin(t * speakFreq) * bobAmp;
+      jaw.current.scale.y = 1 + (Math.sin(t * speakFreq * 1.5) + 1) * 0.15;
     } else {
       jaw.current.scale.y = damp(jaw.current.scale.y, 1, 6);
     }
 
-    // Gentle sway always
-    root.current.rotation.y = Math.sin(t * 0.6) * 0.05;
+    // Gentle sway always, more pronounced during CELEBRATE
+    const swayAmp = state === 'CELEBRATE' ? 0.08 : 0.05;
+    root.current.rotation.y = Math.sin(t * 0.6) * swayAmp;
   });
 
   return (
