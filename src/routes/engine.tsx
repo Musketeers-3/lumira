@@ -4,10 +4,10 @@ import { SocraticEngine } from '@/components/socratic/engine/SocraticEngine';
 export const Route = createFileRoute('/engine')({
   head: () => ({
     meta: [
-      { title: 'The Socratic Engine — AI-Native Learning' },
-      { name: 'description', content: 'Immersive Socratic dialogue. Invent ideas instead of memorizing them.' },
-      { property: 'og:title', content: 'The Socratic Engine — AI-Native Learning' },
-      { property: 'og:description', content: 'Immersive Socratic dialogue. Invent ideas instead of memorizing them.' },
+      { title: 'The Dojo — Lumira' },
+      { name: 'description', content: 'Step into the dojo. A patient mentor walks beside you while you reason your way to ideas.' },
+      { property: 'og:title', content: 'The Dojo — Lumira' },
+      { property: 'og:description', content: 'Step into the dojo. A patient mentor walks beside you while you reason your way to ideas.' },
     ],
   }),
   component: () => (

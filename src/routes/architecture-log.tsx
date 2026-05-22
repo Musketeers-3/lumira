@@ -3,10 +3,10 @@ import { createFileRoute } from '@tanstack/react-router';
 export const Route = createFileRoute('/architecture-log')({
   head: () => ({
     meta: [
-      { title: 'Architecture Log — The Socratic Engine' },
-      { name: 'description', content: 'A timeline of every reasoning session and the intent shape of each dialogue.' },
-      { property: 'og:title', content: 'Architecture Log — The Socratic Engine' },
-      { property: 'og:description', content: 'A timeline of every reasoning session and the intent shape of each dialogue.' },
+      { title: 'Journey Log — Lumira' },
+      { name: 'description', content: 'A quiet record of every walk you and your mentor have taken together.' },
+      { property: 'og:title', content: 'Journey Log — Lumira' },
+      { property: 'og:description', content: 'A quiet record of every walk you and your mentor have taken together.' },
     ],
   }),
   component: ArchitectureLog,
@@ -16,25 +16,25 @@ const sessions = [
   {
     date: 'May 21, 2026', time: '19:42',
     lesson: 'Binary Search via the Dictionary Puzzle',
-    intents: ['Socratic Nudge x3', 'Challenge x2', 'Breakthrough'],
-    excerpt: '"I just... threw away the second half."',
+    intents: ['Gentle Push x3', 'Believing Challenge x2', 'Light Found'],
+    excerpt: '"I... don\'t need them anymore. I can throw the whole second half away."',
   },
   {
     date: 'May 18, 2026', time: '21:08',
     lesson: 'Recursion via the Russian Doll',
-    intents: ['Nudge x4', 'Challenge x1', 'Breakthrough'],
-    excerpt: '"So the function is calling a smaller version of itself."',
+    intents: ['Gentle Push x4', 'Believing Challenge x1', 'Light Found'],
+    excerpt: '"Wait — the function is calling a smaller version of itself."',
   },
   {
     date: 'May 14, 2026', time: '08:33',
     lesson: 'Big-O — Why doubling input matters',
-    intents: ['Nudge x5', 'Challenge x3'],
-    excerpt: '"Wait — it scales with the input, not the clock."',
+    intents: ['Gentle Push x5', 'Believing Challenge x3'],
+    excerpt: '"It scales with the input, not with the clock."',
   },
   {
     date: 'May 09, 2026', time: '22:11',
     lesson: 'Decomposition — Breaking the Sandwich',
-    intents: ['Nudge x2', 'Breakthrough'],
+    intents: ['Gentle Push x2', 'Light Found'],
     excerpt: '"Every big problem is just smaller problems pretending."',
   },
 ];
@@ -44,11 +44,11 @@ function ArchitectureLog() {
     <div className="mx-auto max-w-4xl space-y-8">
       <header>
         <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-state-accent transition-colors duration-700">
-          reasoning history
+          the walks you've taken
         </div>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl">Architecture Log</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl">Journey Log</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Every Socratic session, the intent shape of the dialogue, and the moment you broke through.
+          Every session you've shared, the shape of the conversation, and the moment you found your light.
         </p>
       </header>
 

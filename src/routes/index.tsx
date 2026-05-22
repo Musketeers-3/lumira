@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ArrowRight, Sparkles, Clock, TrendingUp, Brain } from 'lucide-react';
+import { ArrowRight, Sparkles, Clock, TrendingUp, Compass } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Dashboard — The Socratic Engine' },
-      { name: 'description', content: 'Your ambient learning OS — resume sessions, review breakthroughs, enter the Engine.' },
-      { property: 'og:title', content: 'Dashboard — The Socratic Engine' },
-      { property: 'og:description', content: 'Resume sessions, review breakthroughs, enter the Engine.' },
+      { title: 'Your Path — Lumira' },
+      { name: 'description', content: 'Resume your session with a mentor who believes in you.' },
+      { property: 'og:title', content: 'Your Path — Lumira' },
+      { property: 'og:description', content: 'Resume your session with a mentor who believes in you.' },
     ],
   }),
   component: Dashboard,
@@ -32,14 +32,14 @@ function Dashboard() {
         />
         <div className="relative">
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-state-accent transition-colors duration-700">
-            Resume session
+            welcome back
           </div>
           <h1 className="mt-3 max-w-2xl text-4xl font-semibold leading-tight tracking-tight lg:text-5xl">
-            Good evening. Your mind is mid-question on{' '}
+            I've been waiting for you. We were close to something on{' '}
             <span className="text-state-accent transition-colors duration-700">Binary Search</span>.
           </h1>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            The mentor is paused, holding your last reasoning step. Step back in and finish what you started.
+            Your mentor is here, patient — holding the thought right where you left it. Whenever you're ready, we'll continue together.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
@@ -51,14 +51,14 @@ function Dashboard() {
                 boxShadow: '0 0 32px var(--state-glow)',
               }}
             >
-              Enter the Engine
+              Enter the Dojo
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to="/skill-passport"
               className="inline-flex items-center gap-2 rounded-xl border border-glass-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              View Skill Passport
+              See Your Light
             </Link>
           </div>
         </div>
@@ -67,9 +67,9 @@ function Dashboard() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          { icon: Brain, label: 'Sessions', value: '24', sub: 'this month' },
-          { icon: Sparkles, label: 'Breakthroughs', value: '07', sub: 'concepts invented' },
-          { icon: Clock, label: 'Deep work', value: '11.4h', sub: 'in flow' },
+          { icon: Compass, label: 'Sessions', value: '24', sub: 'walks together' },
+          { icon: Sparkles, label: 'Light found', value: '07', sub: 'ideas you invented' },
+          { icon: Clock, label: 'Time present', value: '11.4h', sub: 'patient, focused' },
         ].map(({ icon: Icon, label, value, sub }) => (
           <Glass key={label} className="p-5">
             <Icon className="h-5 w-5 text-state-accent transition-colors duration-700" strokeWidth={1.5} />
@@ -84,7 +84,7 @@ function Dashboard() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Glass className="p-6">
           <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-            Current Lesson
+            Where we are
           </div>
           <h3 className="mt-2 text-xl font-semibold tracking-tight">Computational Thinking</h3>
           <p className="text-sm text-muted-foreground">The Dictionary Puzzle — Step 3 of 5</p>
@@ -101,20 +101,20 @@ function Dashboard() {
             ))}
           </div>
           <Link to="/engine" className="mt-5 inline-flex items-center gap-1.5 text-sm text-state-accent transition-colors duration-700">
-            Continue <ArrowRight className="h-3.5 w-3.5" />
+            Continue together <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </Glass>
 
         <Glass className="p-6">
           <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-            <TrendingUp className="h-3.5 w-3.5" /> Latest Breakthrough
+            <TrendingUp className="h-3.5 w-3.5" /> Light you found
           </div>
           <h3 className="mt-2 text-xl font-semibold tracking-tight">Recursion as Self-Reference</h3>
           <p className="mt-2 text-sm text-muted-foreground italic">
             "A function that solves a smaller version of its own problem."
           </p>
           <div className="mt-5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            invented 3 days ago
+            you reached this 3 days ago
           </div>
         </Glass>
       </div>
