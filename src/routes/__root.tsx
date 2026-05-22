@@ -19,16 +19,16 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center">
         <h1 className="font-mono text-7xl font-bold">404</h1>
-        <h2 className="mt-4 text-xl font-semibold">Signal lost</h2>
+        <h2 className="mt-4 text-xl font-semibold">A path that isn't here yet</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          That route is outside the Socratic Engine.
+          No worries — let's walk back together.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
-            Return to Dashboard
+            Return home
           </Link>
         </div>
       </div>
@@ -62,11 +62,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "The Socratic Engine" },
-      { name: "description", content: "An AI-native, cyber-elegant Socratic learning environment." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "The Socratic Engine" },
-      { property: "og:description", content: "An AI-native, cyber-elegant Socratic learning environment." },
+      { title: "Lumira — Learn beside someone who believes in you" },
+      { name: "description", content: "An AI-native, empathetic learning OS. A patient mentor that helps you invent ideas, not memorize them." },
+      { name: "author", content: "Lumira" },
+      { property: "og:title", content: "Lumira — Learn beside someone who believes in you" },
+      { property: "og:description", content: "An AI-native, empathetic learning OS. A patient mentor that helps you invent ideas, not memorize them." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
