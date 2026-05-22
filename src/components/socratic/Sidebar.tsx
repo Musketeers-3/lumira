@@ -1,12 +1,12 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, Brain, BadgeCheck, ScrollText, Settings } from 'lucide-react';
+import { Compass, Swords, Sparkles, ScrollText, Settings } from 'lucide-react';
 import { useLearningState } from '@/lib/learning-state-context';
 
 const items = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/engine', label: 'Engine', icon: Brain },
-  { to: '/skill-passport', label: 'Skill Passport', icon: BadgeCheck },
-  { to: '/architecture-log', label: 'Architecture Log', icon: ScrollText },
+  { to: '/', label: 'Your Path', icon: Compass },
+  { to: '/engine', label: 'The Dojo', icon: Swords },
+  { to: '/skill-passport', label: 'Your Light', icon: Sparkles },
+  { to: '/architecture-log', label: 'Journey Log', icon: ScrollText },
   { to: '/settings', label: 'Settings', icon: Settings },
 ] as const;
 
@@ -18,10 +18,13 @@ export function Sidebar() {
     <aside className="hidden lg:flex h-screen w-64 shrink-0 flex-col border-r border-glass-border bg-[oklch(0.10_0.03_270/0.6)] backdrop-blur-xl px-5 py-7 transition-colors duration-700">
       <div className="mb-10">
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-          Socratic // OS
+          lumira // ambient os
         </div>
         <div className="mt-1 text-xl font-semibold tracking-tight">
-          The Socratic <span className="text-state-accent transition-colors duration-700">Engine</span>
+          Lum<span className="text-state-accent transition-colors duration-700">ira</span>
+        </div>
+        <div className="mt-1 text-[11px] text-muted-foreground italic">
+          Learn beside someone who believes in you.
         </div>
       </div>
 
@@ -53,7 +56,7 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-xl border border-glass-border bg-white/[0.02] p-3">
         <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          AI Status
+          Mentor state
         </div>
         <div className="mt-1.5 flex items-center gap-2">
           <span

@@ -1,12 +1,12 @@
 import type { LearningState } from '../types';
-import { MentorAvatar } from './MentorAvatar';
+import { Mentor3D } from './Mentor3D';
 import { Waveform } from './Waveform';
 
 const tagFor = (s: LearningState) =>
-  s === 'IDLE' ? 'Awaiting Input'
-  : s === 'FOCUS' ? 'Listening Intently'
-  : s === 'CHALLENGE' ? 'Challenging Premise'
-  : 'Breakthrough Detected';
+  s === 'IDLE' ? 'Walking with you'
+  : s === 'FOCUS' ? 'Listening kindly'
+  : s === 'CHALLENGE' ? 'Believing in you'
+  : 'Proud of you';
 
 interface Props { state: LearningState; isSpeaking: boolean }
 
@@ -22,17 +22,17 @@ export function MentorCanvas({ state, isSpeaking }: Props) {
             className="h-2 w-2 animate-pulse rounded-full"
             style={{ background: 'var(--state-accent)', boxShadow: '0 0 12px var(--state-glow)' }}
           />
-          <span>AI Status:</span>
+          <span>Mentor:</span>
           <span className="text-state-accent transition-colors duration-700">{tagFor(state)}</span>
         </div>
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-          mentor.canvas
+          lumira.dojo
         </div>
       </div>
 
-      <div className="my-2 flex flex-1 items-center justify-center">
-        <div className="h-[320px] w-[320px]">
-          <MentorAvatar state={state} isSpeaking={isSpeaking} />
+      <div className="relative my-2 flex flex-1 items-center justify-center">
+        <div className="h-[420px] w-full max-w-[460px]">
+          <Mentor3D state={state} isSpeaking={isSpeaking} />
         </div>
       </div>
 

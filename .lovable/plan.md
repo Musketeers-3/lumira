@@ -1,135 +1,117 @@
-# The Socratic Engine — Build Plan (Multi-Page)
 
-A premium, multi-page immersive learning app with a state-driven theme system, animated mentor avatar, and a hardcoded Socratic demo. Frontend-only; no backend, no auth, no AI calls. Shared sidebar + ambient background persist across all routes.
+# Lumira — Tanjiro-Inspired 3D Mentor + Full Empathetic Rebrand
 
-## Routes
+Transform "The Socratic Engine" into **Lumira**, an empathetic learning OS with a real-time 3D mentor (original "inspired-by" character — kind-eyed swordsman with checkered green/black haori, scar on left brow) that breathes, leans, and reacts to learning state. Rewrite all copy from challenge-driven to belief-driven mentorship.
 
-| Path | File | Purpose |
-|------|------|---------|
-| `/` | `src/routes/index.tsx` | **Dashboard** — overview: current lesson card, recent breakthroughs, quick-resume CTA into the Engine |
-| `/engine` | `src/routes/engine.tsx` | **The Socratic Engine** — split-view mentor canvas + debate terminal + 5-step Binary Search demo (the centerpiece) |
-| `/skill-passport` | `src/routes/skill-passport.tsx` | **Skill Passport** — glass cards of unlocked concepts (Binary Search, Computational Thinking…), mastery meters, dates |
-| `/architecture-log` | `src/routes/architecture-log.tsx` | **Architecture Log** — timeline of past Socratic sessions, intent breakdown per session, transcript previews |
-| `/settings` | `src/routes/settings.tsx` | **Settings** — theme accent, mentor voice toggle, motion intensity, demo replay reset |
+## 1. Brand & Tone Rebrand
 
-Shared layout (sidebar + ambient background + top header) lives in `src/routes/__root.tsx` so it persists across navigations. Each route file declares its own `head()` meta (title, description, og:title, og:description) — no shared metadata copy.
+**Product name:** The Socratic Engine → **Lumira**
+**Tagline:** "Learn beside someone who believes in you."
 
-Active nav state via `<Link activeProps>` against `useRouterState`.
+**Page titles / route copy** (`__root.tsx`, all route `head()`, sidebar, `TopBar`):
+- Dashboard → "Your Path"
+- Engine → "The Dojo"
+- Skill Passport → "Your Light"
+- Architecture Log → "Journey Log"
+- Settings → "Settings"
 
-## File structure
+**Intent label rewrites** (`types.ts`, `TerminalMessage.tsx`, `demoScript.ts`):
+- `Socratic Nudge` → **Gentle Push**
+- `Socratic Challenge` → **Believing Challenge**
+- `Breakthrough` → **Light Found**
+- `Student` → **You**
+
+**Status pill copy** (`MentorCanvas.tsx`):
+- IDLE → "Walking with you"
+- FOCUS → "Listening kindly"
+- CHALLENGE → "Believing in you"
+- CELEBRATE → "Proud of you"
+
+**Demo script** (`demoScript.ts`) — full rewrite of all 5 steps. Same Binary Search arc, Tanjiro-style voice. Examples:
+- Old: "That works — but it could take all day."
+- New: "That's a real solution — it would work. But you're stronger than that. What if you opened the dictionary right in the middle? I think you'll see something."
+- Old: "You just independently invented the Binary Search Algorithm."
+- New: "You did it. You didn't memorize this — you *found* it. That's Binary Search. And I knew you'd reach it."
+
+Rewrite Dashboard/Skill Passport/Architecture Log/Settings body copy to match (encouragement, belief, no punishment language).
+
+## 2. 3D Mentor (Three.js)
+
+**Stack:** add `three`, `@react-three/fiber`, `@react-three/drei` via `bun add`.
+
+**Character:** original "inspired-by" — no Tanjiro name or exact likeness. Built procedurally from primitives (no GLB needed, no IP risk, no asset hosting):
+- Head: rounded sphere, warm peach material
+- Hair: low-poly tousled dark-brown shape (clustered cones)
+- Eyes: kind almond shape (flattened spheres), soft amber irises with subtle emissive glow
+- Scar: thin red `MeshLine` strip across left brow
+- Earrings: two small flat discs (hanafuda-style, hand-painted texture via canvas)
+- Haori: green/black checkered pattern via a canvas-generated `CanvasTexture` applied to a draped torso mesh (cylinder + folds)
+- Inner kimono: cream tone
+- Belt: dark sash
+
+Optional later: if user uploads a custom GLB, swap procedural model for it (out of scope this turn).
+
+**File: `src/components/socratic/engine/Mentor3D.tsx`**
+- `<Canvas camera={{ position: [0, 1.4, 2.6], fov: 32 }}>` inside the existing `MentorCanvas`.
+- `<ambientLight />` + key/rim lights tinted by `--state-accent` (read via `getComputedStyle` on `useFrame` tick).
+- `<MentorModel state isSpeaking />` group:
+  - **Breathing:** torso scale.y `1 + sin(t * 1.2) * 0.015` (IDLE).
+  - **Lean forward:** group rotation.x lerp toward `-0.08` in FOCUS.
+  - **Crossed arms / lowered head:** in CHALLENGE, arm bones cross, head tilts down 4°, brow furrow via blend (procedural — slight scaleY on eyes).
+  - **Arms-up triumph:** in CELEBRATE, arm groups rotate to raised pose, soft gold rim-light bloom.
+  - **Speaking:** subtle jaw scale pulse + head bob `sin(t * 6) * 0.01` when `isSpeaking`.
+- Soft contact shadow via `<ContactShadows />` from drei.
+- Post-processing: a thin `<Environment preset="sunset" />` or simple HDR-free gradient backdrop for warmth.
+- All motion via `useFrame`, lerped with `MathUtils.damp` for cinematic ease.
+
+**Replace** `MentorAvatar.tsx` usage in `MentorCanvas.tsx` with `<Mentor3D />`. Keep `MentorAvatar.tsx` file as a 2D fallback (rendered if `webgl` unsupported — feature-detect once with `useEffect`).
+
+**Performance:** `dpr={[1, 1.5]}`, `frameloop="always"` (needed for breathing). Single canvas only.
+
+## 3. Palette Warm-Up (subtle)
+
+Lumira's mentor is warm; the cyber-cold base feels off. Tweak `src/styles.css`:
+- IDLE accent shifts from indigo → warm amber-cream: `oklch(0.82 0.10 75)` (still pairs with deep navy bg).
+- CELEBRATE accent shifts emerald → soft gold: `oklch(0.88 0.14 90)`.
+- FOCUS and CHALLENGE unchanged.
+
+Glassmorphism, transitions, and state-driven background stay intact.
+
+## 4. Files Touched
 
 ```
-src/routes/
-  __root.tsx                         -> Sidebar + AmbientBackground + Outlet + per-route head
-  index.tsx                          -> Dashboard
-  engine.tsx                         -> Socratic Engine
-  skill-passport.tsx                 -> Skill Passport
-  architecture-log.tsx               -> Architecture Log
-  settings.tsx                       -> Settings
-
-src/components/socratic/
-  AmbientBackground.tsx              -> radial gradients + drifting orb, state-tinted (global)
-  Sidebar.tsx                        -> Dashboard / Engine / Skill Passport / Architecture Log / Settings
-  TopBar.tsx                         -> route title + global state pill
-  engine/
-    SocraticEngine.tsx               -> owns learningState + demo step
-    StepperBar.tsx                   -> 5-step demo controls + reset
-    MentorCanvas.tsx                 -> glass canvas, state tag, avatar, waveform
-    MentorAvatar.tsx                 -> SVG silhouette posture variants
-    Waveform.tsx                     -> CSS-animated bars
-    DebateTerminal.tsx               -> topic card + log feed + input dock
-    TerminalMessage.tsx              -> terminal-styled message w/ intent subtitle
-    MicButton.tsx                    -> oversized circular ripple button
-    CelebrationOverlay.tsx           -> breakthrough card + particle flashes
-    demoScript.ts                    -> hardcoded 5-step Binary Search script
-  dashboard/
-    LessonCard.tsx, BreakthroughCard.tsx, ResumeCTA.tsx
-  passport/
-    SkillCard.tsx (hover card w/ details)
-  log/
-    SessionTimelineItem.tsx
-  types.ts                           -> LearningState, Intent, Message, Step
-
-src/lib/
-  learning-state-context.tsx         -> React context so sidebar/topbar reflect Engine state across routes
+NEW   src/components/socratic/engine/Mentor3D.tsx          (Canvas + procedural model)
+NEW   src/components/socratic/engine/mentor3d/MentorModel.tsx
+NEW   src/components/socratic/engine/mentor3d/useHaoriTexture.ts  (canvas checkered texture)
+EDIT  src/components/socratic/engine/MentorCanvas.tsx       (use Mentor3D, new status copy)
+EDIT  src/components/socratic/engine/demoScript.ts          (5 steps, Tanjiro voice)
+EDIT  src/components/socratic/engine/TerminalMessage.tsx    (new intent label colors)
+EDIT  src/components/socratic/types.ts                       (new Intent union)
+EDIT  src/components/socratic/Sidebar.tsx                    (Lumira brand, new nav labels)
+EDIT  src/components/socratic/TopBar.tsx                     (Lumira title, new status copy)
+EDIT  src/routes/__root.tsx                                  (title: Lumira)
+EDIT  src/routes/index.tsx                                   (Your Path, empathetic copy)
+EDIT  src/routes/engine.tsx                                  (The Dojo, head meta)
+EDIT  src/routes/skill-passport.tsx                          (Your Light, copy)
+EDIT  src/routes/architecture-log.tsx                        (Journey Log, copy)
+EDIT  src/routes/settings.tsx                                (mentor warmth slider stub)
+EDIT  src/styles.css                                         (warmer IDLE/CELEBRATE accents)
 ```
 
-## Global state (cross-route)
+## 5. Technical notes
 
-`LearningStateProvider` mounted in `__root.tsx` exposes `{ state, setState, isSpeaking }`. The Engine drives it; other pages read it so the **AmbientBackground and sidebar accent tint stay in sync** even when the user wanders to Skill Passport mid-session. Resets to `IDLE` on `/engine` unmount via Reset, not on navigation.
+- New deps: `three`, `@react-three/fiber`, `@react-three/drei` (all MIT, edge-safe — client-only render).
+- 3D Canvas runs client-only; wrap in dynamic mount guard (`useEffect` flag) to avoid SSR `window` errors.
+- No GLB asset needed → no licensing risk, no asset hosting, ships immediately.
+- 2D `MentorAvatar.tsx` retained as graceful fallback if WebGL unavailable.
+- No new routes, no backend, no Cloud.
+- Mic remains visual simulation.
 
-```ts
-type LearningState = 'IDLE' | 'FOCUS' | 'CHALLENGE' | 'CELEBRATE';
-```
+## 6. Out of scope
 
-## Theme system
-
-Tokens added in `src/styles.css` (oklch). State swapped via `data-state` attribute on `<html>` (set from context) so every page transitions together with `duration-700 ease-in-out`. Tokens: `--ambient-from/via/to`, `--glow`, `--accent`, `--aura`, `--surface-glass`, `--border-glass`. Registered in `@theme inline` so Tailwind utilities like `bg-ambient-from`, `border-border-glass`, `shadow-[0_0_80px_var(--glow)]` work.
-
-State palettes:
-- IDLE — deep indigo/charcoal `#0B0F19`, soft indigo orb
-- FOCUS — sapphire + mist-blue, steady pulse
-- CHALLENGE — obsidian + crimson/violet, sharp aura
-- CELEBRATE — emerald + gold radial bursts
-
-## Engine page (the centerpiece)
-
-Top: `StepperBar` (Step 1–5 + Reset). Two-column grid `lg:grid-cols-[3fr_2fr]` (60/40), stacks on mobile.
-
-**Mentor Canvas (60%)** — glass container (`backdrop-blur-xl`, `border border-white/10`, `box-shadow: 0 0 80px var(--glow)`); status pill "AI Status: {tag}" with pulsing dot; SVG `MentorAvatar` with posture variants (IDLE breathing, FOCUS lean, CHALLENGE crossed-arms + crimson eye glow, CELEBRATE arms-up + gold drop-shadow), all via `transition-transform duration-700`; bottom 24-bar waveform amplitude scales with `isSpeaking`.
-
-**Debate Terminal (40%)** — topic card "Computational Thinking — The Dictionary Puzzle" with 5 progress dots (shadcn HoverCard on each); terminal-styled feed (`mentor@socratic:~$` mono prefix, `[Socratic Nudge]` intent subtitle in `--accent`, sans body, fade-in slide-up); dock with oversized circular `MicButton` (h-16 w-16, 3 expanding ripple rings, **visual only — no real audio**) + mono text input `> _`.
-
-### Hardcoded demo script (per spec)
-
-1. **FOCUS** — "If you need to find a specific word in a 1,000-page dictionary…" + student "page 1 to 1000".
-2. **CHALLENGE** — `[Socratic Challenge]` split-in-half prompt.
-3. **CHALLENGE** — student halving response + `[Socratic Nudge]` follow-up.
-4. **CHALLENGE** — student "throw away the second half" breakthrough line.
-5. **CELEBRATE** — triumphant copy + `CelebrationOverlay`: "Breakthrough! You just independently invented the Binary Search Algorithm."
-
-Stepper advances/rewinds; Reset clears messages → IDLE.
-
-## Other pages (content)
-
-- **Dashboard** — hero "Resume your session" linking to `/engine`, current-lesson glass card, last-breakthrough card, quick stats (sessions, breakthroughs, hours).
-- **Skill Passport** — grid of `SkillCard`s (Binary Search unlocked, Computational Thinking in progress, plus 4 locked placeholders), mastery bars, hover cards with discovery date + intent breakdown.
-- **Architecture Log** — vertical timeline of mock sessions; each item: date, lesson, dominant intent tags, expandable transcript snippet.
-- **Settings** — accent picker (indigo/sapphire/emerald), motion intensity slider, "Replay demo from start" button (routes to `/engine` + resets), about blurb. All UI-only.
-
-## Micro-interactions
-
-- All theme-affecting elements: `transition-[background,border-color,box-shadow,color] duration-700 ease-in-out`.
-- shadcn HoverCard on progress dots + skill cards.
-- Celebration: full-screen overlay, radial gold/emerald burst, 12 particle divs with staggered keyframe flashes, auto-dismiss after 3s or click.
-- Mic ripple: 3 concentric expanding rings via keyframes.
-- Sidebar nav: cyber icons (LayoutDashboard, Brain, BadgeCheck, ScrollText, Settings), active item gets `--accent` glow bar + bold label.
-- Sidebar collapses to icon rail on `<lg`.
-
-## Typography
-
-Inter (sans) + JetBrains Mono via Google Fonts `<link>` in `__root.tsx` head. Mapped to `--font-sans` / `--font-mono`. Mono for terminal prefixes, status tags, stepper, mic command text. Inter for everything else.
-
-## SEO / head
-
-Per-route `head()` with distinct title + description + og:title + og:description. No og:image (no hero image generated). Examples:
-- `/` — "Dashboard — The Socratic Engine"
-- `/engine` — "The Socratic Engine — AI-Native Learning"
-- `/skill-passport` — "Skill Passport — The Socratic Engine"
-- `/architecture-log` — "Architecture Log — The Socratic Engine"
-- `/settings` — "Settings — The Socratic Engine"
-
-## Technical notes
-
-- Pure frontend, no Cloud / server functions. No new npm deps.
-- TanStack Start file-based routing; flat route files only (no `_app/` folder).
-- `__root.tsx` keeps `<Outlet />` and renders Sidebar + AmbientBackground + TopBar around it.
-- Avatar is a single SVG with conditional path groups — no external 3D libs.
-- Mic does NOT request microphone permissions; visual simulation only.
-- All colors via semantic tokens — no raw hex in JSX.
-
-## Out of scope
-
-Real STT/AI, persistence, auth, database, og:image generation.
+- Real Tanjiro likeness/name (IP) — using original character per your choice.
+- Uploaded GLB support (can add later if you provide a model).
+- Real voice synthesis for the mentor.
+- Lip-sync (jaw pulse approximates it).
 
 Ready to build on approval.

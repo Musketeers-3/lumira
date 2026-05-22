@@ -7,10 +7,10 @@ import {
 export const Route = createFileRoute('/skill-passport')({
   head: () => ({
     meta: [
-      { title: 'Skill Passport — The Socratic Engine' },
-      { name: 'description', content: 'Concepts you have personally invented through Socratic dialogue.' },
-      { property: 'og:title', content: 'Skill Passport — The Socratic Engine' },
-      { property: 'og:description', content: 'Concepts you have personally invented through Socratic dialogue.' },
+      { title: 'Your Light — Lumira' },
+      { name: 'description', content: 'Every idea here is one you found on your own, beside a mentor who believed you could.' },
+      { property: 'og:title', content: 'Your Light — Lumira' },
+      { property: 'og:description', content: 'Every idea here is one you found on your own, beside a mentor who believed you could.' },
     ],
   }),
   component: SkillPassport,
@@ -39,11 +39,11 @@ function SkillPassport() {
     <div className="mx-auto max-w-6xl space-y-6">
       <header>
         <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-state-accent transition-colors duration-700">
-          credentialed by reasoning
+          ideas you reached on your own
         </div>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl">Skill Passport</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl">Your Light</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Every entry below is something you invented in dialogue — not memorized from a slide.
+          Each one of these — you weren't told. You found it. The mentor only walked beside you.
         </p>
       </header>
 
