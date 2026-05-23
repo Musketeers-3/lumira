@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillPassportRouteImport } from './routes/skill-passport'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as LessonBuilderRouteImport } from './routes/lesson-builder'
 import { Route as EngineRouteImport } from './routes/engine'
 import { Route as ArchitectureLogRouteImport } from './routes/architecture-log'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const SkillPassportRoute = SkillPassportRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonBuilderRoute = LessonBuilderRouteImport.update({
+  id: '/lesson-builder',
+  path: '/lesson-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EngineRoute = EngineRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/architecture-log': typeof ArchitectureLogRoute
   '/engine': typeof EngineRoute
+  '/lesson-builder': typeof LessonBuilderRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/architecture-log': typeof ArchitectureLogRoute
   '/engine': typeof EngineRoute
+  '/lesson-builder': typeof LessonBuilderRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/architecture-log': typeof ArchitectureLogRoute
   '/engine': typeof EngineRoute
+  '/lesson-builder': typeof LessonBuilderRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
 }
@@ -69,15 +78,23 @@ export interface FileRouteTypes {
     | '/'
     | '/architecture-log'
     | '/engine'
+    | '/lesson-builder'
     | '/settings'
     | '/skill-passport'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/architecture-log' | '/engine' | '/settings' | '/skill-passport'
+  to:
+    | '/'
+    | '/architecture-log'
+    | '/engine'
+    | '/lesson-builder'
+    | '/settings'
+    | '/skill-passport'
   id:
     | '__root__'
     | '/'
     | '/architecture-log'
     | '/engine'
+    | '/lesson-builder'
     | '/settings'
     | '/skill-passport'
   fileRoutesById: FileRoutesById
@@ -86,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArchitectureLogRoute: typeof ArchitectureLogRoute
   EngineRoute: typeof EngineRoute
+  LessonBuilderRoute: typeof LessonBuilderRoute
   SettingsRoute: typeof SettingsRoute
   SkillPassportRoute: typeof SkillPassportRoute
 }
@@ -104,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lesson-builder': {
+      id: '/lesson-builder'
+      path: '/lesson-builder'
+      fullPath: '/lesson-builder'
+      preLoaderRoute: typeof LessonBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/engine': {
@@ -134,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArchitectureLogRoute: ArchitectureLogRoute,
   EngineRoute: EngineRoute,
+  LessonBuilderRoute: LessonBuilderRoute,
   SettingsRoute: SettingsRoute,
   SkillPassportRoute: SkillPassportRoute,
 }

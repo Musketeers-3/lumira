@@ -1,25 +1,53 @@
-import { useEffect, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { ContactShadows, Environment } from '@react-three/drei';
-import type { LearningState } from '../types';
-import { MentorModel } from './mentor3d/MentorModel';
-import { MentorAvatar } from './MentorAvatar';
+import { Suspense, useEffect, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { ContactShadows, Environment } from "@react-three/drei";
+import type { LearningState } from "../types";
+import { MentorAvatar } from "./MentorAvatar";
+import { MentorRig } from "./mentor3d/MentorRig";
+import { StudyScene } from "./mentor3d/StudyScene";
+import { MentorSceneLights } from "./mentor3d/MentorSceneLights";
+import { useMentorSettingsOptional } from "@/lib/mentor-settings-hooks";
 
 interface Props {
   state: LearningState;
   isSpeaking: boolean;
+  isPausing?: boolean;
 }
 
 function detectWebGL(): boolean {
   try {
-    const canvas = document.createElement('canvas');
-    return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
   } catch {
     return false;
   }
 }
 
-export function Mentor3D({ state, isSpeaking }: Props) {
+function SceneContent({ state, isSpeaking, isPausing }: Props) {
+  const settings = useMentorSettingsOptional();
+  const warmthBias = settings?.warmthBias ?? 0.6;
+
+  return (
+    <>
+      <MentorSceneLights state={state} warmthBias={warmthBias} />
+      <StudyScene state={state} warmthBias={warmthBias} />
+      <Suspense
+        fallback={
+          <MentorRig state={state} isSpeaking={isSpeaking} isPausing={isPausing ?? false} />
+        }
+      >
+        <MentorRig state={state} isSpeaking={isSpeaking} isPausing={isPausing ?? false} />
+      </Suspense>
+      <ContactShadows position={[0, -0.92, 0]} opacity={0.4} scale={5} blur={2.5} far={2} />
+      <Environment preset="apartment" />
+    </>
+  );
+}
+
+export function Mentor3D({ state, isSpeaking, isPausing = false }: Props) {
   const [mounted, setMounted] = useState(false);
   const [webgl, setWebgl] = useState(true);
 
@@ -33,52 +61,24 @@ export function Mentor3D({ state, isSpeaking }: Props) {
   }
 
   if (!webgl) {
-    // Graceful 2D fallback
     return (
       <div className="h-full w-full">
-        <MentorAvatar state={state} isSpeaking={isSpeaking} />
+        <MentorAvatar state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
       </div>
     );
   }
 
-  // Rim/key light tone shifts with state via emissive hints in materials.
-  const keyColor =
-    state === 'CHALLENGE' ? '#ff6a4d'
-    : state === 'CELEBRATE' ? '#ffd97a'
-    : state === 'FOCUS' ? '#7fb3ff'
-    : '#f4d9a8';
-
   return (
     <Canvas
       shadows
-      dpr={[1, 1.6]}
-      camera={{ position: [0, 0.4, 2.7], fov: 32 }}
-      gl={{ antialias: true, alpha: true }}
-      style={{ width: '100%', height: '100%' }}
+      dpr={[1, 1.5]}
+      camera={{ position: [0, 0.62, 2.15], fov: 36 }}
+      gl={{ antialias: true, alpha: false }}
+      style={{ width: "100%", height: "100%" }}
     >
-      <color attach="background" args={[0, 0, 0]} />
-      <ambientLight intensity={0.45} />
-      <directionalLight
-        position={[2.2, 3, 2]}
-        intensity={1.1}
-        color={keyColor}
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-      />
-      <directionalLight position={[-2.5, 1.5, -1]} intensity={0.45} color={keyColor} />
-      <pointLight position={[0, 1.5, 2]} intensity={0.4} color="#fff2dc" />
-
-      <MentorModel state={state} isSpeaking={isSpeaking} />
-
-      <ContactShadows
-        position={[0, -0.92, 0]}
-        opacity={0.45}
-        scale={4}
-        blur={2.5}
-        far={2}
-      />
-      <Environment preset="sunset" />
+      <color attach="background" args={["#141210"]} />
+      <fog attach="fog" args={["#141210", 4, 9]} />
+      <SceneContent state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
     </Canvas>
   );
 }

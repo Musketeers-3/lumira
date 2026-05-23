@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, RotateCcw, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, Play } from "lucide-react";
 
 interface Props {
   stepIndex: number;
@@ -18,9 +18,9 @@ export function StepperBar({ stepIndex, total, onPrev, onNext, onReset, started 
         </div>
         <div className="font-mono text-sm">
           <span className="text-state-accent transition-colors duration-700">
-            {String(started ? stepIndex + 1 : 0).padStart(2, '0')}
+            {String(started ? stepIndex + 1 : 0).padStart(2, "0")}
           </span>
-          <span className="text-muted-foreground"> / {String(total).padStart(2, '0')}</span>
+          <span className="text-muted-foreground"> / {String(total).padStart(2, "0")}</span>
         </div>
       </div>
 
@@ -43,13 +43,13 @@ export function StepperBar({ stepIndex, total, onPrev, onNext, onReset, started 
           onClick={onNext}
           className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-500"
           style={{
-            background: 'var(--state-accent)',
-            color: 'oklch(0.12 0.02 270)',
-            boxShadow: '0 0 24px var(--state-glow)',
+            background: "var(--state-accent)",
+            color: "oklch(0.12 0.02 270)",
+            boxShadow: "0 0 24px var(--state-glow)",
           }}
         >
           {!started ? <Play className="h-3.5 w-3.5" /> : <ChevronRight className="h-4 w-4" />}
-          {!started ? 'Begin' : stepIndex === total - 1 ? 'Replay' : 'Next'}
+          {!started ? "Begin" : stepIndex === total - 1 ? "Replay" : "Next"}
         </button>
       </div>
     </div>

@@ -1,54 +1,38 @@
-import { useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { useEffect } from "react";
 
 export function CelebrationOverlay({ onClose }: { onClose: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onClose, 4000);
+    const t = setTimeout(onClose, 3500);
     return () => clearTimeout(t);
   }, [onClose]);
 
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md animate-in fade-in duration-500"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-700"
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({ length: 18 }).map((_, i) => {
-          const angle = (i / 18) * Math.PI * 2;
-          const dist = 200 + (i % 4) * 60;
-          return (
-            <span
-              key={i}
-              className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full"
-              style={{
-                background: i % 2 ? 'var(--state-accent)' : 'oklch(0.85 0.18 90)',
-                boxShadow: '0 0 14px var(--state-glow)',
-                ['--tx' as string]: `${Math.cos(angle) * dist}px`,
-                ['--ty' as string]: `${Math.sin(angle) * dist}px`,
-                animation: `particle-pop ${1.2 + (i % 5) * 0.2}s ease-out ${i * 0.04}s forwards`,
-              }}
-            />
-          );
-        })}
-      </div>
+      {/* Single soft glow pulse — no confetti */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-40"
+        style={{
+          background: "radial-gradient(circle, var(--state-glow) 0%, transparent 70%)",
+          animation: "ripple 2.5s ease-out infinite",
+        }}
+      />
 
       <div
-        className="relative max-w-lg rounded-3xl border border-glass-border bg-[oklch(0.14_0.05_140/0.85)] p-10 text-center backdrop-blur-2xl animate-in zoom-in-95 duration-500"
-        style={{ boxShadow: '0 0 120px var(--state-glow)' }}
+        className="relative max-w-lg rounded-3xl border border-glass-border bg-[oklch(0.14_0.05_140/0.9)] p-10 text-center backdrop-blur-2xl animate-in zoom-in-95 duration-700"
+        style={{ boxShadow: "0 0 80px var(--state-glow)" }}
       >
-        <Sparkles
-          className="mx-auto h-10 w-10"
-          style={{ color: 'var(--state-accent)', filter: 'drop-shadow(0 0 12px var(--state-glow))' }}
-          strokeWidth={1.5}
-        />
-        <div className="mt-4 font-mono text-[11px] uppercase tracking-[0.3em] text-state-accent">
+        <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-state-accent">
           Breakthrough
         </div>
-        <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-          You just independently invented the Binary Search Algorithm.
+        <h2 className="mt-4 text-2xl font-semibold tracking-tight leading-snug">
+          You discovered it yourself.
         </h2>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Halve the problem each step → solve any 1,000-page lookup in under 10 moves.
+        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+          That understanding will stay with you now. Binary Search — halve the problem each step,
+          and any lookup becomes a handful of moves.
         </p>
         <div className="mt-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           tap anywhere to continue

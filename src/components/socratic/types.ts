@@ -1,6 +1,6 @@
-export type LearningState = 'IDLE' | 'FOCUS' | 'CHALLENGE' | 'CELEBRATE';
-export type Intent = 'Gentle Push' | 'Believing Challenge' | 'Light Found' | 'You';
-export type Speaker = 'mentor' | 'student';
+export type LearningState = "IDLE" | "FOCUS" | "CHALLENGE" | "CELEBRATE";
+export type Intent = "Gentle Push" | "Believing Challenge" | "Light Found" | "You";
+export type Speaker = "mentor" | "student";
 
 export interface Message {
   id: string;

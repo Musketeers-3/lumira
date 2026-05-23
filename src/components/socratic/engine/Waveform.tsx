@@ -1,19 +1,23 @@
-interface Props { active: boolean }
+interface Props {
+  active: boolean;
+}
+
+/** Subtle presence indicator — not a VTuber equalizer. */
 export function Waveform({ active }: Props) {
+  const bars = 5;
   return (
-    <div className="flex h-12 items-center justify-center gap-[3px]">
-      {Array.from({ length: 28 }).map((_, i) => (
+    <div className="flex h-10 items-end justify-center gap-2">
+      {Array.from({ length: bars }).map((_, i) => (
         <span
           key={i}
-          className="w-[3px] rounded-full transition-colors duration-700"
+          className="w-1 rounded-full transition-all duration-700"
           style={{
-            background: 'var(--state-accent)',
-            opacity: active ? 0.9 : 0.25,
-            height: active ? `${20 + Math.abs(Math.sin(i * 0.6)) * 28}px` : '8px',
+            background: "var(--state-accent)",
+            opacity: active ? 0.55 + (i % 2) * 0.15 : 0.2,
+            height: active ? `${10 + (i % 3) * 6}px` : "6px",
             animation: active
-              ? `wave ${0.6 + (i % 5) * 0.15}s ease-in-out ${i * 0.04}s infinite`
-              : undefined,
-            transition: 'height 400ms ease, opacity 400ms ease',
+              ? `wave ${1.4 + i * 0.2}s ease-in-out ${i * 0.12}s infinite`
+              : "breathe 3s ease-in-out infinite",
           }}
         />
       ))}
