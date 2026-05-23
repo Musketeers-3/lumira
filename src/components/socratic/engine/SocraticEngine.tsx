@@ -213,24 +213,15 @@ export function SocraticEngine({
       />
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
         <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
-        {enableAI ? (
-          <InteractiveDebateTerminal
-            messages={terminalMessages}
-            stepIndex={Math.max(0, stepIndex)}
-            totalSteps={total}
-            isSpeaking={isSpeaking}
-            isLoading={aiLoading}
-            enableAI={enableAI}
-            onSubmitAnswer={handleAiAnswer}
-          />
-        ) : (
-          <DebateTerminal
-            messages={terminalMessages}
-            stepIndex={Math.max(0, stepIndex)}
-            totalSteps={total}
-            isSpeaking={isSpeaking}
-          />
-        )}
+        <InteractiveDebateTerminal
+          messages={terminalMessages}
+          stepIndex={Math.max(0, stepIndex)}
+          totalSteps={total}
+          isSpeaking={isSpeaking}
+          isLoading={aiLoading}
+          enableAI={enableAI}
+          onSubmitAnswer={enableAI ? handleAiAnswer : handleStudentSpeak}
+        />
       </div>
       {celebrate && <CelebrationOverlay onClose={() => setCelebrate(false)} />}
     </div>
