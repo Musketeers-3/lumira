@@ -50,7 +50,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = getSpeechRecognitionCtor();
