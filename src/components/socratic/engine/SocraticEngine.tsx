@@ -8,7 +8,6 @@ import { demoScript } from "./demoScript";
 import type { LearningState, Message } from "../types";
 import { StepperBar } from "./StepperBar";
 import { MentorCanvas } from "./MentorCanvas";
-import { DebateTerminal } from "./DebateTerminal";
 import { InteractiveDebateTerminal } from "./InteractiveDebateTerminal";
 import { CelebrationOverlay } from "./CelebrationOverlay";
 
