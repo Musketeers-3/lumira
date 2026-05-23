@@ -31,7 +31,7 @@ export function InteractiveDebateTerminal({
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { isListening, transcript, startListening, stopListening, resetTranscript } =
+  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } =
     useSpeechRecognition({
       language: "en-US",
       interimResults: true,
