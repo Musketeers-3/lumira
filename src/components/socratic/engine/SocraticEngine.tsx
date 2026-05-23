@@ -177,6 +177,16 @@ export function SocraticEngine({
     }
   };
 
+  const handleStudentSpeak = async (answer: string) => {
+    const newMsg: Message = {
+      id: `student-${Date.now()}`,
+      speaker: "student",
+      intent: "You",
+      text: answer,
+    };
+    setMessages((prev) => [...prev, newMsg]);
+  };
+
   const intentFromAi = (
     type?: "gentle_push" | "revealing_challenge" | "breakthrough_confirmation",
   ): Message["intent"] => {
