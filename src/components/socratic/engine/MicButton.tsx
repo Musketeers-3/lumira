@@ -1,11 +1,19 @@
 import { Mic } from "lucide-react";
 
-export function MicButton({ active }: { active: boolean }) {
+interface MicButtonProps {
+  active: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+export function MicButton({ active, onClick, disabled }: MicButtonProps) {
   return (
     <button
       type="button"
+      onClick={onClick}
+      disabled={disabled}
       aria-label="Voice input (demo)"
-      className="relative flex h-16 w-16 items-center justify-center rounded-full border border-glass-border bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:scale-105"
+      className="relative flex h-16 w-16 items-center justify-center rounded-full border border-glass-border bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
       style={{ boxShadow: "0 0 40px -5px var(--state-glow)" }}
     >
       {active && (

@@ -192,7 +192,10 @@ export function SocraticEngine({
     ],
   };
 
-  const INTENT_TO_STATE: Record<"Gentle Push" | "Believing Challenge" | "Light Found", LearningState> = {
+  const INTENT_TO_STATE: Record<
+    "Gentle Push" | "Believing Challenge" | "Light Found",
+    LearningState
+  > = {
     "Gentle Push": "FOCUS",
     "Believing Challenge": "CHALLENGE",
     "Light Found": "CELEBRATE",

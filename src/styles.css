@@ -56,71 +56,79 @@
 /* Base = dark cyber baseline */
 :root {
   --radius: 0.875rem;
-  --background: oklch(0.16 0.03 270);
-  --foreground: oklch(0.97 0.01 250);
-  --card: oklch(0.2 0.035 268);
-  --card-foreground: oklch(0.97 0.01 250);
-  --popover: oklch(0.2 0.035 268);
-  --popover-foreground: oklch(0.97 0.01 250);
-  --primary: oklch(0.72 0.18 270);
-  --primary-foreground: oklch(0.12 0.02 270);
-  --secondary: oklch(0.28 0.04 268);
-  --secondary-foreground: oklch(0.97 0.01 250);
-  --muted: oklch(0.24 0.03 268);
-  --muted-foreground: oklch(0.7 0.03 260);
-  --accent: oklch(0.3 0.05 268);
-  --accent-foreground: oklch(0.97 0.01 250);
-  --destructive: oklch(0.62 0.24 27);
-  --destructive-foreground: oklch(0.98 0.01 250);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.72 0.18 270);
-  --sidebar: oklch(0.14 0.03 270);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.72 0.18 270);
-  --sidebar-primary-foreground: oklch(0.12 0.02 270);
-  --sidebar-accent: oklch(0.24 0.03 268);
-  --sidebar-accent-foreground: oklch(0.97 0.01 250);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.72 0.18 270);
+
+  /* Converted from OKLCH to standard Hex */
+  --background: #181826;
+  --foreground: #f4f4f8;
+  --card: #212130;
+  --card-foreground: #f4f4f8;
+  --popover: #212130;
+  --popover-foreground: #f4f4f8;
+  --primary: #8b5cf6;
+  --primary-foreground: #12121c;
+  --secondary: #323248;
+  --secondary-foreground: #f4f4f8;
+  --muted: #2a2a3d;
+  --muted-foreground: #a1a1aa;
+  --accent: #373752;
+  --accent-foreground: #f4f4f8;
+  --destructive: #ef4444;
+  --destructive-foreground: #fef2f2;
+
+  /* Alpha transparency (glass/borders) */
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #8b5cf6;
+
+  --sidebar: #151522;
+  --sidebar-foreground: #e4e4e9;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #12121c;
+  --sidebar-accent: #2a2a3d;
+  --sidebar-accent-foreground: #f4f4f8;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #8b5cf6;
 
   /* State tokens, defaults = IDLE */
-  --state-accent: oklch(0.72 0.18 270);
-  --state-glow: oklch(0.55 0.2 270 / 0.45);
-  --ambient-from: oklch(0.13 0.04 275);
-  --ambient-via: oklch(0.16 0.05 268);
-  --ambient-to: oklch(0.1 0.03 265);
-  --surface-glass: oklch(1 0 0 / 4%);
-  --border-glass: oklch(1 0 0 / 10%);
+  --state-accent: #8b5cf6;
+  --state-glow: rgba(139, 92, 246, 0.45);
+  --ambient-from: #121320;
+  --ambient-via: #191a26;
+  --ambient-to: #0f0f18;
+  --surface-glass: rgba(255, 255, 255, 0.04);
+  --border-glass: rgba(255, 255, 255, 0.1);
 }
 
 html[data-state="IDLE"] {
-  --state-accent: oklch(0.84 0.1 75);
-  --state-glow: oklch(0.7 0.14 70 / 0.4);
-  --ambient-from: oklch(0.14 0.04 270);
-  --ambient-via: oklch(0.17 0.05 250);
-  --ambient-to: oklch(0.1 0.03 260);
+  --state-accent: #eabf51; /* The exact color causing your error */
+  --state-glow: rgba(234, 191, 81, 0.4);
+  --ambient-from: #151624;
+  --ambient-via: #1c1c28;
+  --ambient-to: #0f0f18;
 }
+
 html[data-state="FOCUS"] {
-  --state-accent: oklch(0.78 0.15 235);
-  --state-glow: oklch(0.62 0.18 235 / 0.55);
-  --ambient-from: oklch(0.16 0.06 240);
-  --ambient-via: oklch(0.22 0.08 230);
-  --ambient-to: oklch(0.12 0.04 245);
+  --state-accent: #38bdf8;
+  --state-glow: rgba(56, 189, 248, 0.55);
+  --ambient-from: #181b2a;
+  --ambient-via: #222638;
+  --ambient-to: #111420;
 }
+
 html[data-state="CHALLENGE"] {
-  --state-accent: oklch(0.78 0.18 45);
-  --state-glow: oklch(0.62 0.22 35 / 0.55);
-  --ambient-from: oklch(0.12 0.05 30);
-  --ambient-via: oklch(0.15 0.07 18);
-  --ambient-to: oklch(0.09 0.03 280);
+  --state-accent: #fb923c;
+  --state-glow: rgba(251, 146, 60, 0.55);
+  --ambient-from: #18110b;
+  --ambient-via: #22160d;
+  --ambient-to: #0e0d16;
 }
+
 html[data-state="CELEBRATE"] {
-  --state-accent: oklch(0.9 0.16 95);
-  --state-glow: oklch(0.82 0.2 90 / 0.6);
-  --ambient-from: oklch(0.18 0.07 95);
-  --ambient-via: oklch(0.22 0.09 75);
-  --ambient-to: oklch(0.14 0.05 60);
+  --state-accent: #a3e635;
+  --state-glow: rgba(163, 230, 53, 0.6);
+  --ambient-from: #202613;
+  --ambient-via: #2a3317;
+  --ambient-to: #181d11;
 }
 
 @layer base {

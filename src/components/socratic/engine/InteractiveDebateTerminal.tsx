@@ -185,7 +185,9 @@ export function InteractiveDebateTerminal({
                 className="rounded-full border px-3 py-1.5 text-xs font-medium tracking-wide transition-all duration-300"
                 style={{
                   borderColor: active ? "var(--state-accent)" : "var(--border-glass)",
-                  background: active ? "color-mix(in oklab, var(--state-accent) 18%, transparent)" : "rgba(255,255,255,0.03)",
+                  background: active
+                    ? "color-mix(in oklab, var(--state-accent) 18%, transparent)"
+                    : "rgba(255,255,255,0.03)",
                   color: active ? "var(--state-accent)" : "rgb(var(--muted-foreground) / 1)",
                   boxShadow: active ? "0 0 14px var(--state-glow)" : "none",
                 }}
@@ -206,15 +208,15 @@ export function InteractiveDebateTerminal({
           borderColor: inputActive ? "var(--state-accent)" : "var(--border-glass)",
         }}
       >
-        <button
-          type="button"
-          onClick={handleMicToggle}
-          disabled={isSubmitting || isLoading}
-          className="flex-shrink-0"
-          aria-label="Toggle microphone"
-        >
-          <MicButton active={isListening || isSpeaking} />
-        </button>
+        {/* FIXED: Removed outer button to prevent HTML nesting hydration error */}
+        <div className="flex-shrink-0">
+          <MicButton
+            active={isListening || isSpeaking}
+            onClick={handleMicToggle}
+            disabled={isSubmitting || isLoading}
+          />
+        </div>
+
         <input
           ref={inputRef}
           type="text"
