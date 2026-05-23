@@ -163,7 +163,7 @@ export function SocraticEngine({
 
   const handleAiAnswer = async (answer: string, intent?: Message["intent"]) => {
     try {
-      const result = await submitAnswer(answer, intent);
+      const result = await submitAnswer(answer);
       if (!result?.response) return;
 
       const { response } = result;
