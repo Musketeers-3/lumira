@@ -6,12 +6,26 @@ interface SpeechRecognitionOptions {
   interimResults?: boolean;
 }
 
-type SpeechRecognitionCtor = new () => SpeechRecognition;
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 
 interface WindowWithSpeechRecognition extends Window {
   SpeechRecognition?: SpeechRecognitionCtor;
   webkitSpeechRecognition?: SpeechRecognitionCtor;
 }
+
+
 
 function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   if (typeof window === "undefined") return null;
@@ -26,7 +40,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = getSpeechRecognitionCtor();

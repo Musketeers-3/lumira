@@ -1,1 +1,56 @@
-# Lumira — Tanjiro-Inspired 3D Mentor + Full Empathetic RebrandTransform "The Socratic Engine" into **Lumira**, an empathetic learning OS with a real-time 3D mentor (original "inspired-by" character — kind-eyed swordsman with checkered green/black haori, scar on left brow) that breathes, leans, and reacts to learning state. Rewrite all copy from challenge-driven to belief-driven mentorship.## 1. Brand & Tone Rebrand**Product name:** The Socratic Engine → **Lumira****Tagline:** "Learn beside someone who believes in you."**Page titles / route copy** (`__root.tsx`, all route `head()`, sidebar, `TopBar`):- Dashboard → "Your Path"- Engine → "The Dojo"- Skill Passport → "Your Light"- Architecture Log → "Journey Log"- Settings → "Settings"**Intent label rewrites** (`types.ts`, `TerminalMessage.tsx`, `demoScript.ts`):- `Socratic Nudge` → **Gentle Push**- `Socratic Challenge` → **Believing Challenge**- `Breakthrough` → **Light Found**- `Student` → **You****Status pill copy** (`MentorCanvas.tsx`):- IDLE → "Walking with you"- FOCUS → "Listening kindly"- CHALLENGE → "Believing in you"- CELEBRATE → "Proud of you"**Demo script** (`demoScript.ts`) — full rewrite of all 5 steps. Same Binary Search arc, Tanjiro-style voice. Examples:- Old: "That works — but it could take all day."- New: "That's a real solution — it would work. But you're stronger than that. What if you opened the dictionary right in the middle? I think you'll see something."- Old: "You just independently invented the Binary Search Algorithm."- New: "You did it. You didn't memorize this — you _found_ it. That's Binary Search. And I knew you'd reach it."Rewrite Dashboard/Skill Passport/Architecture Log/Settings body copy to match (encouragement, belief, no punishment language).## 2. 3D Mentor (Three.js)**Stack:** add `three`, `@react-three/fiber`, `@react-three/drei` via `bun add`.**Character:** original "inspired-by" — no Tanjiro name or exact likeness. Built procedurally from primitives (no GLB needed, no IP risk, no asset hosting):- Head: rounded sphere, warm peach material- Hair: low-poly tousled dark-brown shape (clustered cones)- Eyes: kind almond shape (flattened spheres), soft amber irises with subtle emissive glow- Scar: thin red `MeshLine` strip across left brow- Earrings: two small flat discs (hanafuda-style, hand-painted texture via canvas)- Haori: green/black checkered pattern via a canvas-generated `CanvasTexture` applied to a draped torso mesh (cylinder + folds)- Inner kimono: cream tone- Belt: dark sashOptional later: if user uploads a custom GLB, swap procedural model for it (out of scope this turn).**File: `src/components/socratic/engine/Mentor3D.tsx`**- `<Canvas camera={{ position: [0, 1.4, 2.6], fov: 32 }}>` inside the existing `MentorCanvas`.- `<ambientLight />` + key/rim lights tinted by `--state-accent` (read via `getComputedStyle` on `useFrame` tick).- `<MentorModel state isSpeaking />` group:  - **Breathing:** torso scale.y `1 + sin(t * 1.2) * 0.015` (IDLE).  - **Lean forward:** group rotation.x lerp toward `-0.08` in FOCUS.  - **Crossed arms / lowered head:** in CHALLENGE, arm bones cross, head tilts down 4°, brow furrow via blend (procedural — slight scaleY on eyes).  - **Arms-up triumph:** in CELEBRATE, arm groups rotate to raised pose, soft gold rim-light bloom.  - **Speaking:** subtle jaw scale pulse + head bob `sin(t * 6) * 0.01` when `isSpeaking`.- Soft contact shadow via `<ContactShadows />` from drei.- Post-processing: a thin `<Environment preset="sunset" />` or simple HDR-free gradient backdrop for warmth.- All motion via `useFrame`, lerped with `MathUtils.damp` for cinematic ease.**Replace** `MentorAvatar.tsx` usage in `MentorCanvas.tsx` with `<Mentor3D />`. Keep `MentorAvatar.tsx` file as a 2D fallback (rendered if `webgl` unsupported — feature-detect once with `useEffect`).**Performance:** `dpr={[1, 1.5]}`, `frameloop="always"` (needed for breathing). Single canvas only.## 3. Palette Warm-Up (subtle)Lumira's mentor is warm; the cyber-cold base feels off. Tweak `src/styles.css`:- IDLE accent shifts from indigo → warm amber-cream: `oklch(0.82 0.10 75)` (still pairs with deep navy bg).- CELEBRATE accent shifts emerald → soft gold: `oklch(0.88 0.14 90)`.- FOCUS and CHALLENGE unchanged.Glassmorphism, transitions, and state-driven background stay intact.## 4. Files Touched```NEW   src/components/socratic/engine/Mentor3D.tsx          (Canvas + procedural model)NEW   src/components/socratic/engine/mentor3d/MentorModel.tsxNEW   src/components/socratic/engine/mentor3d/useHaoriTexture.ts  (canvas checkered texture)EDIT  src/components/socratic/engine/MentorCanvas.tsx       (use Mentor3D, new status copy)EDIT  src/components/socratic/engine/demoScript.ts          (5 steps, Tanjiro voice)EDIT  src/components/socratic/engine/TerminalMessage.tsx    (new intent label colors)EDIT  src/components/socratic/types.ts                       (new Intent union)EDIT  src/components/socratic/Sidebar.tsx                    (Lumira brand, new nav labels)EDIT  src/components/socratic/TopBar.tsx                     (Lumira title, new status copy)EDIT  src/routes/__root.tsx                                  (title: Lumira)EDIT  src/routes/index.tsx                                   (Your Path, empathetic copy)EDIT  src/routes/engine.tsx                                  (The Dojo, head meta)EDIT  src/routes/skill-passport.tsx                          (Your Light, copy)EDIT  src/routes/architecture-log.tsx                        (Journey Log, copy)EDIT  src/routes/settings.tsx                                (mentor warmth slider stub)EDIT  src/styles.css                                         (warmer IDLE/CELEBRATE accents)```## 5. Technical notes- New deps: `three`, `@react-three/fiber`, `@react-three/drei` (all MIT, edge-safe — client-only render).- 3D Canvas runs client-only; wrap in dynamic mount guard (`useEffect` flag) to avoid SSR `window` errors.- No GLB asset needed → no licensing risk, no asset hosting, ships immediately.- 2D `MentorAvatar.tsx` retained as graceful fallback if WebGL unavailable.- No new routes, no backend, no Cloud.- Mic remains visual simulation.## 6. Out of scope- Real Tanjiro likeness/name (IP) — using original character per your choice.- Uploaded GLB support (can add later if you provide a model).- Real voice synthesis for the mentor.- Lip-sync (jaw pulse approximates it).Ready to build on approval.
+# Bring Lumira's VRM to life
+
+Goal: upgrade `src/components/socratic/engine/mentor3d/MentorModel.tsx` so the loaded `mentor.vrm` feels alive — layered body motion and richer, smoothly-blended emotions tied to `LearningState` + `isSpeaking` + `isPausing`. Pure procedural animation on the VRM humanoid rig and expression manager; no new deps, no GLB swap, no backend.
+
+## What changes
+
+Single file: `src/components/socratic/engine/mentor3d/MentorModel.tsx`.
+
+### 1. Motion system (humanoid bones)
+
+Cache these bones on load (in addition to head/neck):
+`spine`, `chest`, `upperChest`, `leftShoulder/UpperArm/LowerArm/Hand`, `rightShoulder/UpperArm/LowerArm/Hand`.
+
+Per-frame, damp each bone toward a state-driven target pose (use `THREE.MathUtils.damp`, dt-based, so it stays framerate-independent):
+
+- **Breath layer (always on):** `sin(t * rate) * amp` added to `spine.rotation.x` and `chest.rotation.x`. Rate/amp shift per state (slower+deeper in IDLE, quicker in CHALLENGE).
+- **Idle sway:** very slow `sin(t*0.3)` on `spine.rotation.z` (~0.02 rad) so he's never frozen.
+- **Per-state pose targets** (damped, not snapped):
+  - IDLE — neutral arms down, slight open chest, soft head tilt right.
+  - FOCUS — lean forward ~6° on spine, slight head-down nod, one hand subtly raised (right elbow bent ~0.4 rad) as if gesturing.
+  - CHALLENGE — upright spine, arms crossed-ish (both upper arms rotated inward, lower arms folded up ~1.2 rad). If `isPausing`, add a slow head shake (`sin(t*0.6)*0.04` on head.y) + slight downward tilt.
+  - CELEBRATE — chest lifted, shoulders back, both arms relaxed open (upper arms out ~0.3 rad), gentle bobbing nod (`sin(t*2)*0.05` on head.x).
+- **Speaking gesture additive:** when `isSpeaking && !isPausing`, add small `sin(t*3)` wobble to right hand and chest so he "talks with his body".
+- **Saccade-style gaze:** every 2–5s pick a small random target for head.y / head.x (±0.05 rad) and damp toward it, instead of the current single sine.
+
+### 2. Emotion system (VRM expressions)
+
+Keep current blink + Aa mouth, then layer:
+
+- **Smooth expression blending:** instead of `setValue(..., 0)` hard reset each frame, damp every emotion channel (`Happy`, `Angry`, `Sad`, `Relaxed`, `Surprised`, `Neutral`) toward its target for the current state. Prevents pops on state changes.
+- **State → expression mix:**
+  - IDLE — `Relaxed` 0.25, `Happy` 0.1 (soft smile baseline).
+  - FOCUS — `Relaxed` 0.4, `Happy` 0.15 (warm, attentive).
+  - CHALLENGE (not pausing) — `Neutral` 0.3, `Happy` 0.1 (kind, not stern — drop the current Angry 0.15 which reads harsh and contradicts the Tanjiro-style empathy rules).
+  - CHALLENGE + `isPausing` — `Sad` 0.15, `Relaxed` 0.2 (concerned, patient).
+  - CELEBRATE — `Happy` 0.8, `Relaxed` 0.3, brief `Surprised` 0.4 burst that decays over ~1.2s on entry (joyful gasp).
+- **Lip-sync improvement:** when speaking, drive `Aa`, `Ih`, `Ou` from three offset sine waves (e.g. `Aa = max(0, sin(t*14))*0.4`, `Ih = max(0, sin(t*11 + 1.3))*0.25`, `Ou = max(0, sin(t*9 + 2.1))*0.2`) so the mouth shape varies instead of flapping open/closed. Damp all three to 0 when silent.
+- **Micro-expressions:** every 6–10s, briefly raise `Happy` by +0.1 for ~0.8s in IDLE/FOCUS (a "smile twitch") for life.
+- **Blink:** keep current logic; add an occasional double-blink (10% chance) for naturalness.
+
+### 3. State-change transitions
+
+On `state` change, fade body pose targets and expression targets in over ~0.8s via the existing damp loop (no new timers needed — damp rate constants do the work). On entering CELEBRATE, trigger the one-shot `Surprised` burst with a ref-tracked timer.
+
+## Out of scope
+
+- No new files, no new deps.
+- No real audio/lip-sync from mic.
+- No swapping the VRM model or editing the spec doc.
+- No changes to other components, routes, or styles.
+
+## Risk / verification
+
+- Some VRMs don't expose every expression preset (`Ih`, `Ou`, `Surprised`). Guard each `setValue` with an `expressions.getExpression(name)` check; skip silently if missing so it degrades to the current behavior.
+- Some VRMs lack `upperChest` or `shoulder` bones. Each bone lookup already returns `null`; only animate when non-null.
+- Verify by loading `/engine` and stepping through the demo: mentor should breathe in IDLE, lean+gesture in FOCUS, fold arms+soften in CHALLENGE, open up and beam in CELEBRATE, with no popping between states.

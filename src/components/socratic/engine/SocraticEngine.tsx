@@ -8,7 +8,6 @@ import { demoScript } from "./demoScript";
 import type { LearningState, Message } from "../types";
 import { StepperBar } from "./StepperBar";
 import { MentorCanvas } from "./MentorCanvas";
-import { DebateTerminal } from "./DebateTerminal";
 import { InteractiveDebateTerminal } from "./InteractiveDebateTerminal";
 import { CelebrationOverlay } from "./CelebrationOverlay";
 
@@ -162,7 +161,7 @@ export function SocraticEngine({
     }
   };
 
-  const handleAiAnswer = async (answer: string) => {
+  const handleAiAnswer = async (answer: string, intent?: Message["intent"]) => {
     try {
       const result = await submitAnswer(answer);
       if (!result?.response) return;
@@ -175,6 +174,55 @@ export function SocraticEngine({
       }
     } catch (error) {
       console.error("[AI Mentor]", error);
+    }
+  };
+
+  const INTENT_REPLIES: Record<"Gentle Push" | "Believing Challenge" | "Light Found", string[]> = {
+    "Gentle Push": [
+      "You're closer than you think. What happens if the list grows much larger?",
+      "Good — keep that thread. What's the first thing you'd check?",
+    ],
+    "Believing Challenge": [
+      "I believe you can sharpen that. What assumption are you leaning on?",
+      "Push it one step further — where would this break?",
+    ],
+    "Light Found": [
+      "That's it. You just named the idea — halving the search space.",
+      "Beautiful. Hold onto that feeling — that's the shape of insight.",
+    ],
+  };
+
+  const INTENT_TO_STATE: Record<"Gentle Push" | "Believing Challenge" | "Light Found", LearningState> = {
+    "Gentle Push": "FOCUS",
+    "Believing Challenge": "CHALLENGE",
+    "Light Found": "CELEBRATE",
+  };
+
+  const handleStudentSpeak = async (answer: string, intent?: Message["intent"]) => {
+    const chosen = (intent && intent !== "You" ? intent : "Gentle Push") as
+      | "Gentle Push"
+      | "Believing Challenge"
+      | "Light Found";
+
+    const studentMsg: Message = {
+      id: `student-${Date.now()}`,
+      speaker: "student",
+      intent: "You",
+      text: answer,
+    };
+    const replies = INTENT_REPLIES[chosen];
+    const mentorMsg: Message = {
+      id: `mentor-${Date.now()}`,
+      speaker: "mentor",
+      intent: chosen,
+      text: replies[Math.floor(Math.random() * replies.length)],
+    };
+
+    setMessages((prev) => [...prev, studentMsg, mentorMsg]);
+    const mentorState = INTENT_TO_STATE[chosen];
+    playMentorPresence(mentorState, mentorMsg.text.length);
+    if (chosen === "Light Found") {
+      setTimeout(() => setCelebrate(true), 900);
     }
   };
 
@@ -214,24 +262,15 @@ export function SocraticEngine({
       />
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
         <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
-        {enableAI ? (
-          <InteractiveDebateTerminal
-            messages={terminalMessages}
-            stepIndex={Math.max(0, stepIndex)}
-            totalSteps={total}
-            isSpeaking={isSpeaking}
-            isLoading={aiLoading}
-            enableAI={enableAI}
-            onSubmitAnswer={handleAiAnswer}
-          />
-        ) : (
-          <DebateTerminal
-            messages={terminalMessages}
-            stepIndex={Math.max(0, stepIndex)}
-            totalSteps={total}
-            isSpeaking={isSpeaking}
-          />
-        )}
+        <InteractiveDebateTerminal
+          messages={terminalMessages}
+          stepIndex={Math.max(0, stepIndex)}
+          totalSteps={total}
+          isSpeaking={isSpeaking}
+          isLoading={aiLoading}
+          enableAI={enableAI}
+          onSubmitAnswer={enableAI ? handleAiAnswer : handleStudentSpeak}
+        />
       </div>
       {celebrate && <CelebrationOverlay onClose={() => setCelebrate(false)} />}
     </div>

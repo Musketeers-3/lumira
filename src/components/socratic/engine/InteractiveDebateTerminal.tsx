@@ -1,19 +1,28 @@
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import type { Message } from "../types";
 import { TerminalMessage } from "./TerminalMessage";
 import { MicButton } from "./MicButton";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
+type MentorIntent = "Gentle Push" | "Believing Challenge" | "Light Found";
+
 interface Props {
   messages: Message[];
   stepIndex: number;
   totalSteps: number;
   isSpeaking: boolean;
-  onSubmitAnswer?: (answer: string) => Promise<void>;
+  onSubmitAnswer?: (answer: string, intent?: MentorIntent) => Promise<void>;
   isLoading?: boolean;
   enableAI?: boolean; // Flag to enable real AI or keep demo
 }
+
+const INTENT_OPTIONS: { value: MentorIntent; label: string; hint: string }[] = [
+  { value: "Gentle Push", label: "Gentle Push", hint: "Nudge me forward" },
+  { value: "Believing Challenge", label: "Believing Challenge", hint: "Press my thinking" },
+  { value: "Light Found", label: "Light Found", hint: "Celebrate the insight" },
+];
 
 export function InteractiveDebateTerminal({
   messages,
@@ -29,8 +38,9 @@ export function InteractiveDebateTerminal({
   const [inputActive, setInputActive] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nextIntent, setNextIntent] = useState<MentorIntent>("Gentle Push");
 
-  const { isListening, transcript, startListening, stopListening, resetTranscript } =
+  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } =
     useSpeechRecognition({
       language: "en-US",
       interimResults: true,
@@ -59,11 +69,12 @@ export function InteractiveDebateTerminal({
     const answer = inputValue.trim();
     if (!answer || isSubmitting || isLoading) return;
 
+    if (isListening) stopListening();
     setIsSubmitting(true);
 
     try {
-      if (onSubmitAnswer && enableAI) {
-        await onSubmitAnswer(answer);
+      if (onSubmitAnswer) {
+        await onSubmitAnswer(answer, nextIntent);
       }
       setInputValue("");
       resetTranscript();
@@ -75,9 +86,15 @@ export function InteractiveDebateTerminal({
   };
 
   const handleMicToggle = () => {
+    if (!isSupported) {
+      toast.error("Voice input isn't supported in this browser. Try Chrome or Edge.");
+      return;
+    }
     if (isListening) {
       stopListening();
     } else {
+      setInputValue("");
+      resetTranscript();
       startListening();
     }
   };
@@ -148,6 +165,37 @@ export function InteractiveDebateTerminal({
             ))}
           </div>
         )}
+      </div>
+
+      {/* Intent selector */}
+      <div className="rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+          Ask Lumira to respond with…
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {INTENT_OPTIONS.map((opt) => {
+            const active = nextIntent === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setNextIntent(opt.value)}
+                aria-pressed={active}
+                title={opt.hint}
+                className="rounded-full border px-3 py-1.5 text-xs font-medium tracking-wide transition-all duration-300"
+                style={{
+                  borderColor: active ? "var(--state-accent)" : "var(--border-glass)",
+                  background: active ? "color-mix(in oklab, var(--state-accent) 18%, transparent)" : "rgba(255,255,255,0.03)",
+                  color: active ? "var(--state-accent)" : "rgb(var(--muted-foreground) / 1)",
+                  boxShadow: active ? "0 0 14px var(--state-glow)" : "none",
+                }}
+              >
+                {opt.label}
+                <span className="ml-2 opacity-60">{opt.hint}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Input dock */}

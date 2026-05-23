@@ -1,12 +1,10 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { LearningState } from "../../types";
 
-const WOOD = "#4a3528";
-const WOOD_DARK = "#2e2118";
 const LAMP_WARM = "#fff4e0";
-const BOOK = "#5c4a3a";
 
 interface Props {
   state: LearningState;
@@ -26,87 +24,95 @@ function readAccent(): THREE.Color {
 }
 
 export function StudyScene({ state, warmthBias = 0.6 }: Props) {
-  const lampRef = useRef<THREE.PointLight>(null!);
-  const accentRef = useRef(new THREE.Color());
+  // 1. Load your newly prepared asset
+  const { scene } = useGLTF("/models/study-desk.glb");
 
+  // Clone the scene so we can mutate it safely without affecting the cached version
+  const clone = useMemo(() => scene.clone(), [scene]);
+
+  const lampLightRef = useRef<THREE.PointLight>(null!);
+  const accentRef = useRef(new THREE.Color());
+  const lampMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+
+  // 2. Traverse the model to enable shadows and hook into the LampShade material
+  useMemo(() => {
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        // Hook into the material you explicitly renamed in Blender
+        if (mesh.material && (mesh.material as THREE.Material).name === "LampShade") {
+          // Clone the material so we don't mutate a shared instance
+          mesh.material = (mesh.material as THREE.Material).clone();
+          lampMaterialRef.current = mesh.material as THREE.MeshStandardMaterial;
+          lampMaterialRef.current.emissive = new THREE.Color(LAMP_WARM);
+        }
+      }
+    });
+  }, [clone]);
+
+  // 3. The procedural life engine for the lighting
   useFrame(() => {
     accentRef.current = readAccent();
-    if (lampRef.current) {
-      const intensity =
-        state === "CHALLENGE"
-          ? 0.55 + warmthBias * 0.15
-          : state === "CELEBRATE"
-            ? 0.5 + warmthBias * 0.2
-            : state === "FOCUS"
-              ? 0.45 + warmthBias * 0.1
-              : 0.4 + warmthBias * 0.1;
-      lampRef.current.intensity = THREE.MathUtils.lerp(lampRef.current.intensity, intensity, 0.05);
-      lampRef.current.color.lerp(accentRef.current, 0.03);
+
+    // Calculate intensity based on the current emotional state
+    const intensity =
+      state === "CHALLENGE"
+        ? 0.55 + warmthBias * 0.15
+        : state === "CELEBRATE"
+          ? 0.5 + warmthBias * 0.2
+          : state === "FOCUS"
+            ? 0.45 + warmthBias * 0.1
+            : 0.4 + warmthBias * 0.1;
+
+    // Update the physical light source
+    if (lampLightRef.current) {
+      lampLightRef.current.intensity = THREE.MathUtils.lerp(
+        lampLightRef.current.intensity,
+        intensity,
+        0.05,
+      );
+      lampLightRef.current.color.lerp(accentRef.current, 0.03);
+    }
+
+    // Update the glowing material on the 3D model itself
+    if (lampMaterialRef.current) {
+      lampMaterialRef.current.emissive.lerp(accentRef.current, 0.03);
+      lampMaterialRef.current.emissiveIntensity = THREE.MathUtils.lerp(
+        lampMaterialRef.current.emissiveIntensity,
+        intensity * 1.5,
+        0.05,
+      );
     }
   });
 
   return (
     <group position={[0, -0.92, 0]}>
-      {/* Floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <planeGeometry args={[8, 8]} />
-        <meshStandardMaterial color={WOOD_DARK} roughness={0.92} />
-      </mesh>
+      {/* The imported desk model. 
+        Note: You may need to tweak the position/scale slightly depending on 
+        where the 3D artist placed the origin point of the model in Blender.
+        I have set it close to where the old primitive desk was located.
+      */}
+      <primitive object={clone} position={[0, 0, 0.4]} scale={1} rotation={[0, 0, 0]} />
 
-      {/* Back wall gradient plane */}
-      <mesh position={[0, 1.8, -2.2]}>
-        <planeGeometry args={[6, 3.5]} />
-        <meshStandardMaterial color="#1a1512" roughness={1} />
-      </mesh>
-
-      {/* Desk — aligned with mentor hands */}
-      <mesh position={[0, 0.38, 0.42]} castShadow receiveShadow>
-        <boxGeometry args={[1.8, 0.08, 0.9]} />
-        <meshStandardMaterial color={WOOD} roughness={0.88} />
-      </mesh>
-      <mesh position={[0, 0.04, 0.42]} castShadow>
-        <boxGeometry args={[0.12, 0.42, 0.7]} />
-        <meshStandardMaterial color={WOOD_DARK} roughness={0.9} />
-      </mesh>
-      <mesh position={[-0.55, 0.04, 0.42]} castShadow>
-        <boxGeometry args={[0.12, 0.42, 0.7]} />
-        <meshStandardMaterial color={WOOD_DARK} roughness={0.9} />
-      </mesh>
-
-      {/* Book stack */}
-      <mesh position={[0.55, 0.52, 0.2]} rotation={[0, 0.2, 0]} castShadow>
-        <boxGeometry args={[0.22, 0.06, 0.16]} />
-        <meshStandardMaterial color={BOOK} roughness={0.85} />
-      </mesh>
-      <mesh position={[0.58, 0.58, 0.22]} rotation={[0, 0.15, 0.04]} castShadow>
-        <boxGeometry args={[0.2, 0.05, 0.14]} />
-        <meshStandardMaterial color="#6b5544" roughness={0.85} />
-      </mesh>
-
-      {/* Desk lamp */}
-      <group position={[-0.65, 0.44, 0.22]}>
-        <mesh position={[0, 0.35, 0]}>
-          <cylinderGeometry args={[0.02, 0.03, 0.7, 8]} />
-          <meshStandardMaterial color="#8a7a68" metalness={0.3} roughness={0.6} />
-        </mesh>
-        <mesh position={[0.12, 0.68, 0.08]} rotation={[0.5, 0, 0]}>
-          <coneGeometry args={[0.12, 0.14, 12, 1, true]} />
-          <meshStandardMaterial
-            color={LAMP_WARM}
-            emissive={LAMP_WARM}
-            emissiveIntensity={0.35 + warmthBias * 0.2}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-        <pointLight
-          ref={lampRef}
-          position={[0.12, 0.6, 0.1]}
-          intensity={0.5}
-          color={LAMP_WARM}
-          distance={3}
-          decay={2}
-        />
-      </group>
+      {/* The physical point light. 
+        You will likely need to adjust the position coordinates [x, y, z] 
+        so it sits perfectly underneath the metal hood of the new lamp.
+      */}
+      <pointLight
+        ref={lampLightRef}
+        position={[-0.5, 0.7, 0.2]} // <-- Tweak this to align with the new lamp hood
+        intensity={0.5}
+        color={LAMP_WARM}
+        distance={3.5}
+        decay={2}
+        castShadow
+      />
     </group>
   );
 }
+
+// Preload the asset to ensure zero visual pop-in when the component mounts
+useGLTF.preload("/models/study-desk.glb");
