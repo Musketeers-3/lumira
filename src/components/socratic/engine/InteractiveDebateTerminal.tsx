@@ -59,10 +59,11 @@ export function InteractiveDebateTerminal({
     const answer = inputValue.trim();
     if (!answer || isSubmitting || isLoading) return;
 
+    if (isListening) stopListening();
     setIsSubmitting(true);
 
     try {
-      if (onSubmitAnswer && enableAI) {
+      if (onSubmitAnswer) {
         await onSubmitAnswer(answer);
       }
       setInputValue("");
