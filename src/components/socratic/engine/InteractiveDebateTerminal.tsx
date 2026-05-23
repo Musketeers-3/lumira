@@ -6,15 +6,23 @@ import { TerminalMessage } from "./TerminalMessage";
 import { MicButton } from "./MicButton";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
+type MentorIntent = "Gentle Push" | "Believing Challenge" | "Light Found";
+
 interface Props {
   messages: Message[];
   stepIndex: number;
   totalSteps: number;
   isSpeaking: boolean;
-  onSubmitAnswer?: (answer: string) => Promise<void>;
+  onSubmitAnswer?: (answer: string, intent?: MentorIntent) => Promise<void>;
   isLoading?: boolean;
   enableAI?: boolean; // Flag to enable real AI or keep demo
 }
+
+const INTENT_OPTIONS: { value: MentorIntent; label: string; hint: string }[] = [
+  { value: "Gentle Push", label: "Gentle Push", hint: "Nudge me forward" },
+  { value: "Believing Challenge", label: "Believing Challenge", hint: "Press my thinking" },
+  { value: "Light Found", label: "Light Found", hint: "Celebrate the insight" },
+];
 
 export function InteractiveDebateTerminal({
   messages,
