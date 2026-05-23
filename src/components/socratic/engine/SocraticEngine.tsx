@@ -8,7 +8,6 @@ import { demoScript } from "./demoScript";
 import type { LearningState, Message } from "../types";
 import { StepperBar } from "./StepperBar";
 import { MentorCanvas } from "./MentorCanvas";
-import { DebateTerminal } from "./DebateTerminal";
 import { InteractiveDebateTerminal } from "./InteractiveDebateTerminal";
 import { CelebrationOverlay } from "./CelebrationOverlay";
 
@@ -178,6 +177,16 @@ export function SocraticEngine({
     }
   };
 
+  const handleStudentSpeak = async (answer: string) => {
+    const newMsg: Message = {
+      id: `student-${Date.now()}`,
+      speaker: "student",
+      intent: "You",
+      text: answer,
+    };
+    setMessages((prev) => [...prev, newMsg]);
+  };
+
   const intentFromAi = (
     type?: "gentle_push" | "revealing_challenge" | "breakthrough_confirmation",
   ): Message["intent"] => {
@@ -214,24 +223,15 @@ export function SocraticEngine({
       />
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
         <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
-        {enableAI ? (
-          <InteractiveDebateTerminal
-            messages={terminalMessages}
-            stepIndex={Math.max(0, stepIndex)}
-            totalSteps={total}
-            isSpeaking={isSpeaking}
-            isLoading={aiLoading}
-            enableAI={enableAI}
-            onSubmitAnswer={handleAiAnswer}
-          />
-        ) : (
-          <DebateTerminal
-            messages={terminalMessages}
-            stepIndex={Math.max(0, stepIndex)}
-            totalSteps={total}
-            isSpeaking={isSpeaking}
-          />
-        )}
+        <InteractiveDebateTerminal
+          messages={terminalMessages}
+          stepIndex={Math.max(0, stepIndex)}
+          totalSteps={total}
+          isSpeaking={isSpeaking}
+          isLoading={aiLoading}
+          enableAI={enableAI}
+          onSubmitAnswer={enableAI ? handleAiAnswer : handleStudentSpeak}
+        />
       </div>
       {celebrate && <CelebrationOverlay onClose={() => setCelebrate(false)} />}
     </div>

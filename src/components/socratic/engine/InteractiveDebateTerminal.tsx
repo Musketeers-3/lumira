@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import type { Message } from "../types";
 import { TerminalMessage } from "./TerminalMessage";
@@ -30,7 +31,7 @@ export function InteractiveDebateTerminal({
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { isListening, transcript, startListening, stopListening, resetTranscript } =
+  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } =
     useSpeechRecognition({
       language: "en-US",
       interimResults: true,
@@ -59,10 +60,11 @@ export function InteractiveDebateTerminal({
     const answer = inputValue.trim();
     if (!answer || isSubmitting || isLoading) return;
 
+    if (isListening) stopListening();
     setIsSubmitting(true);
 
     try {
-      if (onSubmitAnswer && enableAI) {
+      if (onSubmitAnswer) {
         await onSubmitAnswer(answer);
       }
       setInputValue("");
@@ -75,9 +77,15 @@ export function InteractiveDebateTerminal({
   };
 
   const handleMicToggle = () => {
+    if (!isSupported) {
+      toast.error("Voice input isn't supported in this browser. Try Chrome or Edge.");
+      return;
+    }
     if (isListening) {
       stopListening();
     } else {
+      setInputValue("");
+      resetTranscript();
       startListening();
     }
   };
