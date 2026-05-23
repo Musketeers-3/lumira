@@ -74,7 +74,7 @@ export function InteractiveDebateTerminal({
 
     try {
       if (onSubmitAnswer) {
-        await onSubmitAnswer(answer);
+        await onSubmitAnswer(answer, nextIntent);
       }
       setInputValue("");
       resetTranscript();
