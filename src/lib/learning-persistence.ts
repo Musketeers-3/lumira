@@ -115,7 +115,7 @@ export async function saveSessionMessage(
     user_id: user.id,
     mentor_state: state,
     message_text: message.text,
-    sender: message.sender,
+    sender: message.speaker,
     message_type: "text",
   });
 
