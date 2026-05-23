@@ -77,9 +77,15 @@ export function InteractiveDebateTerminal({
   };
 
   const handleMicToggle = () => {
+    if (!isSupported) {
+      toast.error("Voice input isn't supported in this browser. Try Chrome or Edge.");
+      return;
+    }
     if (isListening) {
       stopListening();
     } else {
+      setInputValue("");
+      resetTranscript();
       startListening();
     }
   };
