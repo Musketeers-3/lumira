@@ -161,7 +161,7 @@ export function SocraticEngine({
     }
   };
 
-  const handleAiAnswer = async (answer: string) => {
+  const handleAiAnswer = async (answer: string, intent?: Message["intent"]) => {
     try {
       const result = await submitAnswer(answer);
       if (!result?.response) return;
@@ -177,14 +177,53 @@ export function SocraticEngine({
     }
   };
 
-  const handleStudentSpeak = async (answer: string) => {
-    const newMsg: Message = {
+  const INTENT_REPLIES: Record<"Gentle Push" | "Believing Challenge" | "Light Found", string[]> = {
+    "Gentle Push": [
+      "You're closer than you think. What happens if the list grows much larger?",
+      "Good — keep that thread. What's the first thing you'd check?",
+    ],
+    "Believing Challenge": [
+      "I believe you can sharpen that. What assumption are you leaning on?",
+      "Push it one step further — where would this break?",
+    ],
+    "Light Found": [
+      "That's it. You just named the idea — halving the search space.",
+      "Beautiful. Hold onto that feeling — that's the shape of insight.",
+    ],
+  };
+
+  const INTENT_TO_STATE: Record<"Gentle Push" | "Believing Challenge" | "Light Found", LearningState> = {
+    "Gentle Push": "FOCUS",
+    "Believing Challenge": "CHALLENGE",
+    "Light Found": "CELEBRATE",
+  };
+
+  const handleStudentSpeak = async (answer: string, intent?: Message["intent"]) => {
+    const chosen = (intent && intent !== "You" ? intent : "Gentle Push") as
+      | "Gentle Push"
+      | "Believing Challenge"
+      | "Light Found";
+
+    const studentMsg: Message = {
       id: `student-${Date.now()}`,
       speaker: "student",
       intent: "You",
       text: answer,
     };
-    setMessages((prev) => [...prev, newMsg]);
+    const replies = INTENT_REPLIES[chosen];
+    const mentorMsg: Message = {
+      id: `mentor-${Date.now()}`,
+      speaker: "mentor",
+      intent: chosen,
+      text: replies[Math.floor(Math.random() * replies.length)],
+    };
+
+    setMessages((prev) => [...prev, studentMsg, mentorMsg]);
+    const mentorState = INTENT_TO_STATE[chosen];
+    playMentorPresence(mentorState, mentorMsg.text.length);
+    if (chosen === "Light Found") {
+      setTimeout(() => setCelebrate(true), 900);
+    }
   };
 
   const intentFromAi = (
