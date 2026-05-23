@@ -6,12 +6,36 @@ interface SpeechRecognitionOptions {
   interimResults?: boolean;
 }
 
-type SpeechRecognitionCtor = new () => SpeechRecognition;
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  [index: number]: { transcript: string };
+}
+interface SpeechRecognitionEventLike {
+  resultIndex: number;
+  results: { length: number; [index: number]: SpeechRecognitionResultLike };
+}
+interface SpeechRecognitionErrorEventLike {
+  error: string;
+}
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 
 interface WindowWithSpeechRecognition extends Window {
   SpeechRecognition?: SpeechRecognitionCtor;
   webkitSpeechRecognition?: SpeechRecognitionCtor;
 }
+
 
 function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   if (typeof window === "undefined") return null;
