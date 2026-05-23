@@ -167,6 +167,37 @@ export function InteractiveDebateTerminal({
         )}
       </div>
 
+      {/* Intent selector */}
+      <div className="rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+          Ask Lumira to respond with…
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {INTENT_OPTIONS.map((opt) => {
+            const active = nextIntent === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setNextIntent(opt.value)}
+                aria-pressed={active}
+                title={opt.hint}
+                className="rounded-full border px-3 py-1.5 text-xs font-medium tracking-wide transition-all duration-300"
+                style={{
+                  borderColor: active ? "var(--state-accent)" : "var(--border-glass)",
+                  background: active ? "color-mix(in oklab, var(--state-accent) 18%, transparent)" : "rgba(255,255,255,0.03)",
+                  color: active ? "var(--state-accent)" : "rgb(var(--muted-foreground) / 1)",
+                  boxShadow: active ? "0 0 14px var(--state-glow)" : "none",
+                }}
+              >
+                {opt.label}
+                <span className="ml-2 opacity-60">{opt.hint}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Input dock */}
       <div
         className="flex items-center gap-3 rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl transition-all duration-500"
