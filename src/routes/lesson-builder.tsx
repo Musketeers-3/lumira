@@ -1,10 +1,28 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
-import { LessonBuilder } from '@/components/lesson-builder/LessonBuilder';
-import { LessonsList } from '@/components/lesson-builder/LessonsList';
-import type { LessonDraft } from '@/types/lesson';
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { LessonBuilder } from "@/components/lesson-builder/LessonBuilder";
+import { LessonsList } from "@/components/lesson-builder/LessonsList";
+import type { LessonDraft } from "@/types/lesson";
 
-export const Route = createFileRoute('/lesson-builder')({
+function createNewLessonDraft(): LessonDraft {
+  const now = new Date().toISOString();
+  return {
+    id: Math.random().toString(36).slice(2, 11),
+    title: "Untitled Lesson",
+    description: "",
+    topic: "",
+    targetSkills: [],
+    difficulty: "beginner",
+    steps: [],
+    estimatedDuration: 15,
+    createdBy: "teacher",
+    createdAt: now,
+    updatedAt: now,
+    isPublished: false,
+  };
+}
+
+export const Route = createFileRoute("/lesson-builder")({
   component: LessonBuilderPage,
 });
 
@@ -15,12 +33,12 @@ function LessonBuilderPage() {
 
   // Load lessons from localStorage (demo implementation)
   useEffect(() => {
-    const stored = localStorage.getItem('lessons');
+    const stored = localStorage.getItem("lessons");
     if (stored) {
       try {
         setLessons(JSON.parse(stored));
       } catch {
-        console.error('Failed to load lessons');
+        console.error("Failed to load lessons");
       }
     }
     setIsLoading(false);
@@ -32,22 +50,22 @@ function LessonBuilderPage() {
       : [...lessons, lesson];
 
     setLessons(updatedLessons);
-    localStorage.setItem('lessons', JSON.stringify(updatedLessons));
+    localStorage.setItem("lessons", JSON.stringify(updatedLessons));
     setEditingLesson(null);
   };
 
   const handleDelete = async (lessonId: string) => {
     const updatedLessons = lessons.filter((l) => l.id !== lessonId);
     setLessons(updatedLessons);
-    localStorage.setItem('lessons', JSON.stringify(updatedLessons));
+    localStorage.setItem("lessons", JSON.stringify(updatedLessons));
   };
 
   const handlePublish = async (lessonId: string) => {
     const updatedLessons = lessons.map((l) =>
-      l.id === lessonId ? { ...l, isPublished: true } : l
+      l.id === lessonId ? { ...l, isPublished: true } : l,
     );
     setLessons(updatedLessons);
-    localStorage.setItem('lessons', JSON.stringify(updatedLessons));
+    localStorage.setItem("lessons", JSON.stringify(updatedLessons));
   };
 
   if (isLoading) {
@@ -71,7 +89,7 @@ function LessonBuilderPage() {
   return (
     <LessonsList
       lessons={lessons}
-      onNewLesson={() => setEditingLesson(undefined as any)}
+      onNewLesson={() => setEditingLesson(createNewLessonDraft())}
       onEditLesson={setEditingLesson}
       onDeleteLesson={handleDelete}
       onPublishLesson={handlePublish}

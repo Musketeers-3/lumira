@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import * as THREE from 'three';
+import { useMemo } from "react";
+import * as THREE from "three";
 
 /**
  * Hand-painted checkered haori texture (green + black squares)
@@ -7,18 +7,18 @@ import * as THREE from 'three';
  */
 export function useHaoriTexture() {
   return useMemo(() => {
-    if (typeof document === 'undefined') return null;
+    if (typeof document === "undefined") return null;
     const size = 512;
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = size;
     canvas.height = size;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext("2d")!;
     // base black
-    ctx.fillStyle = '#0a0a0a';
+    ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, size, size);
     // green squares — deep mossy green
     const cell = size / 8;
-    ctx.fillStyle = '#2d5a3d';
+    ctx.fillStyle = "#2d5a3d";
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         if ((x + y) % 2 === 0) {

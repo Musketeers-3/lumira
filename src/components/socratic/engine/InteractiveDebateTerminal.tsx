@@ -1,13 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import type { Message } from '../types';
-import { TerminalMessage } from './TerminalMessage';
-import { MicButton } from './MicButton';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
+import { useEffect, useRef, useState } from "react";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import type { Message } from "../types";
+import { TerminalMessage } from "./TerminalMessage";
+import { MicButton } from "./MicButton";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface Props {
   messages: Message[];
@@ -31,17 +27,17 @@ export function InteractiveDebateTerminal({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputActive, setInputActive] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { isListening, transcript, startListening, stopListening, resetTranscript } =
     useSpeechRecognition({
-      language: 'en-US',
+      language: "en-US",
       interimResults: true,
     });
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
   useEffect(() => {
@@ -69,10 +65,10 @@ export function InteractiveDebateTerminal({
       if (onSubmitAnswer && enableAI) {
         await onSubmitAnswer(answer);
       }
-      setInputValue('');
+      setInputValue("");
       resetTranscript();
     } catch (error) {
-      console.error('[Submit Answer Error]', error);
+      console.error("[Submit Answer Error]", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -87,7 +83,7 @@ export function InteractiveDebateTerminal({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -100,9 +96,7 @@ export function InteractiveDebateTerminal({
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
           Current Lesson
         </div>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight">
-          Computational Thinking
-        </h2>
+        <h2 className="mt-1 text-lg font-semibold tracking-tight">Computational Thinking</h2>
         <p className="text-sm text-muted-foreground">The Dictionary Puzzle</p>
         <div className="mt-4 flex items-center gap-2">
           {Array.from({ length: totalSteps }).map((_, i) => {
@@ -114,8 +108,8 @@ export function InteractiveDebateTerminal({
                     type="button"
                     className="h-2 flex-1 rounded-full transition-all duration-500"
                     style={{
-                      background: reached ? 'var(--state-accent)' : 'rgba(255,255,255,0.08)',
-                      boxShadow: reached ? '0 0 12px var(--state-glow)' : 'none',
+                      background: reached ? "var(--state-accent)" : "rgba(255,255,255,0.08)",
+                      boxShadow: reached ? "0 0 12px var(--state-glow)" : "none",
                     }}
                     aria-label={`Step ${i + 1}`}
                   />
@@ -125,11 +119,11 @@ export function InteractiveDebateTerminal({
                     Step {i + 1} / {totalSteps}
                   </div>
                   <div className="mt-1 text-sm">
-                    {i === 0 && 'Frame the problem.'}
-                    {i === 1 && 'Challenge the linear approach.'}
-                    {i === 2 && 'Discover halving.'}
-                    {i === 3 && 'Realize elimination.'}
-                    {i === 4 && 'Breakthrough — Binary Search.'}
+                    {i === 0 && "Frame the problem."}
+                    {i === 1 && "Challenge the linear approach."}
+                    {i === 2 && "Discover halving."}
+                    {i === 3 && "Realize elimination."}
+                    {i === 4 && "Breakthrough — Binary Search."}
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -160,8 +154,8 @@ export function InteractiveDebateTerminal({
       <div
         className="flex items-center gap-3 rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl transition-all duration-500"
         style={{
-          boxShadow: inputActive ? '0 0 24px var(--state-glow)' : 'none',
-          borderColor: inputActive ? 'var(--state-accent)' : 'var(--border-glass)',
+          boxShadow: inputActive ? "0 0 24px var(--state-glow)" : "none",
+          borderColor: inputActive ? "var(--state-accent)" : "var(--border-glass)",
         }}
       >
         <button
@@ -185,7 +179,7 @@ export function InteractiveDebateTerminal({
           disabled={isSubmitting || isLoading}
           className="flex flex-1 items-center gap-2 rounded-xl bg-white/[0.04] px-4 py-3 font-mono text-sm text-muted-foreground placeholder-muted-foreground outline-none transition-all duration-500 disabled:opacity-50"
           style={{
-            backgroundColor: inputActive ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
+            backgroundColor: inputActive ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)",
           }}
         />
         <button

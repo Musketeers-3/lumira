@@ -1,4 +1,3 @@
-
 # Lumira — Tanjiro-Inspired 3D Mentor + Full Empathetic Rebrand
 
 Transform "The Socratic Engine" into **Lumira**, an empathetic learning OS with a real-time 3D mentor (original "inspired-by" character — kind-eyed swordsman with checkered green/black haori, scar on left brow) that breathes, leans, and reacts to learning state. Rewrite all copy from challenge-driven to belief-driven mentorship.
@@ -9,6 +8,7 @@ Transform "The Socratic Engine" into **Lumira**, an empathetic learning OS with 
 **Tagline:** "Learn beside someone who believes in you."
 
 **Page titles / route copy** (`__root.tsx`, all route `head()`, sidebar, `TopBar`):
+
 - Dashboard → "Your Path"
 - Engine → "The Dojo"
 - Skill Passport → "Your Light"
@@ -16,22 +16,25 @@ Transform "The Socratic Engine" into **Lumira**, an empathetic learning OS with 
 - Settings → "Settings"
 
 **Intent label rewrites** (`types.ts`, `TerminalMessage.tsx`, `demoScript.ts`):
+
 - `Socratic Nudge` → **Gentle Push**
 - `Socratic Challenge` → **Believing Challenge**
 - `Breakthrough` → **Light Found**
 - `Student` → **You**
 
 **Status pill copy** (`MentorCanvas.tsx`):
+
 - IDLE → "Walking with you"
 - FOCUS → "Listening kindly"
 - CHALLENGE → "Believing in you"
 - CELEBRATE → "Proud of you"
 
 **Demo script** (`demoScript.ts`) — full rewrite of all 5 steps. Same Binary Search arc, Tanjiro-style voice. Examples:
+
 - Old: "That works — but it could take all day."
 - New: "That's a real solution — it would work. But you're stronger than that. What if you opened the dictionary right in the middle? I think you'll see something."
 - Old: "You just independently invented the Binary Search Algorithm."
-- New: "You did it. You didn't memorize this — you *found* it. That's Binary Search. And I knew you'd reach it."
+- New: "You did it. You didn't memorize this — you _found_ it. That's Binary Search. And I knew you'd reach it."
 
 Rewrite Dashboard/Skill Passport/Architecture Log/Settings body copy to match (encouragement, belief, no punishment language).
 
@@ -40,6 +43,7 @@ Rewrite Dashboard/Skill Passport/Architecture Log/Settings body copy to match (e
 **Stack:** add `three`, `@react-three/fiber`, `@react-three/drei` via `bun add`.
 
 **Character:** original "inspired-by" — no Tanjiro name or exact likeness. Built procedurally from primitives (no GLB needed, no IP risk, no asset hosting):
+
 - Head: rounded sphere, warm peach material
 - Hair: low-poly tousled dark-brown shape (clustered cones)
 - Eyes: kind almond shape (flattened spheres), soft amber irises with subtle emissive glow
@@ -52,6 +56,7 @@ Rewrite Dashboard/Skill Passport/Architecture Log/Settings body copy to match (e
 Optional later: if user uploads a custom GLB, swap procedural model for it (out of scope this turn).
 
 **File: `src/components/socratic/engine/Mentor3D.tsx`**
+
 - `<Canvas camera={{ position: [0, 1.4, 2.6], fov: 32 }}>` inside the existing `MentorCanvas`.
 - `<ambientLight />` + key/rim lights tinted by `--state-accent` (read via `getComputedStyle` on `useFrame` tick).
 - `<MentorModel state isSpeaking />` group:
@@ -71,6 +76,7 @@ Optional later: if user uploads a custom GLB, swap procedural model for it (out 
 ## 3. Palette Warm-Up (subtle)
 
 Lumira's mentor is warm; the cyber-cold base feels off. Tweak `src/styles.css`:
+
 - IDLE accent shifts from indigo → warm amber-cream: `oklch(0.82 0.10 75)` (still pairs with deep navy bg).
 - CELEBRATE accent shifts emerald → soft gold: `oklch(0.88 0.14 90)`.
 - FOCUS and CHALLENGE unchanged.

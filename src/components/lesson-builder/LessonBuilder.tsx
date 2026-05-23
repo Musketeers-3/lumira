@@ -1,41 +1,41 @@
-import { useState } from 'react';
-import { ChevronDown, Plus, Trash2, Eye, Save } from 'lucide-react';
-import type { LessonDraft, LessonStep } from '@/types/lesson';
+import { useState } from "react";
+import { ChevronDown, Plus, Trash2, Eye, Save } from "lucide-react";
+import type { LessonDraft, LessonStep } from "@/types/lesson";
 
 interface LessonBuilderProps {
   initialLesson?: LessonDraft;
   onSave?: (lesson: LessonDraft) => Promise<void>;
 }
 
-const STATES = ['IDLE', 'FOCUS', 'CHALLENGE', 'CELEBRATE'] as const;
-const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
+const STATES = ["IDLE", "FOCUS", "CHALLENGE", "CELEBRATE"] as const;
+const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
 
 export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
   const [lesson, setLesson] = useState<LessonDraft>(
     initialLesson || {
       id: Math.random().toString(36).substring(7),
-      title: 'Untitled Lesson',
-      description: '',
-      topic: '',
+      title: "Untitled Lesson",
+      description: "",
+      topic: "",
       targetSkills: [],
-      difficulty: 'beginner',
+      difficulty: "beginner",
       steps: [
         {
-          id: '1',
-          state: 'FOCUS',
-          mentorMessage: 'Welcome! Let\'s explore this concept together.',
-          studentPrompt: 'What do you already know?',
+          id: "1",
+          state: "FOCUS",
+          mentorMessage: "Welcome! Let's explore this concept together.",
+          studentPrompt: "What do you already know?",
           expectedConcepts: [],
           celebrate: false,
           order: 0,
         },
       ],
       estimatedDuration: 15,
-      createdBy: 'educator',
+      createdBy: "educator",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       isPublished: false,
-    }
+    },
   );
 
   const [isSaving, setIsSaving] = useState(false);
@@ -51,9 +51,9 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
   const addStep = () => {
     const newStep: LessonStep = {
       id: Math.random().toString(36).substring(7),
-      state: 'FOCUS',
-      mentorMessage: '',
-      studentPrompt: '',
+      state: "FOCUS",
+      mentorMessage: "",
+      studentPrompt: "",
       expectedConcepts: [],
       celebrate: false,
       order: lesson.steps.length,
@@ -74,7 +74,7 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
 
   const handleSave = async () => {
     if (!lesson.title.trim() || !lesson.topic.trim()) {
-      alert('Please fill in lesson title and topic');
+      alert("Please fill in lesson title and topic");
       return;
     }
     setIsSaving(true);
@@ -106,7 +106,7 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
             className="flex items-center gap-2 rounded-lg bg-state-accent px-4 py-2 text-sm font-medium text-black transition-all hover:brightness-110 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
-            {isSaving ? 'Saving...' : 'Save Lesson'}
+            {isSaving ? "Saving..." : "Save Lesson"}
           </button>
         </div>
 
@@ -127,7 +127,7 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
             <select
               value={lesson.difficulty}
               onChange={(e) =>
-                setLesson({ ...lesson, difficulty: e.target.value as LessonDraft['difficulty'] })
+                setLesson({ ...lesson, difficulty: e.target.value as LessonDraft["difficulty"] })
               }
               className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
             >
@@ -197,23 +197,25 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
                         Step {idx + 1} • {step.state}
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1">
-                        {step.mentorMessage || 'Click to edit'}
+                        {step.mentorMessage || "Click to edit"}
                       </p>
                     </div>
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform ${expandedStep === step.id ? 'rotate-180' : ''}`}
+                    className={`h-4 w-4 transition-transform ${expandedStep === step.id ? "rotate-180" : ""}`}
                   />
                 </button>
 
                 {expandedStep === step.id && (
                   <div className="border-t border-glass-border px-4 py-4 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">State</label>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        State
+                      </label>
                       <select
                         value={step.state}
                         onChange={(e) =>
-                          updateStep(step.id, { state: e.target.value as LessonStep['state'] })
+                          updateStep(step.id, { state: e.target.value as LessonStep["state"] })
                         }
                         className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
                       >

@@ -1,21 +1,21 @@
-import { useCallback, useRef, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
-import type { SocraticContext, SocraticResponse } from '@/lib/ai-mentor';
-import { generateSocraticResponse, evaluateUnderstanding } from '@/lib/ai-mentor';
+import { useCallback, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import type { SocraticContext, SocraticResponse } from "@/lib/ai-mentor";
+import { generateSocraticResponse, evaluateUnderstanding } from "@/lib/ai-mentor";
 
 interface MessageLog {
   id: string;
-  role: 'user' | 'mentor';
+  role: "user" | "mentor";
   content: string;
   timestamp: number;
-  type?: 'gentle_push' | 'revealing_challenge' | 'breakthrough_confirmation';
+  type?: "gentle_push" | "revealing_challenge" | "breakthrough_confirmation";
 }
 
 export function useSocraticDialogue(initialContext: SocraticContext) {
   const [messages, setMessages] = useState<MessageLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [lastMentorState, setLastMentorState] = useState<'FOCUS' | 'CHALLENGE' | 'CELEBRATE'>(
-    'FOCUS'
+  const [lastMentorState, setLastMentorState] = useState<"FOCUS" | "CHALLENGE" | "CELEBRATE">(
+    "FOCUS",
   );
   const contextRef = useRef<SocraticContext>(initialContext);
 
@@ -28,7 +28,7 @@ export function useSocraticDialogue(initialContext: SocraticContext) {
       // Add student message
       const studentMsg: MessageLog = {
         id: `user-${Date.now()}`,
-        role: 'user',
+        role: "user",
         content: studentAnswer,
         timestamp: Date.now(),
       };
@@ -38,7 +38,7 @@ export function useSocraticDialogue(initialContext: SocraticContext) {
         // Evaluate understanding
         const evaluation = await evaluateUnderstanding(
           studentAnswer,
-          contextRef.current.learningObjective
+          contextRef.current.learningObjective,
         );
 
         // Generate Socratic response
@@ -47,7 +47,7 @@ export function useSocraticDialogue(initialContext: SocraticContext) {
         // Add mentor message
         const mentorMsg: MessageLog = {
           id: `mentor-${Date.now()}`,
-          role: 'mentor',
+          role: "mentor",
           content: socraticResponse.mentor_response,
           timestamp: Date.now(),
           type: socraticResponse.question_type,
@@ -64,19 +64,19 @@ export function useSocraticDialogue(initialContext: SocraticContext) {
           response: socraticResponse,
         };
       } catch (error) {
-        console.error('[Socratic Dialogue Error]', error);
+        console.error("[Socratic Dialogue Error]", error);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading]
+    [isLoading],
   );
 
   const reset = useCallback(() => {
     setMessages([]);
     contextRef.current.studentAnswers = [];
-    setLastMentorState('FOCUS');
+    setLastMentorState("FOCUS");
   }, []);
 
   return {

@@ -1,6 +1,6 @@
 export interface LessonStep {
   id: string;
-  state: 'IDLE' | 'FOCUS' | 'CHALLENGE' | 'CELEBRATE';
+  state: "IDLE" | "FOCUS" | "CHALLENGE" | "CELEBRATE";
   mentorMessage: string;
   studentPrompt: string;
   expectedConcepts: string[];
@@ -14,7 +14,7 @@ export interface LessonDraft {
   description: string;
   topic: string;
   targetSkills: string[];
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   steps: LessonStep[];
   estimatedDuration: number; // in minutes
   createdBy: string;

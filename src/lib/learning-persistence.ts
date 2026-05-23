@@ -1,5 +1,5 @@
-import { createClient } from './supabase/client';
-import type { Message } from '@/components/socratic/types';
+import { createClient } from "./supabase/client";
+import type { Message } from "@/components/socratic/types";
 
 export interface LearningSession {
   id: string;
@@ -19,7 +19,7 @@ export interface LearningSession {
  */
 export async function createLearningSession(
   lessonId: string,
-  topic: string
+  topic: string,
 ): Promise<LearningSession | null> {
   const supabase = createClient();
   const {
@@ -29,7 +29,7 @@ export async function createLearningSession(
   if (!user) return null;
 
   const { data, error } = await supabase
-    .from('learning_sessions')
+    .from("learning_sessions")
     .insert({
       user_id: user.id,
       lesson_id: lessonId,
@@ -39,7 +39,7 @@ export async function createLearningSession(
     .single();
 
   if (error) {
-    console.error('[Learning Persistence] Error creating session:', error);
+    console.error("[Learning Persistence] Error creating session:", error);
     return null;
   }
 
@@ -56,16 +56,13 @@ export async function updateLearningSession(
     messages_count?: number;
     performance_score?: number;
     breakthrough?: boolean;
-  }
+  },
 ): Promise<boolean> {
   const supabase = createClient();
-  const { error } = await supabase
-    .from('learning_sessions')
-    .update(updates)
-    .eq('id', sessionId);
+  const { error } = await supabase.from("learning_sessions").update(updates).eq("id", sessionId);
 
   if (error) {
-    console.error('[Learning Persistence] Error updating session:', error);
+    console.error("[Learning Persistence] Error updating session:", error);
     return false;
   }
 
@@ -78,20 +75,20 @@ export async function updateLearningSession(
 export async function completeLearningSession(
   sessionId: string,
   durationSeconds: number,
-  performanceScore: number
+  performanceScore: number,
 ): Promise<boolean> {
   const supabase = createClient();
   const { error } = await supabase
-    .from('learning_sessions')
+    .from("learning_sessions")
     .update({
       completed_at: new Date().toISOString(),
       duration_seconds: durationSeconds,
       performance_score: performanceScore,
     })
-    .eq('id', sessionId);
+    .eq("id", sessionId);
 
   if (error) {
-    console.error('[Learning Persistence] Error completing session:', error);
+    console.error("[Learning Persistence] Error completing session:", error);
     return false;
   }
 
@@ -104,7 +101,7 @@ export async function completeLearningSession(
 export async function saveSessionMessage(
   sessionId: string,
   state: string,
-  message: Message
+  message: Message,
 ): Promise<boolean> {
   const supabase = createClient();
   const {
@@ -113,17 +110,17 @@ export async function saveSessionMessage(
 
   if (!user) return false;
 
-  const { error } = await supabase.from('session_messages').insert({
+  const { error } = await supabase.from("session_messages").insert({
     session_id: sessionId,
     user_id: user.id,
     mentor_state: state,
     message_text: message.text,
     sender: message.sender,
-    message_type: 'text',
+    message_type: "text",
   });
 
   if (error) {
-    console.error('[Learning Persistence] Error saving message:', error);
+    console.error("[Learning Persistence] Error saving message:", error);
     return false;
   }
 
@@ -141,19 +138,16 @@ export async function getSkillTracking(skillName?: string) {
 
   if (!user) return null;
 
-  let query = supabase
-    .from('skill_tracking')
-    .select('*')
-    .eq('user_id', user.id);
+  let query = supabase.from("skill_tracking").select("*").eq("user_id", user.id);
 
   if (skillName) {
-    query = query.eq('skill_name', skillName);
+    query = query.eq("skill_name", skillName);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    console.error('[Learning Persistence] Error fetching skills:', error);
+    console.error("[Learning Persistence] Error fetching skills:", error);
     return null;
   }
 
@@ -167,7 +161,7 @@ export async function updateSkillMastery(
   skillName: string,
   skillCategory: string,
   proficiencyLevel: number,
-  masteryScore: number
+  masteryScore: number,
 ): Promise<boolean> {
   const supabase = createClient();
   const {
@@ -176,7 +170,7 @@ export async function updateSkillMastery(
 
   if (!user) return false;
 
-  const { error } = await supabase.from('skill_tracking').upsert(
+  const { error } = await supabase.from("skill_tracking").upsert(
     {
       user_id: user.id,
       skill_name: skillName,
@@ -186,11 +180,11 @@ export async function updateSkillMastery(
       last_practiced: new Date().toISOString(),
       times_practiced: proficiencyLevel + 1,
     },
-    { onConflict: 'user_id,skill_name' }
+    { onConflict: "user_id,skill_name" },
   );
 
   if (error) {
-    console.error('[Learning Persistence] Error updating skill:', error);
+    console.error("[Learning Persistence] Error updating skill:", error);
     return false;
   }
 
@@ -209,14 +203,14 @@ export async function getRecentSessions(limit: number = 10) {
   if (!user) return null;
 
   const { data, error } = await supabase
-    .from('learning_sessions')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+    .from("learning_sessions")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('[Learning Persistence] Error fetching sessions:', error);
+    console.error("[Learning Persistence] Error fetching sessions:", error);
     return null;
   }
 

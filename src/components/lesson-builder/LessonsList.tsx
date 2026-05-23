@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Lock } from 'lucide-react';
-import type { LessonDraft } from '@/types/lesson';
+import { useState } from "react";
+import { Plus, Edit, Trash2, Eye, Lock } from "lucide-react";
+import type { LessonDraft } from "@/types/lesson";
 
 interface LessonsListProps {
   lessons: LessonDraft[];
@@ -21,7 +21,7 @@ export function LessonsList({
   const [publishing, setPublishing] = useState<string | null>(null);
 
   const handleDelete = async (lessonId: string) => {
-    if (!confirm('Are you sure? This cannot be undone.')) return;
+    if (!confirm("Are you sure? This cannot be undone.")) return;
     setDeleting(lessonId);
     try {
       await onDeleteLesson(lessonId);
@@ -46,7 +46,9 @@ export function LessonsList({
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground">My Lessons</h1>
-            <p className="text-muted-foreground">Create and manage your Socratic learning lessons</p>
+            <p className="text-muted-foreground">
+              Create and manage your Socratic learning lessons
+            </p>
           </div>
           <button
             onClick={onNewLesson}
@@ -98,9 +100,7 @@ export function LessonsList({
                       {lesson.description}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        📚 {lesson.topic}
-                      </span>
+                      <span className="text-xs text-muted-foreground">📚 {lesson.topic}</span>
                       <span className="text-xs text-muted-foreground">
                         ⏱️ {lesson.estimatedDuration} min
                       </span>
@@ -122,7 +122,7 @@ export function LessonsList({
                       onClick={() => handlePublish(lesson.id)}
                       disabled={publishing === lesson.id || lesson.isPublished}
                       className="rounded-lg bg-state-accent/10 p-2 text-state-accent transition-all hover:bg-state-accent/20 disabled:opacity-50"
-                      title={lesson.isPublished ? 'Already published' : 'Publish lesson'}
+                      title={lesson.isPublished ? "Already published" : "Publish lesson"}
                     >
                       <Eye className="h-4 w-4" />
                     </button>

@@ -1,14 +1,14 @@
-import { Link, useRouterState } from '@tanstack/react-router';
-import { Compass, Swords, Sparkles, ScrollText, Settings, BookOpen } from 'lucide-react';
-import { useLearningState } from '@/lib/learning-state-context';
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Compass, Swords, Sparkles, ScrollText, Settings, BookOpen } from "lucide-react";
+import { useLearningState } from "@/lib/learning-state-context";
 
 const items = [
-  { to: '/', label: 'Your Path', icon: Compass },
-  { to: '/engine', label: 'The Dojo', icon: Swords },
-  { to: '/skill-passport', label: 'Your Light', icon: Sparkles },
-  { to: '/lesson-builder', label: 'Create Lesson', icon: BookOpen },
-  { to: '/architecture-log', label: 'Journey Log', icon: ScrollText },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: "/", label: "Your Path", icon: Compass },
+  { to: "/engine", label: "The Dojo", icon: Swords },
+  { to: "/skill-passport", label: "Your Light", icon: Sparkles },
+  { to: "/lesson-builder", label: "Create Lesson", icon: BookOpen },
+  { to: "/architecture-log", label: "Journey Log", icon: ScrollText },
+  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function Sidebar() {
@@ -38,18 +38,21 @@ export function Sidebar() {
               to={to}
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300 ${
                 active
-                  ? 'bg-white/5 text-foreground'
-                  : 'text-muted-foreground hover:bg-white/[0.03] hover:text-foreground'
+                  ? "bg-white/5 text-foreground"
+                  : "text-muted-foreground hover:bg-white/[0.03] hover:text-foreground"
               }`}
             >
               {active && (
                 <span
                   className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-full transition-colors duration-700"
-                  style={{ background: 'var(--state-accent)', boxShadow: '0 0 12px var(--state-glow)' }}
+                  style={{
+                    background: "var(--state-accent)",
+                    boxShadow: "0 0 12px var(--state-glow)",
+                  }}
                 />
               )}
               <Icon className="h-4 w-4" strokeWidth={1.5} />
-              <span className={active ? 'font-medium' : ''}>{label}</span>
+              <span className={active ? "font-medium" : ""}>{label}</span>
             </Link>
           );
         })}
@@ -62,7 +65,7 @@ export function Sidebar() {
         <div className="mt-1.5 flex items-center gap-2">
           <span
             className="h-2 w-2 rounded-full transition-colors duration-700"
-            style={{ background: 'var(--state-accent)', boxShadow: '0 0 10px var(--state-glow)' }}
+            style={{ background: "var(--state-accent)", boxShadow: "0 0 10px var(--state-glow)" }}
           />
           <span className="text-sm font-medium tracking-wide">{state}</span>
         </div>

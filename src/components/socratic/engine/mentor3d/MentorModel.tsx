@@ -1,223 +1,159 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-import type { LearningState } from '../../types';
-import { useHaoriTexture } from './useHaoriTexture';
+import { useEffect, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { VRMLoaderPlugin, VRM, VRMExpressionPresetName } from "@pixiv/three-vrm";
+import type { LearningState } from "../../types";
 
 interface Props {
   state: LearningState;
   isSpeaking: boolean;
+  isPausing?: boolean;
+  vrmUrl?: string;
 }
 
-const SKIN = '#f2cda0';
-const HAIR = '#1a0e0a';
-const KIMONO = '#f0e6d2';
-const SASH = '#1a1a1a';
-const EYE = '#c8842a';
-const SCAR = '#7a1818';
+export function MentorModel({
+  state,
+  isSpeaking,
+  isPausing = false,
+  vrmUrl = "/models/mentor.vrm",
+}: Props) {
+  const [vrm, setVrm] = useState<VRM | null>(null);
+  const headBoneRef = useRef<THREE.Object3D | null>(null);
+  const neckBoneRef = useRef<THREE.Object3D | null>(null);
+  const blinkTimer = useRef(0);
+  const nextBlink = useRef(3 + Math.random() * 3);
 
-export function MentorModel({ state, isSpeaking }: Props) {
-  const root = useRef<THREE.Group>(null!);
-  const head = useRef<THREE.Group>(null!);
-  const torso = useRef<THREE.Group>(null!);
-  const leftArm = useRef<THREE.Group>(null!);
-  const rightArm = useRef<THREE.Group>(null!);
-  const eyeL = useRef<THREE.Mesh>(null!);
-  const eyeR = useRef<THREE.Mesh>(null!);
-  const jaw = useRef<THREE.Mesh>(null!);
+  // 1. Load and Parse the VRM File
+  useEffect(() => {
+    const loader = new GLTFLoader();
 
-  const haori = useHaoriTexture();
+    // Clean TypeScript registration using the core three.js GLTFLoader
+    loader.register((parser) => {
+      return new VRMLoaderPlugin(parser);
+    });
 
+    loader.load(
+      vrmUrl,
+      (gltf) => {
+        const loadedVrm = gltf.userData.vrm as VRM;
+        setVrm(loadedVrm);
+
+        // VRM models usually load facing backwards. Rotate to face the camera.
+        loadedVrm.scene.rotation.y = 0;
+
+        // Extract bones for procedural animation
+        headBoneRef.current = loadedVrm.humanoid?.getNormalizedBoneNode("head") || null;
+        neckBoneRef.current = loadedVrm.humanoid?.getNormalizedBoneNode("neck") || null;
+
+        // Drop his arms down to his sides naturally
+        const leftUpperArm = loadedVrm.humanoid?.getNormalizedBoneNode("leftUpperArm");
+        const rightUpperArm = loadedVrm.humanoid?.getNormalizedBoneNode("rightUpperArm");
+        if (leftUpperArm) leftUpperArm.rotation.z = -1.2;
+        if (rightUpperArm) rightUpperArm.rotation.z = 1.2;
+
+        // Disable frustum culling to prevent the model from disappearing during animations
+        loadedVrm.scene.traverse((obj) => {
+          if ((obj as THREE.Mesh).isMesh) {
+            obj.frustumCulled = false;
+          }
+        });
+      },
+      (progress) => {
+        // Optional loading progress hook
+      },
+      (error) => console.error("Failed to load VRM:", error),
+    );
+
+    return () => {
+      // Memory cleanup on unmount
+      if (vrm) {
+        vrm.scene.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+      }
+    };
+  }, [vrmUrl]);
+
+  // 2. The Procedural Life Engine (Runs every frame)
   useFrame((_, dt) => {
+    if (!vrm) return;
     const t = performance.now() / 1000;
-    if (!root.current) return;
 
-    // Posture targets per state
-    const targetLean = state === 'FOCUS' ? -0.12 : state === 'CHALLENGE' ? 0.04 : state === 'CELEBRATE' ? -0.06 : 0;
-    const targetHeadTilt = state === 'CHALLENGE' ? -0.18 : state === 'CELEBRATE' ? 0.15 : 0;
-    const targetHeadY = state === 'CHALLENGE' ? -0.05 : state === 'CELEBRATE' ? 0.08 : 0;
+    // Update VRM internal physics (hair/clothes swinging)
+    vrm.update(dt);
 
-    // Arm poses
-    // IDLE/FOCUS: hands down. CHALLENGE: crossed. CELEBRATE: raised.
-    let lArmZ = 0.05;
-    let rArmZ = -0.05;
-    let lArmX = 0;
-    let rArmX = 0;
-    if (state === 'CHALLENGE') {
-      lArmZ = -0.7; rArmZ = 0.7;
-      lArmX = -0.3; rArmX = -0.3;
-    } else if (state === 'CELEBRATE') {
-      lArmZ = -2.4; rArmZ = 2.4;
-      lArmX = -0.2; rArmX = -0.2;
-    }
+    const expressions = vrm.expressionManager;
+    if (!expressions) return;
 
-    THREE.MathUtils.damp;
-    const damp = (current: number, target: number, lambda = 4) =>
-      THREE.MathUtils.damp(current, target, lambda, dt);
-
-    root.current.rotation.x = damp(root.current.rotation.x, targetLean);
-    head.current.rotation.x = damp(head.current.rotation.x, targetHeadTilt);
-    head.current.position.y = damp(head.current.position.y, 1.55 + targetHeadY);
-
-    leftArm.current.rotation.z = damp(leftArm.current.rotation.z, lArmZ);
-    rightArm.current.rotation.z = damp(rightArm.current.rotation.z, rArmZ);
-    leftArm.current.rotation.x = damp(leftArm.current.rotation.x, lArmX);
-    rightArm.current.rotation.x = damp(rightArm.current.rotation.x, rArmX);
-
-    // Breathing — enhanced with state awareness
-    const breatheFreq = state === 'CHALLENGE' ? 2.2 : state === 'CELEBRATE' ? 1.8 : 1.2;
-    const breatheAmp = state === 'CELEBRATE' ? 0.018 : 0.012;
-    const breath = 1 + Math.sin(t * breatheFreq) * breatheAmp;
-    torso.current.scale.y = breath;
-
-    // Eye narrow on CHALLENGE, warm gaze on CELEBRATE
-    const eyeScale = state === 'CHALLENGE' ? 0.45 : state === 'CELEBRATE' ? 1.1 : 1;
-    eyeL.current.scale.y = damp(eyeL.current.scale.y, eyeScale, 3);
-    eyeR.current.scale.y = damp(eyeR.current.scale.y, eyeScale, 3);
-
-    // Eye contact shift — slight tracking
-    const eyeContactX = state === 'FOCUS' ? 0.02 : state === 'CHALLENGE' ? -0.008 : 0.01;
-    eyeL.current.position.x = damp(eyeL.current.position.x, -0.11 + eyeContactX, 2.5);
-    eyeR.current.position.x = damp(eyeR.current.position.x, 0.11 + eyeContactX, 2.5);
-
-    // Speaking — jaw + head bob with energy variation
-    if (isSpeaking) {
-      const speakFreq = state === 'CHALLENGE' ? 12 : 10;
-      const bobAmp = state === 'CHALLENGE' ? 0.012 : 0.008;
-      head.current.position.y += Math.sin(t * speakFreq) * bobAmp;
-      jaw.current.scale.y = 1 + (Math.sin(t * speakFreq * 1.5) + 1) * 0.15;
+    // Procedural Blinking
+    blinkTimer.current += dt;
+    if (blinkTimer.current >= nextBlink.current) {
+      expressions.setValue(VRMExpressionPresetName.Blink, 1);
+      blinkTimer.current = 0;
+      nextBlink.current = 2.5 + Math.random() * 4;
     } else {
-      jaw.current.scale.y = damp(jaw.current.scale.y, 1, 6);
+      const currentBlink = expressions.getValue(VRMExpressionPresetName.Blink) || 0;
+      if (currentBlink > 0) {
+        expressions.setValue(
+          VRMExpressionPresetName.Blink,
+          THREE.MathUtils.damp(currentBlink, 0, 12, dt),
+        );
+      }
     }
 
-    // Gentle sway always, more pronounced during CELEBRATE
-    const swayAmp = state === 'CELEBRATE' ? 0.08 : 0.05;
-    root.current.rotation.y = Math.sin(t * 0.6) * swayAmp;
+    // Emotional State Mapping (Reset baseline first)
+    expressions.setValue(VRMExpressionPresetName.Happy, 0);
+    expressions.setValue(VRMExpressionPresetName.Angry, 0);
+    expressions.setValue(VRMExpressionPresetName.Relaxed, 0);
+    expressions.setValue(VRMExpressionPresetName.Sad, 0);
+
+    if (state === "FOCUS") {
+      expressions.setValue(VRMExpressionPresetName.Relaxed, 0.4);
+    } else if (state === "CHALLENGE") {
+      if (isPausing) {
+        expressions.setValue(VRMExpressionPresetName.Sad, 0.1);
+      } else {
+        expressions.setValue(VRMExpressionPresetName.Angry, 0.15);
+      }
+    } else if (state === "CELEBRATE") {
+      expressions.setValue(VRMExpressionPresetName.Happy, 0.6);
+    }
+
+    // Procedural Speaking (Simulated Lip-sync)
+    if (isSpeaking && !isPausing) {
+      const mouthOpen = (Math.sin(t * 15) + 1) * 0.35;
+      expressions.setValue(VRMExpressionPresetName.Aa, mouthOpen);
+    } else {
+      const currentAa = expressions.getValue(VRMExpressionPresetName.Aa) || 0;
+      expressions.setValue(VRMExpressionPresetName.Aa, THREE.MathUtils.damp(currentAa, 0, 10, dt));
+    }
+
+    // Subconscious Movement (Breathing & Head Tracking)
+    if (headBoneRef.current && neckBoneRef.current) {
+      const breath = Math.sin(t * (state === "CHALLENGE" ? 1.5 : 1.0)) * 0.02;
+      neckBoneRef.current.rotation.x = breath;
+
+      const targetTilt = state === "CHALLENGE" ? -0.05 : state === "CELEBRATE" ? 0.05 : 0;
+      headBoneRef.current.rotation.x = THREE.MathUtils.damp(
+        headBoneRef.current.rotation.x,
+        targetTilt,
+        2,
+        dt,
+      );
+
+      headBoneRef.current.rotation.y = Math.sin(t * 0.5) * 0.03;
+      headBoneRef.current.rotation.z = Math.cos(t * 0.3) * 0.01;
+    }
   });
 
-  return (
-    <group ref={root} position={[0, -0.9, 0]}>
-      {/* Torso (haori over kimono) */}
-      <group ref={torso} position={[0, 0.5, 0]}>
-        {/* Inner kimono cream */}
-        <mesh position={[0, 0, 0.02]}>
-          <cylinderGeometry args={[0.42, 0.55, 1.05, 16]} />
-          <meshStandardMaterial color={KIMONO} roughness={0.9} />
-        </mesh>
-        {/* Haori shell — slightly larger */}
-        <mesh position={[0, 0.05, 0]}>
-          <cylinderGeometry args={[0.46, 0.6, 1.1, 16, 1, true]} />
-          <meshStandardMaterial
-            map={haori ?? undefined}
-            color={haori ? '#ffffff' : '#2d5a3d'}
-            roughness={0.85}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-        {/* Sash */}
-        <mesh position={[0, -0.35, 0]}>
-          <cylinderGeometry args={[0.56, 0.56, 0.14, 16]} />
-          <meshStandardMaterial color={SASH} roughness={0.7} />
-        </mesh>
-        {/* Collar V */}
-        <mesh position={[0, 0.45, 0.32]} rotation={[0.2, 0, 0]}>
-          <boxGeometry args={[0.5, 0.18, 0.04]} />
-          <meshStandardMaterial color={KIMONO} roughness={0.8} />
-        </mesh>
-      </group>
-
-      {/* Arms — origin at shoulder */}
-      <group ref={leftArm} position={[-0.5, 1.0, 0]}>
-        <mesh position={[0, -0.4, 0]}>
-          <capsuleGeometry args={[0.1, 0.55, 6, 12]} />
-          <meshStandardMaterial map={haori ?? undefined} color={haori ? '#ffffff' : '#2d5a3d'} roughness={0.85} />
-        </mesh>
-        {/* hand */}
-        <mesh position={[0, -0.8, 0]}>
-          <sphereGeometry args={[0.09, 12, 12]} />
-          <meshStandardMaterial color={SKIN} roughness={0.7} />
-        </mesh>
-      </group>
-      <group ref={rightArm} position={[0.5, 1.0, 0]}>
-        <mesh position={[0, -0.4, 0]}>
-          <capsuleGeometry args={[0.1, 0.55, 6, 12]} />
-          <meshStandardMaterial map={haori ?? undefined} color={haori ? '#ffffff' : '#2d5a3d'} roughness={0.85} />
-        </mesh>
-        <mesh position={[0, -0.8, 0]}>
-          <sphereGeometry args={[0.09, 12, 12]} />
-          <meshStandardMaterial color={SKIN} roughness={0.7} />
-        </mesh>
-      </group>
-
-      {/* Neck */}
-      <mesh position={[0, 1.18, 0]}>
-        <cylinderGeometry args={[0.11, 0.13, 0.18, 12]} />
-        <meshStandardMaterial color={SKIN} roughness={0.75} />
-      </mesh>
-
-      {/* Head group */}
-      <group ref={head} position={[0, 1.55, 0]}>
-        {/* Face */}
-        <mesh>
-          <sphereGeometry args={[0.32, 32, 32]} />
-          <meshStandardMaterial color={SKIN} roughness={0.7} />
-        </mesh>
-
-        {/* Hair — tousled cap */}
-        <mesh position={[0, 0.12, -0.02]}>
-          <sphereGeometry args={[0.34, 24, 24, 0, Math.PI * 2, 0, Math.PI / 1.7]} />
-          <meshStandardMaterial color={HAIR} roughness={0.95} />
-        </mesh>
-        {/* Hair tufts in front */}
-        <mesh position={[-0.12, 0.22, 0.24]} rotation={[0.3, 0.2, -0.4]}>
-          <coneGeometry args={[0.08, 0.18, 8]} />
-          <meshStandardMaterial color={HAIR} roughness={0.95} />
-        </mesh>
-        <mesh position={[0.05, 0.26, 0.26]} rotation={[0.3, -0.1, 0.2]}>
-          <coneGeometry args={[0.07, 0.16, 8]} />
-          <meshStandardMaterial color={HAIR} roughness={0.95} />
-        </mesh>
-        <mesh position={[0.16, 0.21, 0.22]} rotation={[0.3, -0.3, 0.5]}>
-          <coneGeometry args={[0.07, 0.15, 8]} />
-          <meshStandardMaterial color={HAIR} roughness={0.95} />
-        </mesh>
-
-        {/* Eyes — almond, kind */}
-        <mesh ref={eyeL} position={[-0.11, 0.02, 0.29]}>
-          <sphereGeometry args={[0.045, 16, 16]} />
-          <meshStandardMaterial color={EYE} emissive={EYE} emissiveIntensity={0.35} roughness={0.4} />
-        </mesh>
-        <mesh ref={eyeR} position={[0.11, 0.02, 0.29]}>
-          <sphereGeometry args={[0.045, 16, 16]} />
-          <meshStandardMaterial color={EYE} emissive={EYE} emissiveIntensity={0.35} roughness={0.4} />
-        </mesh>
-
-        {/* Scar over left brow — diagonal */}
-        <mesh position={[-0.14, 0.13, 0.27]} rotation={[0, 0, -0.5]}>
-          <boxGeometry args={[0.11, 0.018, 0.005]} />
-          <meshStandardMaterial color={SCAR} roughness={0.6} />
-        </mesh>
-        <mesh position={[-0.1, 0.07, 0.28]} rotation={[0, 0, -0.5]}>
-          <boxGeometry args={[0.05, 0.012, 0.005]} />
-          <meshStandardMaterial color={SCAR} roughness={0.6} />
-        </mesh>
-
-        {/* Mouth / jaw */}
-        <mesh ref={jaw} position={[0, -0.12, 0.28]}>
-          <boxGeometry args={[0.1, 0.018, 0.01]} />
-          <meshStandardMaterial color="#6b3a3a" roughness={0.7} />
-        </mesh>
-
-        {/* Earrings — hanafuda-style flat discs */}
-        <mesh position={[-0.3, -0.05, 0.05]} rotation={[0, 0, 0]}>
-          <cylinderGeometry args={[0.04, 0.04, 0.005, 12]} />
-          <meshStandardMaterial color="#e8e0d0" emissive="#a83030" emissiveIntensity={0.15} roughness={0.5} />
-        </mesh>
-        <mesh position={[0.3, -0.05, 0.05]}>
-          <cylinderGeometry args={[0.04, 0.04, 0.005, 12]} />
-          <meshStandardMaterial color="#e8e0d0" emissive="#a83030" emissiveIntensity={0.15} roughness={0.5} />
-        </mesh>
-      </group>
-    </group>
-  );
+  // Position adjusted to frame the anime character from the chest up
+  return vrm ? <primitive object={vrm.scene} position={[0, -1.5, 0]} /> : null;
 }
