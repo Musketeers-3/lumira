@@ -38,6 +38,7 @@ export function InteractiveDebateTerminal({
   const [inputActive, setInputActive] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nextIntent, setNextIntent] = useState<MentorIntent>("Gentle Push");
 
   const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } =
     useSpeechRecognition({
