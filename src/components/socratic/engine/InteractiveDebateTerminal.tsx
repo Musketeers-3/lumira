@@ -109,13 +109,23 @@ export function InteractiveDebateTerminal({
   return (
     <div className="flex h-full min-h-[520px] flex-col gap-4">
       {/* Lesson card */}
-      <div className="rounded-2xl border border-glass-border bg-white/[0.03] p-5 backdrop-blur-xl transition-colors duration-700">
-        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+      <div className="surface-luxe p-5 transition-colors duration-700">
+        <div
+          className="font-mono text-[10px] uppercase tracking-[0.25em] relative z-10"
+          style={{ color: "var(--gold-soft)" }}
+        >
           Current Lesson
         </div>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight">Computational Thinking</h2>
-        <p className="text-sm text-muted-foreground">The Dictionary Puzzle</p>
-        <div className="mt-4 flex items-center gap-2">
+        <h2
+          className="mt-1 text-lg font-semibold tracking-tight relative z-10"
+          style={{ color: "#F5F1E6" }}
+        >
+          Computational Thinking
+        </h2>
+        <p className="text-sm relative z-10" style={{ color: "rgba(245,241,230,0.6)" }}>
+          The Dictionary Puzzle
+        </p>
+        <div className="mt-4 flex items-center gap-2 relative z-10">
           {Array.from({ length: totalSteps }).map((_, i) => {
             const reached = i <= stepIndex;
             return (
@@ -125,17 +135,29 @@ export function InteractiveDebateTerminal({
                     type="button"
                     className="h-2 flex-1 rounded-full transition-all duration-500"
                     style={{
-                      background: reached ? "var(--state-accent)" : "rgba(255,255,255,0.08)",
+                      background: reached
+                        ? "linear-gradient(90deg, var(--state-accent), var(--gold-soft))"
+                        : "rgba(245,241,230,0.06)",
                       boxShadow: reached ? "0 0 12px var(--state-glow)" : "none",
                     }}
                     aria-label={`Step ${i + 1}`}
                   />
                 </HoverCardTrigger>
-                <HoverCardContent className="w-56 border-glass-border bg-[oklch(0.14_0.03_270/0.95)] backdrop-blur-xl">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                <HoverCardContent
+                  className="w-56 backdrop-blur-xl"
+                  style={{
+                    background: "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
+                    border: "1px solid rgba(201,162,75,0.25)",
+                    boxShadow: "var(--shadow-deep), var(--inset-highlight)",
+                  }}
+                >
+                  <div
+                    className="font-mono text-[10px] uppercase tracking-widest"
+                    style={{ color: "var(--gold-soft)" }}
+                  >
                     Step {i + 1} / {totalSteps}
                   </div>
-                  <div className="mt-1 text-sm">
+                  <div className="mt-1 text-sm" style={{ color: "#F5F1E6" }}>
                     {i === 0 && "Frame the problem."}
                     {i === 1 && "Challenge the linear approach."}
                     {i === 2 && "Discover halving."}
