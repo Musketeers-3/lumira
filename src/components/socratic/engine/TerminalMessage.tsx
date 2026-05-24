@@ -1,11 +1,12 @@
 import type { Message } from "../types";
 
 const intentColor = (intent: Message["intent"]) => {
-  if (intent === "Believing Challenge") return "text-[oklch(0.82_0.16_60)]";
-  if (intent === "Light Found") return "text-[oklch(0.88_0.18_95)]";
-  if (intent === "Gentle Push") return "text-state-accent";
+  if (intent === "Believing Challenge") return "text-[#E37B3C]";
+  if (intent === "Light Found") return "text-[#E6C97A]";
+  if (intent === "Gentle Push") return "text-[#5BC0EB]";
   return "text-muted-foreground";
 };
+
 
 export function TerminalMessage({ message }: { message: Message }) {
   const isMentor = message.speaker === "mentor";

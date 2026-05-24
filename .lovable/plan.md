@@ -1,56 +1,106 @@
-# Bring Lumira's VRM to life
+# Luxury aesthetic pass — all tabs (mentor untouched)
 
-Goal: upgrade `src/components/socratic/engine/mentor3d/MentorModel.tsx` so the loaded `mentor.vrm` feels alive — layered body motion and richer, smoothly-blended emotions tied to `LearningState` + `isSpeaking` + `isPausing`. Pure procedural animation on the VRM humanoid rig and expression manager; no new deps, no GLB swap, no backend.
+Goal: lift every surface outside the 3D mentor to feel premium — deeper blacks, jewel-tone state accents, gold micro-details, layered glass with real texture (grain, gradients, inset highlights, shadows). All colors as hex or rgb/rgba — no `oklch`.
 
-## What changes
+## Out of scope (do NOT touch)
+- `src/components/socratic/engine/Mentor3D.tsx`
+- `src/components/socratic/engine/MentorCanvas.tsx`
+- everything under `src/components/socratic/engine/mentor3d/**`
+- `mentor.vrm`, motion FBX/GLB files, retarget logic
 
-Single file: `src/components/socratic/engine/mentor3d/MentorModel.tsx`.
+Mentor canvas keeps its current look; only its surrounding chrome changes.
 
-### 1. Motion system (humanoid bones)
+## 1. New token system in `src/styles.css`
 
-Cache these bones on load (in addition to head/neck):
-`spine`, `chest`, `upperChest`, `leftShoulder/UpperArm/LowerArm/Hand`, `rightShoulder/UpperArm/LowerArm/Hand`.
+Replace the current flat dark palette with a layered "noir + jewel" system. All values in hex / rgba.
 
-Per-frame, damp each bone toward a state-driven target pose (use `THREE.MathUtils.damp`, dt-based, so it stays framerate-independent):
+```text
+Base (always-on)
+--bg-abyss:        #07070C   (page background, deepest)
+--bg-night:        #0E0E18   (app shell)
+--bg-onyx:         #15151F   (card base)
+--bg-onyx-raised:  #1B1B28   (raised card / popover)
+--ink-primary:     #F5F1E6   (warm ivory text)
+--ink-secondary:   rgba(245,241,230,0.62)
+--ink-tertiary:    rgba(245,241,230,0.38)
 
-- **Breath layer (always on):** `sin(t * rate) * amp` added to `spine.rotation.x` and `chest.rotation.x`. Rate/amp shift per state (slower+deeper in IDLE, quicker in CHALLENGE).
-- **Idle sway:** very slow `sin(t*0.3)` on `spine.rotation.z` (~0.02 rad) so he's never frozen.
-- **Per-state pose targets** (damped, not snapped):
-  - IDLE — neutral arms down, slight open chest, soft head tilt right.
-  - FOCUS — lean forward ~6° on spine, slight head-down nod, one hand subtly raised (right elbow bent ~0.4 rad) as if gesturing.
-  - CHALLENGE — upright spine, arms crossed-ish (both upper arms rotated inward, lower arms folded up ~1.2 rad). If `isPausing`, add a slow head shake (`sin(t*0.6)*0.04` on head.y) + slight downward tilt.
-  - CELEBRATE — chest lifted, shoulders back, both arms relaxed open (upper arms out ~0.3 rad), gentle bobbing nod (`sin(t*2)*0.05` on head.x).
-- **Speaking gesture additive:** when `isSpeaking && !isPausing`, add small `sin(t*3)` wobble to right hand and chest so he "talks with his body".
-- **Saccade-style gaze:** every 2–5s pick a small random target for head.y / head.x (±0.05 rad) and damp toward it, instead of the current single sine.
+Metals (luxury accents, state-independent)
+--gold:            #C9A24B
+--gold-soft:       #E6C97A
+--gold-deep:       #8B6B2A
+--platinum:        #D8DCE3
+--copper:          #B87333
 
-### 2. Emotion system (VRM expressions)
+Borders & glass
+--hairline:        rgba(245,241,230,0.07)   (default border)
+--hairline-strong: rgba(245,241,230,0.14)   (hover/active border)
+--glass-tint:      rgba(255,255,255,0.025)
+--glass-tint-2:    rgba(255,255,255,0.05)
+--inset-highlight: inset 0 1px 0 rgba(255,255,255,0.06)
 
-Keep current blink + Aa mouth, then layer:
+Shadows (depth)
+--shadow-soft:     0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35)
+--shadow-deep:     0 2px 4px rgba(0,0,0,0.5), 0 24px 60px -12px rgba(0,0,0,0.6)
+--shadow-lift:     0 30px 80px -20px rgba(0,0,0,0.7)
 
-- **Smooth expression blending:** instead of `setValue(..., 0)` hard reset each frame, damp every emotion channel (`Happy`, `Angry`, `Sad`, `Relaxed`, `Surprised`, `Neutral`) toward its target for the current state. Prevents pops on state changes.
-- **State → expression mix:**
-  - IDLE — `Relaxed` 0.25, `Happy` 0.1 (soft smile baseline).
-  - FOCUS — `Relaxed` 0.4, `Happy` 0.15 (warm, attentive).
-  - CHALLENGE (not pausing) — `Neutral` 0.3, `Happy` 0.1 (kind, not stern — drop the current Angry 0.15 which reads harsh and contradicts the Tanjiro-style empathy rules).
-  - CHALLENGE + `isPausing` — `Sad` 0.15, `Relaxed` 0.2 (concerned, patient).
-  - CELEBRATE — `Happy` 0.8, `Relaxed` 0.3, brief `Surprised` 0.4 burst that decays over ~1.2s on entry (joyful gasp).
-- **Lip-sync improvement:** when speaking, drive `Aa`, `Ih`, `Ou` from three offset sine waves (e.g. `Aa = max(0, sin(t*14))*0.4`, `Ih = max(0, sin(t*11 + 1.3))*0.25`, `Ou = max(0, sin(t*9 + 2.1))*0.2`) so the mouth shape varies instead of flapping open/closed. Damp all three to 0 when silent.
-- **Micro-expressions:** every 6–10s, briefly raise `Happy` by +0.1 for ~0.8s in IDLE/FOCUS (a "smile twitch") for life.
-- **Blink:** keep current logic; add an occasional double-blink (10% chance) for naturalness.
+Gradients (reusable)
+--grad-onyx:       linear-gradient(180deg, #1B1B28 0%, #13131C 100%)
+--grad-aurora:     linear-gradient(135deg, rgba(201,162,75,0.10), rgba(56,189,248,0.08) 50%, rgba(139,92,246,0.10))
+--grad-vignette:   radial-gradient(ellipse at top, rgba(201,162,75,0.08), transparent 60%)
+```
 
-### 3. State-change transitions
+### State accents (richer, jewel-toned)
+Each state gets accent / glow / ambient triplet + a metallic companion.
 
-On `state` change, fade body pose targets and expression targets in over ~0.8s via the existing damp loop (no new timers needed — damp rate constants do the work). On entering CELEBRATE, trigger the one-shot `Surprised` burst with a ref-tracked timer.
+```text
+IDLE       --state-accent #D4A84B   --state-glow rgba(212,168,75,0.40)   ambient #11111A → #14131F → #08080E
+FOCUS      --state-accent #5BC0EB   --state-glow rgba(91,192,235,0.45)   ambient #0B1622 → #122236 → #07101A   companion: sapphire #2A6FB5
+CHALLENGE  --state-accent #E37B3C   --state-glow rgba(227,123,60,0.50)   ambient #1A0E08 → #251510 → #0D0A0E   companion: ember #C0392B
+CELEBRATE  --state-accent #9BD66C   --state-glow rgba(155,214,108,0.50)  ambient #14200E → #1E2C12 → #0E1408   companion: gold #E6C97A
+```
 
-## Out of scope
+## 2. Reusable surface classes (added in `styles.css`)
 
-- No new files, no new deps.
-- No real audio/lip-sync from mic.
-- No swapping the VRM model or editing the spec doc.
-- No changes to other components, routes, or styles.
+- `.surface-luxe` — onyx gradient + `--inset-highlight` + `--shadow-deep` + 1px hairline border + subtle noise (SVG data-URI grain) at 4% opacity.
+- `.surface-luxe-elevated` — same + `--shadow-lift` + brighter top edge.
+- `.hairline-gold` — 1px border with `linear-gradient(90deg, transparent, var(--gold) 50%, transparent)` mask for a thin gold divider.
+- `.text-gold` — `--gold` with subtle text-shadow `0 0 18px rgba(201,162,75,0.25)`.
+- `.glow-state` — utility for state-driven box glow.
+- `@keyframes shimmer-gold` — slow pan over gold gradient (used on hero CTA + accent badges).
+- Global noise overlay (`body::after`) at 3% opacity for filmic texture.
 
-## Risk / verification
+## 3. Per-tab refinements
 
-- Some VRMs don't expose every expression preset (`Ih`, `Ou`, `Surprised`). Guard each `setValue` with an `expressions.getExpression(name)` check; skip silently if missing so it degrades to the current behavior.
-- Some VRMs lack `upperChest` or `shoulder` bones. Each bone lookup already returns `null`; only animate when non-null.
-- Verify by loading `/engine` and stepping through the demo: mentor should breathe in IDLE, lean+gesture in FOCUS, fold arms+soften in CHALLENGE, open up and beam in CELEBRATE, with no popping between states.
+Each route gets the same kit applied: deeper base, layered glass, gold hairlines, jewel-tone accent driven by state.
+
+| File | Changes |
+|---|---|
+| `src/routes/__root.tsx` | Body background = `--bg-abyss` + `--grad-vignette` overlay + global noise. |
+| `src/components/socratic/Sidebar.tsx` | Replace `bg-[oklch(...)]` with `--bg-night` gradient; gold-hairline right border; active item gets gold left bar + soft state-glow; logo "ira" in gold. |
+| `src/components/socratic/TopBar.tsx` | Onyx gradient bg, gold hairline bottom border, mentor-status chip becomes pill with gold ring + state dot. |
+| `src/routes/index.tsx` (Your Path) | Hero → `surface-luxe-elevated` with aurora gradient + shimmer-gold band under heading; CTA button = gold gradient (`#E6C97A → #C9A24B → #8B6B2A`) with deep shadow + hover lift; stat cards → `surface-luxe` with gold icon ring; progress bars use state-accent → gold gradient. |
+| `src/routes/skill-passport.tsx` | Cards → `surface-luxe`; badges get gold foil border; section headers use gold eyebrow + ivory title. |
+| `src/routes/architecture-log.tsx` | Timeline rail = gold hairline; entries on onyx cards with state-tinted left edge. |
+| `src/routes/lesson-builder.tsx` | Form panels → `surface-luxe`; inputs → `--bg-onyx-raised` with `--hairline-strong` focus → gold ring. |
+| `src/routes/settings.tsx` | Same surface kit; toggles get gold-on track when active. |
+| `src/components/socratic/engine/SocraticEngine.tsx` (layout only, not mentor canvas) | Outer panels, stepper, terminal frame upgraded; **MentorCanvas stays as-is**. |
+| `src/components/socratic/engine/InteractiveDebateTerminal.tsx` | Terminal frame: onyx gradient, gold hairline top, intent selector buttons get gold-active state, mic button gets state-glow ring. |
+| `src/components/socratic/engine/StepperBar.tsx` | Steps: completed = gold gradient pill, active = state-accent with glow, pending = hairline. |
+| `src/components/socratic/engine/CelebrationOverlay.tsx` | Confetti tint → gold + celebrate-green; backdrop = radial gold vignette. |
+| `src/components/socratic/AmbientBackground.tsx` | Add second layer: slow-drifting radial gold orb (8% opacity) + film grain. |
+
+## 4. Texture details (the "4K / luxury" feel)
+
+- Inset highlight (`inset 0 1px 0 rgba(255,255,255,0.06)`) on every raised surface so edges catch light.
+- Outer shadow uses two layers (sharp contact + soft ambient).
+- Borders are never pure white — always warm ivory at low alpha.
+- Backgrounds are always gradients, never flat fills (onyx top → deeper bottom).
+- Body-level SVG noise (3–4% opacity, `feTurbulence`) kills banding in dark gradients.
+- Gold accents reserved for: brand mark, primary CTA, active nav, dividers, key numerals — never bulk text.
+
+## 5. Verification
+
+After build:
+1. Visit `/`, `/engine`, `/skill-passport`, `/lesson-builder`, `/architecture-log`, `/settings` — every surface shows layered depth, gold hairlines, and state-driven accent shifts on the FOCUS/CHALLENGE/CELEBRATE buttons.
+2. Confirm mentor canvas on `/engine` is visually unchanged (only its surrounding chrome differs).
+3. Grep confirms no new `oklch(` in changed files; all colors are hex or rgb/rgba.

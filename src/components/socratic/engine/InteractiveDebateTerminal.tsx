@@ -109,13 +109,23 @@ export function InteractiveDebateTerminal({
   return (
     <div className="flex h-full min-h-[520px] flex-col gap-4">
       {/* Lesson card */}
-      <div className="rounded-2xl border border-glass-border bg-white/[0.03] p-5 backdrop-blur-xl transition-colors duration-700">
-        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+      <div className="surface-luxe p-5 transition-colors duration-700">
+        <div
+          className="font-mono text-[10px] uppercase tracking-[0.25em] relative z-10"
+          style={{ color: "var(--gold-soft)" }}
+        >
           Current Lesson
         </div>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight">Computational Thinking</h2>
-        <p className="text-sm text-muted-foreground">The Dictionary Puzzle</p>
-        <div className="mt-4 flex items-center gap-2">
+        <h2
+          className="mt-1 text-lg font-semibold tracking-tight relative z-10"
+          style={{ color: "#F5F1E6" }}
+        >
+          Computational Thinking
+        </h2>
+        <p className="text-sm relative z-10" style={{ color: "rgba(245,241,230,0.6)" }}>
+          The Dictionary Puzzle
+        </p>
+        <div className="mt-4 flex items-center gap-2 relative z-10">
           {Array.from({ length: totalSteps }).map((_, i) => {
             const reached = i <= stepIndex;
             return (
@@ -125,17 +135,29 @@ export function InteractiveDebateTerminal({
                     type="button"
                     className="h-2 flex-1 rounded-full transition-all duration-500"
                     style={{
-                      background: reached ? "var(--state-accent)" : "rgba(255,255,255,0.08)",
+                      background: reached
+                        ? "linear-gradient(90deg, var(--state-accent), var(--gold-soft))"
+                        : "rgba(245,241,230,0.06)",
                       boxShadow: reached ? "0 0 12px var(--state-glow)" : "none",
                     }}
                     aria-label={`Step ${i + 1}`}
                   />
                 </HoverCardTrigger>
-                <HoverCardContent className="w-56 border-glass-border bg-[oklch(0.14_0.03_270/0.95)] backdrop-blur-xl">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                <HoverCardContent
+                  className="w-56 backdrop-blur-xl"
+                  style={{
+                    background: "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
+                    border: "1px solid rgba(201,162,75,0.25)",
+                    boxShadow: "var(--shadow-deep), var(--inset-highlight)",
+                  }}
+                >
+                  <div
+                    className="font-mono text-[10px] uppercase tracking-widest"
+                    style={{ color: "var(--gold-soft)" }}
+                  >
                     Step {i + 1} / {totalSteps}
                   </div>
-                  <div className="mt-1 text-sm">
+                  <div className="mt-1 text-sm" style={{ color: "#F5F1E6" }}>
                     {i === 0 && "Frame the problem."}
                     {i === 1 && "Challenge the linear approach."}
                     {i === 2 && "Discover halving."}
@@ -152,10 +174,26 @@ export function InteractiveDebateTerminal({
       {/* Terminal feed */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto rounded-2xl border border-glass-border bg-[oklch(0.10_0.02_270/0.55)] p-5 backdrop-blur-xl transition-colors duration-700"
+        className="flex-1 overflow-y-auto rounded-2xl p-5 backdrop-blur-xl transition-colors duration-700 relative"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(11,11,18,0.85) 0%, rgba(7,7,12,0.7) 100%)",
+          border: "1px solid rgba(245,241,230,0.06)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 60px rgba(0,0,0,0.45), 0 16px 40px -16px rgba(0,0,0,0.6)",
+        }}
       >
+        {/* Top gold hairline */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-6 right-6 top-0 h-px"
+          style={{ background: "var(--grad-hairline-gold)" }}
+        />
         {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
+          <div
+            className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-[0.3em]"
+            style={{ color: "rgba(245,241,230,0.35)" }}
+          >
             // session idle — press start
           </div>
         ) : (
@@ -168,11 +206,14 @@ export function InteractiveDebateTerminal({
       </div>
 
       {/* Intent selector */}
-      <div className="rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl">
-        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+      <div className="surface-luxe p-3.5">
+        <div
+          className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] relative z-10"
+          style={{ color: "var(--gold-soft)" }}
+        >
           Ask Lumira to respond with…
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 relative z-10">
           {INTENT_OPTIONS.map((opt) => {
             const active = nextIntent === opt.value;
             return (
@@ -182,14 +223,18 @@ export function InteractiveDebateTerminal({
                 onClick={() => setNextIntent(opt.value)}
                 aria-pressed={active}
                 title={opt.hint}
-                className="rounded-full border px-3 py-1.5 text-xs font-medium tracking-wide transition-all duration-300"
+                className="rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide transition-all duration-300"
                 style={{
-                  borderColor: active ? "var(--state-accent)" : "var(--border-glass)",
+                  border: active
+                    ? "1px solid var(--state-accent)"
+                    : "1px solid rgba(245,241,230,0.10)",
                   background: active
-                    ? "color-mix(in oklab, var(--state-accent) 18%, transparent)"
-                    : "rgba(255,255,255,0.03)",
-                  color: active ? "var(--state-accent)" : "rgb(var(--muted-foreground) / 1)",
-                  boxShadow: active ? "0 0 14px var(--state-glow)" : "none",
+                    ? "linear-gradient(180deg, rgba(201,162,75,0.16), rgba(20,20,30,0.4))"
+                    : "rgba(245,241,230,0.03)",
+                  color: active ? "var(--state-accent)" : "rgba(245,241,230,0.6)",
+                  boxShadow: active
+                    ? "0 0 18px var(--state-glow), inset 0 1px 0 rgba(255,255,255,0.06)"
+                    : "inset 0 1px 0 rgba(255,255,255,0.03)",
                 }}
               >
                 {opt.label}
@@ -202,13 +247,17 @@ export function InteractiveDebateTerminal({
 
       {/* Input dock */}
       <div
-        className="flex items-center gap-3 rounded-2xl border border-glass-border bg-white/[0.03] p-3 backdrop-blur-xl transition-all duration-500"
+        className="flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl transition-all duration-500"
         style={{
-          boxShadow: inputActive ? "0 0 24px var(--state-glow)" : "none",
-          borderColor: inputActive ? "var(--state-accent)" : "var(--border-glass)",
+          background: "linear-gradient(180deg, #1B1B28 0%, #13131C 100%)",
+          border: inputActive
+            ? "1px solid var(--state-accent)"
+            : "1px solid rgba(201,162,75,0.18)",
+          boxShadow: inputActive
+            ? "0 0 28px var(--state-glow), inset 0 1px 0 rgba(255,255,255,0.05)"
+            : "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.4)",
         }}
       >
-        {/* FIXED: Removed outer button to prevent HTML nesting hydration error */}
         <div className="flex-shrink-0">
           <MicButton
             active={isListening || isSpeaking}
@@ -227,24 +276,23 @@ export function InteractiveDebateTerminal({
           onBlur={() => setInputActive(false)}
           placeholder="type or speak your reasoning_"
           disabled={isSubmitting || isLoading}
-          className="flex flex-1 items-center gap-2 rounded-xl bg-white/[0.04] px-4 py-3 font-mono text-sm text-muted-foreground placeholder-muted-foreground outline-none transition-all duration-500 disabled:opacity-50"
+          className="flex flex-1 items-center gap-2 rounded-xl px-4 py-3 font-mono text-sm outline-none transition-all duration-500 disabled:opacity-50"
           style={{
-            backgroundColor: inputActive ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)",
+            background: inputActive ? "rgba(7,7,12,0.7)" : "rgba(7,7,12,0.5)",
+            color: "#F5F1E6",
+            border: "1px solid rgba(245,241,230,0.06)",
+            boxShadow: "inset 0 2px 4px rgba(0,0,0,0.4)",
           }}
         />
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!inputValue.trim() || isSubmitting || isLoading}
-          className="flex-shrink-0 text-state-accent hover:drop-shadow-[0_0_8px_var(--state-glow)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-shrink-0 transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ color: "var(--gold-soft)", filter: "drop-shadow(0 0 6px var(--state-glow))" }}
           aria-label="Submit answer"
         >
-          <svg
-            className="h-5 w-5 transition-transform hover:scale-110"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
