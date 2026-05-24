@@ -53,7 +53,7 @@ export function DebateTerminal({ messages, stepIndex, totalSteps, isSpeaking }: 
                     aria-label={`Step ${i + 1}`}
                   />
                 </HoverCardTrigger>
-                <HoverCardContent className="w-56 border-glass-border bg-[oklch(0.14_0.03_270/0.95)] backdrop-blur-xl">
+                <HoverCardContent className="w-56 border-glass-border bg-[#1B1B28] backdrop-blur-xl">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                     Step {i + 1} / {totalSteps}
                   </div>
@@ -74,7 +74,7 @@ export function DebateTerminal({ messages, stepIndex, totalSteps, isSpeaking }: 
       {/* Terminal feed */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto rounded-2xl border border-glass-border bg-[oklch(0.10_0.02_270/0.55)] p-5 backdrop-blur-xl transition-colors duration-700"
+        className="flex-1 overflow-y-auto rounded-2xl border border-glass-border bg-[#0B0B12]/85 p-5 backdrop-blur-xl transition-colors duration-700"
       >
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
