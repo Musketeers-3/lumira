@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { LearningStateProvider } from "@/lib/learning-state-context";
 import { MentorSettingsProvider } from "@/lib/mentor-settings-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import { AmbientBackground } from "@/components/socratic/AmbientBackground";
 import { Sidebar } from "@/components/socratic/Sidebar";
 import { TopBar } from "@/components/socratic/TopBar";
@@ -114,20 +115,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <LearningStateProvider>
-        <MentorSettingsProvider>
-          <AmbientBackground />
-          <div className="relative flex min-h-screen w-full">
-            <Sidebar />
-            <div className="flex min-h-screen flex-1 flex-col">
-              <TopBar />
-              <main className="flex-1 p-5 lg:p-8">
-                <Outlet />
-              </main>
+      <ThemeProvider>
+        <LearningStateProvider>
+          <MentorSettingsProvider>
+            <AmbientBackground />
+            <div className="relative flex min-h-screen w-full">
+              <Sidebar />
+              <div className="flex min-h-screen flex-1 flex-col">
+                <TopBar />
+                <main className="flex-1 p-5 lg:p-8">
+                  <Outlet />
+                </main>
+              </div>
             </div>
-          </div>
-        </MentorSettingsProvider>
-      </LearningStateProvider>
+          </MentorSettingsProvider>
+        </LearningStateProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

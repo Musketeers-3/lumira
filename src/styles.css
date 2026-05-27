@@ -371,3 +371,157 @@ html[data-state="CELEBRATE"] {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
+
+/* ============================================================
+   Clay Light Theme — bubbly Minecraft-clay-with-shaders feel
+   matte off-whites, soft pastel greys, warm grayish-black ink,
+   puffy multi-layer shadows, slight darker bevel hairline.
+   ============================================================ */
+html[data-theme="light"] {
+  --bg-abyss: #F4F1EC;
+  --bg-night: #EDE8E0;
+  --bg-onyx: #FFFFFF;
+  --bg-onyx-raised: #FBF8F2;
+
+  --ink-primary: #1F1B16;
+  --ink-secondary: rgba(31, 27, 22, 0.62);
+  --ink-tertiary: rgba(31, 27, 22, 0.42);
+
+  --hairline: rgba(31, 27, 22, 0.10);
+  --hairline-strong: rgba(31, 27, 22, 0.18);
+  --glass-tint: rgba(31, 27, 22, 0.025);
+  --glass-tint-2: rgba(31, 27, 22, 0.05);
+  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --inset-lowlight: inset 0 -1px 0 rgba(31, 27, 22, 0.06);
+
+  --shadow-soft: 0 1px 2px rgba(31, 27, 22, 0.06), 0 8px 24px rgba(31, 27, 22, 0.08);
+  --shadow-deep: 0 2px 6px rgba(31, 27, 22, 0.08), 0 24px 60px -16px rgba(31, 27, 22, 0.18);
+  --shadow-lift: 0 30px 80px -28px rgba(31, 27, 22, 0.22);
+
+  --gold: #B8862F;
+  --gold-soft: #D9B25E;
+  --gold-deep: #7A5618;
+  --platinum: #8A8F99;
+  --copper: #A65D2A;
+
+  --grad-onyx: linear-gradient(180deg, #FFFFFF 0%, #F6F1E8 100%);
+  --grad-onyx-raised: linear-gradient(180deg, #FFFFFF 0%, #FBF6EC 100%);
+  --grad-aurora: linear-gradient(135deg, rgba(184, 134, 47, 0.10), rgba(46, 143, 184, 0.08) 50%, rgba(139, 92, 246, 0.08));
+  --grad-vignette: radial-gradient(ellipse at top, rgba(184, 134, 47, 0.10), transparent 60%);
+  --grad-gold: linear-gradient(135deg, #E5C173 0%, #B8862F 45%, #7A5618 100%);
+  --grad-hairline-gold: linear-gradient(90deg, transparent, rgba(184, 134, 47, 0.55) 50%, transparent);
+
+  /* shadcn shims */
+  --background: #F4F1EC;
+  --foreground: #1F1B16;
+  --card: #FFFFFF;
+  --card-foreground: #1F1B16;
+  --popover: #FFFFFF;
+  --popover-foreground: #1F1B16;
+  --primary: #B8862F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EDE8E0;
+  --secondary-foreground: #1F1B16;
+  --muted: #EDE8E0;
+  --muted-foreground: rgba(31, 27, 22, 0.55);
+  --accent: #FBF8F2;
+  --accent-foreground: #1F1B16;
+  --destructive: #C0392B;
+  --destructive-foreground: #FFFFFF;
+
+  --border: rgba(31, 27, 22, 0.10);
+  --input: rgba(31, 27, 22, 0.14);
+  --ring: #B8862F;
+
+  --sidebar: #EDE8E0;
+  --sidebar-foreground: #1F1B16;
+  --sidebar-primary: #B8862F;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FBF8F2;
+  --sidebar-accent-foreground: #1F1B16;
+  --sidebar-border: rgba(184, 134, 47, 0.20);
+  --sidebar-ring: #B8862F;
+
+  --surface-glass: rgba(31, 27, 22, 0.025);
+  --border-glass: rgba(31, 27, 22, 0.10);
+
+  /* default IDLE in light */
+  --state-accent: #C99A3A;
+  --state-glow: rgba(201, 154, 58, 0.22);
+  --state-companion: #7A5618;
+  --ambient-from: #FFFFFF;
+  --ambient-via: #F6F1E8;
+  --ambient-to: #EDE8E0;
+}
+
+html[data-theme="light"][data-state="IDLE"] {
+  --state-accent: #C99A3A;
+  --state-glow: rgba(201, 154, 58, 0.22);
+  --state-companion: #7A5618;
+  --ambient-from: #FFFDF7;
+  --ambient-via: #F6F1E8;
+  --ambient-to: #EDE8E0;
+}
+html[data-theme="light"][data-state="FOCUS"] {
+  --state-accent: #2E8FB8;
+  --state-glow: rgba(46, 143, 184, 0.24);
+  --state-companion: #1F6F94;
+  --ambient-from: #F0F8FC;
+  --ambient-via: #E4F0F7;
+  --ambient-to: #D8E8F0;
+}
+html[data-theme="light"][data-state="CHALLENGE"] {
+  --state-accent: #C75A28;
+  --state-glow: rgba(199, 90, 40, 0.26);
+  --state-companion: #8B3A14;
+  --ambient-from: #FCF1EB;
+  --ambient-via: #F6E2D5;
+  --ambient-to: #EFD2BF;
+}
+html[data-theme="light"][data-state="CELEBRATE"] {
+  --state-accent: #4FA64A;
+  --state-glow: rgba(79, 166, 74, 0.26);
+  --state-companion: #B8862F;
+  --ambient-from: #F1F8EE;
+  --ambient-via: #E3F0DD;
+  --ambient-to: #D4E7CC;
+}
+
+/* Clay shader feel: softer radii, bottom AO, gentler grain */
+html[data-theme="light"] .surface-luxe {
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-deep), var(--inset-highlight), var(--inset-lowlight);
+}
+html[data-theme="light"] .surface-luxe-elevated {
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-lift), var(--inset-highlight), var(--inset-lowlight);
+}
+html[data-theme="light"] .surface-luxe::before,
+html[data-theme="light"] .surface-luxe-elevated::before {
+  opacity: 0.018;
+  mix-blend-mode: multiply;
+}
+html[data-theme="light"] body::after {
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+}
+
+/* Bubbly clay buttons — squishy press */
+html[data-theme="light"] .btn-gold,
+html[data-theme="light"] .btn-state {
+  border-radius: 9999px;
+  border-color: rgba(31, 27, 22, 0.10);
+}
+html[data-theme="light"] .btn-gold {
+  color: #2A1F0C;
+}
+html[data-theme="light"] .btn-state {
+  color: #1F1B16;
+}
+html[data-theme="light"] .btn-gold:active,
+html[data-theme="light"] .btn-state:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 6px rgba(31, 27, 22, 0.18),
+    0 0 18px var(--state-glow);
+}

@@ -1,106 +1,148 @@
-# Luxury aesthetic pass — all tabs (mentor untouched)
 
-Goal: lift every surface outside the 3D mentor to feel premium — deeper blacks, jewel-tone state accents, gold micro-details, layered glass with real texture (grain, gradients, inset highlights, shadows). All colors as hex or rgb/rgba — no `oklch`.
+# Mentor glass shell + State Indicator + Clay light mode
 
-## Out of scope (do NOT touch)
-- `src/components/socratic/engine/Mentor3D.tsx`
-- `src/components/socratic/engine/MentorCanvas.tsx`
-- everything under `src/components/socratic/engine/mentor3d/**`
-- `mentor.vrm`, motion FBX/GLB files, retarget logic
+Three intertwined upgrades, all outside the mentor 3D internals. Mentor canvas, model, and motion files stay untouched — we only enhance the **frame around** it and the global theme.
 
-Mentor canvas keeps its current look; only its surrounding chrome changes.
+## Out of scope (untouched)
+- `Mentor3D.tsx`, `MentorCanvas.tsx` internals, everything under `mentor3d/**`
+- `mentor.vrm`, FBX motions, retarget logic
 
-## 1. New token system in `src/styles.css`
+We will wrap `MentorCanvas` from the outside (in `SocraticEngine.tsx`) and tweak `styles.css` — the canvas itself stays as-is.
 
-Replace the current flat dark palette with a layered "noir + jewel" system. All values in hex / rgba.
+---
 
+## 1. Luxury glass shell around the mentor
+
+New component `src/components/socratic/engine/MentorGlassFrame.tsx` that wraps `<MentorCanvas />` without modifying it.
+
+Structure:
 ```text
-Base (always-on)
---bg-abyss:        #07070C   (page background, deepest)
---bg-night:        #0E0E18   (app shell)
---bg-onyx:         #15151F   (card base)
---bg-onyx-raised:  #1B1B28   (raised card / popover)
---ink-primary:     #F5F1E6   (warm ivory text)
---ink-secondary:   rgba(245,241,230,0.62)
---ink-tertiary:    rgba(245,241,230,0.38)
-
-Metals (luxury accents, state-independent)
---gold:            #C9A24B
---gold-soft:       #E6C97A
---gold-deep:       #8B6B2A
---platinum:        #D8DCE3
---copper:          #B87333
-
-Borders & glass
---hairline:        rgba(245,241,230,0.07)   (default border)
---hairline-strong: rgba(245,241,230,0.14)   (hover/active border)
---glass-tint:      rgba(255,255,255,0.025)
---glass-tint-2:    rgba(255,255,255,0.05)
---inset-highlight: inset 0 1px 0 rgba(255,255,255,0.06)
-
-Shadows (depth)
---shadow-soft:     0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35)
---shadow-deep:     0 2px 4px rgba(0,0,0,0.5), 0 24px 60px -12px rgba(0,0,0,0.6)
---shadow-lift:     0 30px 80px -20px rgba(0,0,0,0.7)
-
-Gradients (reusable)
---grad-onyx:       linear-gradient(180deg, #1B1B28 0%, #13131C 100%)
---grad-aurora:     linear-gradient(135deg, rgba(201,162,75,0.10), rgba(56,189,248,0.08) 50%, rgba(139,92,246,0.10))
---grad-vignette:   radial-gradient(ellipse at top, rgba(201,162,75,0.08), transparent 60%)
+┌─ MentorGlassFrame ──────────────────────────────┐
+│  [State Indicator Tag]          [lumira · live] │  ← header rail (gold hairline)
+│                                                 │
+│   ╭──────────────────────────────────────╮     │
+│   │                                      │     │
+│   │         <MentorCanvas /> (unchanged) │     │  ← inner well, recessed
+│   │                                      │     │
+│   ╰──────────────────────────────────────╯     │
+│                                                 │
+│   ◦ ambient state ring · breathing glow         │  ← footer (subtle)
+└─────────────────────────────────────────────────┘
 ```
 
-### State accents (richer, jewel-toned)
-Each state gets accent / glow / ambient triplet + a metallic companion.
+Visual treatment:
+- Outer card: `.surface-luxe-elevated` + double border (1px gold hairline outside, 1px ivory hairline inside) → "frame within a frame" jewelry-box feel.
+- Inner well holding the canvas: inset shadow (`inset 0 2px 12px rgba(0,0,0,0.55)`), rounded `1.25rem`, slight backdrop blur on the rim so the 3D scene appears set into the glass.
+- Animated breathing glow around the frame driven by `--state-glow` (pulse 4s).
+- Corner accents: 4 tiny gold L-brackets at each corner (12px) — pure CSS, "luxury watch case" detail.
+- Light grain overlay reusing the existing SVG noise.
 
+## 2. State Indicator Tag (visible, always-on)
+
+New `src/components/socratic/engine/StateIndicatorTag.tsx`, mounted in the glass shell header.
+
+Reads `useLearningState()` and renders a pill:
+- Left: pulsing dot in `--state-accent` with `--state-glow` halo.
+- Middle: state label in uppercase mono (`IDLE · WALKING WITH YOU`, `FOCUS · LISTENING`, `CHALLENGE · BELIEVING IN YOU`, `CELEBRATE · PROUD OF YOU`).
+- Right: thin gold divider + intent micro-label (when speaking: "speaking…", when paused: "thinking…").
+- Pill style: `bg-onyx-raised` with gold ring, inset highlight, soft `--state-glow` outer shadow that intensifies on state change (300ms transition).
+- Tag swaps tint smoothly because it uses CSS vars already driven by `data-state` on `<html>`.
+
+Reuses existing `LearningState` from `src/components/socratic/types.ts` — no logic changes.
+
+## 3. Visual richness pass (non-mentor surfaces)
+
+Small, targeted additions on top of the existing luxe system:
+- **Dashboard hero (`src/routes/index.tsx`)**: add a soft floating gold orb + parallax aurora gradient behind the headline.
+- **Sidebar**: active nav item gets a hairline gold left bar + state-glow halo.
+- **Engine layout (`SocraticEngine.tsx`)**: the new `MentorGlassFrame` replaces the bare `<MentorCanvas />` placement; stepper and terminal get matching corner brackets so the engine reads as one jewelry set.
+- **Buttons across tabs**: ensure primary CTAs use `.btn-gold`, state actions use `.btn-state` (audit + fix any stragglers).
+
+No new dependencies. All hex/rgba.
+
+## 4. Clay-shader light mode
+
+Add a true light theme keyed off `<html data-theme="light">` with a "bubbly Minecraft-clay-with-shaders" feel: matte off-whites, soft pastel greys, rounded soft shadows, gentle ambient occlusion vibe — not flat, not harsh.
+
+### Palette (hex)
 ```text
-IDLE       --state-accent #D4A84B   --state-glow rgba(212,168,75,0.40)   ambient #11111A → #14131F → #08080E
-FOCUS      --state-accent #5BC0EB   --state-glow rgba(91,192,235,0.45)   ambient #0B1622 → #122236 → #07101A   companion: sapphire #2A6FB5
-CHALLENGE  --state-accent #E37B3C   --state-glow rgba(227,123,60,0.50)   ambient #1A0E08 → #251510 → #0D0A0E   companion: ember #C0392B
-CELEBRATE  --state-accent #9BD66C   --state-glow rgba(155,214,108,0.50)  ambient #14200E → #1E2C12 → #0E1408   companion: gold #E6C97A
+Surfaces (clay)
+--bg-abyss      #F4F1EC   (page — warm bone)
+--bg-night      #EDE8E0   (shell — soft clay)
+--bg-onyx       #FFFFFF   (card — fresh clay)
+--bg-onyx-raised#FBF8F2   (raised — cream highlight)
+
+Ink
+--ink-primary   #1F1B16   (grayish-black, warm)
+--ink-secondary rgba(31,27,22,0.62)
+--ink-tertiary  rgba(31,27,22,0.42)
+
+Hairlines (the "shader edge" — slight darker rim like clay bevel)
+--hairline       rgba(31,27,22,0.10)
+--hairline-strong rgba(31,27,22,0.18)
+--inset-highlight inset 0 1px 0 rgba(255,255,255,0.95)   /* top light */
+--inset-lowlight  inset 0 -1px 0 rgba(31,27,22,0.06)     /* bottom AO */
+
+Shadows (puffy / bubbly — multiple soft layers, not sharp)
+--shadow-soft  0 1px 2px rgba(31,27,22,0.06), 0 8px 24px rgba(31,27,22,0.08)
+--shadow-deep  0 2px 6px rgba(31,27,22,0.08), 0 24px 60px -16px rgba(31,27,22,0.18)
+--shadow-lift  0 30px 80px -28px rgba(31,27,22,0.22)
+
+Metals (kept, slightly warmer to sit on cream)
+--gold        #B8862F
+--gold-soft   #D9B25E
+--gold-deep   #7A5618
+
+Gradients (clay glaze)
+--grad-onyx         linear-gradient(180deg, #FFFFFF 0%, #F6F1E8 100%)
+--grad-onyx-raised  linear-gradient(180deg, #FFFFFF 0%, #FBF6EC 100%)
+--grad-vignette     radial-gradient(ellipse at top, rgba(184,134,47,0.08), transparent 60%)
 ```
 
-## 2. Reusable surface classes (added in `styles.css`)
+### State accents (light-mode versions — softer, candy-shaded)
+```text
+IDLE      accent #C99A3A  glow rgba(201,154,58,0.22)
+FOCUS     accent #2E8FB8  glow rgba(46,143,184,0.24)
+CHALLENGE accent #C75A28  glow rgba(199,90,40,0.26)
+CELEBRATE accent #4FA64A  glow rgba(79,166,74,0.26)
+```
 
-- `.surface-luxe` — onyx gradient + `--inset-highlight` + `--shadow-deep` + 1px hairline border + subtle noise (SVG data-URI grain) at 4% opacity.
-- `.surface-luxe-elevated` — same + `--shadow-lift` + brighter top edge.
-- `.hairline-gold` — 1px border with `linear-gradient(90deg, transparent, var(--gold) 50%, transparent)` mask for a thin gold divider.
-- `.text-gold` — `--gold` with subtle text-shadow `0 0 18px rgba(201,162,75,0.25)`.
-- `.glow-state` — utility for state-driven box glow.
-- `@keyframes shimmer-gold` — slow pan over gold gradient (used on hero CTA + accent badges).
-- Global noise overlay (`body::after`) at 3% opacity for filmic texture.
+### "Clay shader" feel
+The bubbly Minecraft-shader look = matte surface + top highlight + bottom ambient occlusion + soft outer shadow + slightly rounder corners. We get that via:
+- Every `.surface-luxe*` adds both `--inset-highlight` and `--inset-lowlight` in light mode.
+- Border-radius bumped from `1rem` → `1.25rem` and `1.25rem` → `1.5rem` in light mode (pill/clay feel).
+- Buttons get a gentle pressed-in shadow on `:active` (mimics squishy clay).
+- Grain overlay opacity reduced to `0.025` (just enough to kill banding without dirtying the cream).
+- Body background uses `--grad-vignette` + a slow drifting cream orb (analog of the dark gold orb).
 
-## 3. Per-tab refinements
+### Theme switching
+- Add `ThemeProvider` in `src/lib/theme-context.tsx` (localStorage-persisted, default `dark`, respects `prefers-color-scheme`).
+- Sets `data-theme` on `<html>`; existing `data-state` continues to drive state accents.
+- Add toggle in `TopBar.tsx` (sun/moon icon, gold ring, animated swap).
+- `styles.css` adds `html[data-theme="light"] { ... }` block overriding the tokens above; all existing component classes inherit automatically because they use CSS vars.
 
-Each route gets the same kit applied: deeper base, layered glass, gold hairlines, jewel-tone accent driven by state.
+---
 
-| File | Changes |
-|---|---|
-| `src/routes/__root.tsx` | Body background = `--bg-abyss` + `--grad-vignette` overlay + global noise. |
-| `src/components/socratic/Sidebar.tsx` | Replace `bg-[oklch(...)]` with `--bg-night` gradient; gold-hairline right border; active item gets gold left bar + soft state-glow; logo "ira" in gold. |
-| `src/components/socratic/TopBar.tsx` | Onyx gradient bg, gold hairline bottom border, mentor-status chip becomes pill with gold ring + state dot. |
-| `src/routes/index.tsx` (Your Path) | Hero → `surface-luxe-elevated` with aurora gradient + shimmer-gold band under heading; CTA button = gold gradient (`#E6C97A → #C9A24B → #8B6B2A`) with deep shadow + hover lift; stat cards → `surface-luxe` with gold icon ring; progress bars use state-accent → gold gradient. |
-| `src/routes/skill-passport.tsx` | Cards → `surface-luxe`; badges get gold foil border; section headers use gold eyebrow + ivory title. |
-| `src/routes/architecture-log.tsx` | Timeline rail = gold hairline; entries on onyx cards with state-tinted left edge. |
-| `src/routes/lesson-builder.tsx` | Form panels → `surface-luxe`; inputs → `--bg-onyx-raised` with `--hairline-strong` focus → gold ring. |
-| `src/routes/settings.tsx` | Same surface kit; toggles get gold-on track when active. |
-| `src/components/socratic/engine/SocraticEngine.tsx` (layout only, not mentor canvas) | Outer panels, stepper, terminal frame upgraded; **MentorCanvas stays as-is**. |
-| `src/components/socratic/engine/InteractiveDebateTerminal.tsx` | Terminal frame: onyx gradient, gold hairline top, intent selector buttons get gold-active state, mic button gets state-glow ring. |
-| `src/components/socratic/engine/StepperBar.tsx` | Steps: completed = gold gradient pill, active = state-accent with glow, pending = hairline. |
-| `src/components/socratic/engine/CelebrationOverlay.tsx` | Confetti tint → gold + celebrate-green; backdrop = radial gold vignette. |
-| `src/components/socratic/AmbientBackground.tsx` | Add second layer: slow-drifting radial gold orb (8% opacity) + film grain. |
+## Files
 
-## 4. Texture details (the "4K / luxury" feel)
+**New**
+- `src/components/socratic/engine/MentorGlassFrame.tsx`
+- `src/components/socratic/engine/StateIndicatorTag.tsx`
+- `src/lib/theme-context.tsx`
 
-- Inset highlight (`inset 0 1px 0 rgba(255,255,255,0.06)`) on every raised surface so edges catch light.
-- Outer shadow uses two layers (sharp contact + soft ambient).
-- Borders are never pure white — always warm ivory at low alpha.
-- Backgrounds are always gradients, never flat fills (onyx top → deeper bottom).
-- Body-level SVG noise (3–4% opacity, `feTurbulence`) kills banding in dark gradients.
-- Gold accents reserved for: brand mark, primary CTA, active nav, dividers, key numerals — never bulk text.
+**Edited**
+- `src/styles.css` — add `html[data-theme="light"]` token block, `--inset-lowlight`, light-mode `.surface-luxe*` rules, softer shadows on `:active` for buttons.
+- `src/components/socratic/engine/SocraticEngine.tsx` — wrap `<MentorCanvas />` in `<MentorGlassFrame>`.
+- `src/components/socratic/TopBar.tsx` — theme toggle button.
+- `src/routes/__root.tsx` — mount `ThemeProvider`.
+- `src/routes/index.tsx` — floating orb + aurora behind hero.
+- `src/components/socratic/Sidebar.tsx` — gold bar + state halo on active item.
 
-## 5. Verification
+**Untouched (per your rule)**
+- `Mentor3D.tsx`, `MentorCanvas.tsx`, `mentor3d/**`, `mentor.vrm`, FBX/GLB motion files.
 
-After build:
-1. Visit `/`, `/engine`, `/skill-passport`, `/lesson-builder`, `/architecture-log`, `/settings` — every surface shows layered depth, gold hairlines, and state-driven accent shifts on the FOCUS/CHALLENGE/CELEBRATE buttons.
-2. Confirm mentor canvas on `/engine` is visually unchanged (only its surrounding chrome differs).
-3. Grep confirms no new `oklch(` in changed files; all colors are hex or rgb/rgba.
+## Verification
+1. `/engine`: mentor canvas now sits inside a luxe glass case with corner brackets and a visible State Indicator Tag that recolors as state changes (FOCUS → sapphire, CHALLENGE → ember, CELEBRATE → emerald).
+2. Mentor 3D scene itself is pixel-identical to before.
+3. Theme toggle in top bar flips entire app to clay light mode — surfaces feel matte/bubbly, gold accents warmer, state tags soften but stay legible.
+4. Grep confirms no `oklch(` introduced; all new colors hex/rgba.

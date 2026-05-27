@@ -8,6 +8,7 @@ import { demoScript } from "./demoScript";
 import type { LearningState, Message } from "../types";
 import { StepperBar } from "./StepperBar";
 import { MentorCanvas } from "./MentorCanvas";
+import { MentorGlassFrame } from "./MentorGlassFrame";
 import { InteractiveDebateTerminal } from "./InteractiveDebateTerminal";
 import { CelebrationOverlay } from "./CelebrationOverlay";
 
@@ -264,7 +265,9 @@ export function SocraticEngine({
         started={started}
       />
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
-        <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
+        <MentorGlassFrame isSpeaking={isSpeaking} isPausing={isPausing}>
+          <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
+        </MentorGlassFrame>
         <InteractiveDebateTerminal
           messages={terminalMessages}
           stepIndex={Math.max(0, stepIndex)}
