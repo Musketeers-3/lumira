@@ -27,7 +27,7 @@ export function StepperBar({ stepIndex, total, onPrev, onNext, onReset, started 
           >
             {String(started ? stepIndex + 1 : 0).padStart(2, "0")}
           </span>
-          <span style={{ color: "rgba(245,241,230,0.4)" }}> / {String(total).padStart(2, "0")}</span>
+          <span style={{ color: "var(--ink-tertiary)" }}> / {String(total).padStart(2, "0")}</span>
         </div>
       </div>
 
@@ -38,7 +38,7 @@ export function StepperBar({ stepIndex, total, onPrev, onNext, onReset, started 
           style={{
             background: "rgba(245,241,230,0.03)",
             border: "1px solid rgba(245,241,230,0.08)",
-            color: "rgba(245,241,230,0.6)",
+            color: "var(--ink-secondary)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
@@ -52,7 +52,7 @@ export function StepperBar({ stepIndex, total, onPrev, onNext, onReset, started 
           style={{
             background: "rgba(245,241,230,0.03)",
             border: "1px solid rgba(245,241,230,0.08)",
-            color: "rgba(245,241,230,0.6)",
+            color: "var(--ink-secondary)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >

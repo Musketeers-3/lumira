@@ -118,11 +118,11 @@ export function InteractiveDebateTerminal({
         </div>
         <h2
           className="mt-1 text-lg font-semibold tracking-tight relative z-10"
-          style={{ color: "#F5F1E6" }}
+          style={{ color: "var(--ink-primary)" }}
         >
           Computational Thinking
         </h2>
-        <p className="text-sm relative z-10" style={{ color: "rgba(245,241,230,0.6)" }}>
+        <p className="text-sm relative z-10" style={{ color: "var(--ink-secondary)" }}>
           The Dictionary Puzzle
         </p>
         <div className="mt-4 flex items-center gap-2 relative z-10">
@@ -157,7 +157,7 @@ export function InteractiveDebateTerminal({
                   >
                     Step {i + 1} / {totalSteps}
                   </div>
-                  <div className="mt-1 text-sm" style={{ color: "#F5F1E6" }}>
+                  <div className="mt-1 text-sm" style={{ color: "var(--ink-primary)" }}>
                     {i === 0 && "Frame the problem."}
                     {i === 1 && "Challenge the linear approach."}
                     {i === 2 && "Discover halving."}
@@ -192,7 +192,7 @@ export function InteractiveDebateTerminal({
         {messages.length === 0 ? (
           <div
             className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-[0.3em]"
-            style={{ color: "rgba(245,241,230,0.35)" }}
+            style={{ color: "var(--ink-tertiary)" }}
           >
             // session idle — press start
           </div>
@@ -279,7 +279,7 @@ export function InteractiveDebateTerminal({
           className="flex flex-1 items-center gap-2 rounded-xl px-4 py-3 font-mono text-sm outline-none transition-all duration-500 disabled:opacity-50"
           style={{
             background: inputActive ? "rgba(7,7,12,0.7)" : "rgba(7,7,12,0.5)",
-            color: "#F5F1E6",
+            color: "var(--ink-primary)",
             border: "1px solid rgba(245,241,230,0.06)",
             boxShadow: "inset 0 2px 4px rgba(0,0,0,0.4)",
           }}
