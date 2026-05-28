@@ -1,45 +1,83 @@
-# Fix invisible text in light mode
+# Build: Cinematic Editorial Grain
 
-## Root cause
+Lift the chosen v3 direction into the real app. Locked: Onyx & Platinum palette, DM Serif Display + Fira Sans + JetBrains Mono accents, bento layout. Scope: shell (sidebar, topbar, ambient bg) + dashboard route. Other routes inherit tokens automatically.
 
-Many components hardcode dark-theme ink as inline styles:
-- `color: "#F5F1E6"` (cream)
-- `color: "rgba(245,241,230,0.62 / 0.55 / 0.45 / 0.40 / 0.35)"`
-- one hardcoded `background: "#F5F1E6"` swatch in settings
+## Design tokens (copied from prototype, mapped to Onyx & Platinum)
 
-These never switch when `html[data-theme="light"]` flips `--ink-primary` to `#1F1B16`, so on white surfaces the text renders cream-on-cream and is essentially invisible.
+Update `src/styles.css` (dark theme block):
 
-## Fix
+```
+--bg-abyss: #050505
+--bg-night: #0A0A0F
+--bg-onyx: #0C0C12
+--bg-onyx-raised: #14141A
 
-Swap every hardcoded cream value for the existing theme tokens that already adapt across light/dark:
+--ink-primary: #F5F5F7
+--ink-secondary: rgba(245,245,247,0.55)
+--ink-tertiary: rgba(245,245,247,0.32)
 
-| Hardcoded | Replace with |
-|---|---|
-| `#F5F1E6` (text) | `var(--ink-primary)` |
-| `rgba(245,241,230,0.62)` | `var(--ink-secondary)` |
-| `rgba(245,241,230,0.55 / 0.50 / 0.45 / 0.40 / 0.35)` | `var(--ink-tertiary)` (the few intermediate shades collapse cleanly to secondary/tertiary) |
-| `#F5F1E6` (swatch background in `settings.tsx`) | `var(--ink-primary)` |
-| `rgba(230,201,122,0.85)` gold-on-dark chips | `var(--gold-soft)` (already token-aware) |
+--platinum: #D8DCE3
+--platinum-soft: #8A8F99
+--hairline: rgba(255,255,255,0.05)
+--hairline-strong: rgba(255,255,255,0.10)
 
-Tokens stay as-is; they already have correct light-mode values (`--ink-primary: #1F1B16`, `--ink-secondary: rgba(31,27,22,0.62)`, `--ink-tertiary: rgba(31,27,22,0.42)`).
+/* keep --gold/--gold-soft as restrained spotlight only */
+```
 
-## Files to edit
+Light mode: keep clay tokens already in place; verify contrast.
 
-Frontend-only, no logic changes, no mentor files:
+## Typography wire-up
 
-- `src/routes/index.tsx`
-- `src/routes/skill-passport.tsx`
-- `src/routes/architecture-log.tsx`
-- `src/routes/settings.tsx`
-- `src/components/socratic/Sidebar.tsx`
-- `src/components/socratic/TopBar.tsx` (audit only — already mostly tokenized)
+Add to `__root.tsx` link rel:
+- `Cormorant Garamond` (italic + 500) — display serif for hero headline + bento numerals
+- `Outfit` (300/400/600) — body/UI sans
+- keep `JetBrains Mono` for catalog labels
 
-## Out of scope
+Add to `@theme inline` in `styles.css`:
+```
+--font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+--font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+--font-mono: "JetBrains Mono", ui-monospace, monospace;
+```
+Add utility `.font-display` for the serif hero.
 
-- No changes to mentor (`Mentor3D.tsx`, `MentorCanvas.tsx`, `mentor3d/**`, `MentorGlassFrame.tsx` mentor internals).
-- No changes to `styles.css` tokens — they're already correct.
-- No changes to the engine terminal intent colors (`#E37B3C / #E6C97A / #5BC0EB`) — those are intent semantics, readable in both themes.
+## Components to edit
+
+### `src/components/socratic/Sidebar.tsx`
+- Wider rail (`w-72`), 8-unit padding, gap-12 sections.
+- Header: mono eyebrow `LUMIRA // AMBIENT OS`, wordmark `Lumi<span>ra</span>` (gold accent on "ra"), italic tagline.
+- Nav items: numbered catalog markers `01`–`05` in a 20px ring, label on right. Active = `bg-gold/5 + border-gold/20 + white text`. Inactive = `zinc-tertiary` with hover ring + white text.
+- Settings sits below with `mt-8` gap, marker `S`.
+- Mentor State card: `surface-luxe`-style raised tile with grain overlay, mono micro-label, pulsing dot using `--state-accent`, uppercase IDLE/FOCUS/etc.
+
+### `src/components/socratic/TopBar.tsx`
+- 80px height, 40px horizontal padding, bottom hairline.
+- Left: mono gold eyebrow `LUMIRA`, route title in white medium.
+- Right: pill `mentor: <state-accent>walking with you</>` in mono on onyx pill, then circular 40px theme toggle with hairline border.
+
+### `src/components/socratic/AmbientBackground.tsx`
+- Replace current gold orb with: (1) very faint radial spotlight top-right tinted with `--state-glow`, (2) full-viewport SVG grain at 4% opacity, (3) hairline vertical guide lines at 25% / 75% on viewports ≥ lg.
+
+### `src/routes/index.tsx` (Your Path)
+- Hero card: `rounded-[2.5rem]`, `bg-bg-onyx`, hairline border, padding `p-16`, internal radial spotlight + grain overlay.
+- Eyebrow chip `WELCOME BACK` in mono on `bg-white/5` rounded-md.
+- Headline: `font-display italic` for "I've been waiting for you.", then `not-italic opacity-80` for the bridge phrase, then `Outfit semibold not-italic` for the resumed-topic span with gold underline.
+- Body: Outfit light, `--ink-secondary`, max-w-2xl.
+- CTAs: primary `btn-gold` reshape — `rounded-2xl`, `px-8 py-4`, black text, `shadow-[0_0_40px_rgba(201,162,75,0.18)]`, arrow icon; secondary outline `border-white/10`, rounded-2xl.
+- Bento: 3-col grid, each tile `rounded-[2rem]`, `bg-bg-onyx-raised/30`, hairline border, icon in 48px rounded-2xl onyx well, mono micro-label, `font-display text-5xl` numeral with sub-label, hover gold underline gradient at bottom.
+
+### `src/components/socratic/engine/MentorGlassFrame.tsx`
+- Adopt the same vocabulary: hairline border, grain overlay, mono `MENTOR // STATE` eyebrow, numeral marker corners. Keep existing API (children).
+
+### `src/components/socratic/engine/StateIndicatorTag.tsx`
+- Pill restyle: onyx bg, hairline border, mono uppercase state label, state-accent dot. No layout changes.
+
+## Out of scope (this iteration)
+
+- Mentor 3D internals (`Mentor3D.tsx`, `MentorCanvas.tsx`, `mentor3d/**`, `.vrm`, motion files) — UNTOUCHED.
+- Server/data logic.
+- `architecture-log`, `skill-passport`, `settings` routes inherit token + font changes automatically; we won't recompose them in this pass.
 
 ## Verification
 
-After edits: load `/`, `/skill-passport`, `/architecture-log`, `/settings` in light mode via the TopBar toggle and confirm headings, body copy, and sidebar labels are all legible on the clay-white surfaces.
+After edits: screenshot `/` in both themes, confirm hero serif/sans mix renders, bento tiles align, sidebar numerals render, no hardcoded cream text reintroduced, contrast passes in light mode.

@@ -52,41 +52,44 @@
   --color-gold-soft: var(--gold-soft);
   --color-gold-deep: var(--gold-deep);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
 }
 
 /* ============================================================
-   Noir + Jewel — luxury token system
+   Onyx & Platinum — Cinematic Editorial token system
    All values in hex / rgba (no oklch).
    ============================================================ */
 :root {
   --radius: 0.875rem;
 
-  /* Base surfaces */
-  --bg-abyss: #07070C;
-  --bg-night: #0E0E18;
-  --bg-onyx: #15151F;
-  --bg-onyx-raised: #1B1B28;
+  /* Base surfaces — cinema black */
+  --bg-abyss: #050507;
+  --bg-night: #0A0A0F;
+  --bg-onyx: #0C0C12;
+  --bg-onyx-raised: #14141A;
 
-  /* Ink */
-  --ink-primary: #F5F1E6;
-  --ink-secondary: rgba(245, 241, 230, 0.62);
-  --ink-tertiary: rgba(245, 241, 230, 0.38);
+  /* Ink — platinum white, neutral (no cream) */
+  --ink-primary: #F5F5F7;
+  --ink-secondary: rgba(245, 245, 247, 0.58);
+  --ink-tertiary: rgba(245, 245, 247, 0.34);
 
   /* Metals */
   --gold: #C9A24B;
   --gold-soft: #E6C97A;
   --gold-deep: #8B6B2A;
   --platinum: #D8DCE3;
+  --platinum-soft: #8A8F99;
   --copper: #B87333;
 
-  /* Hairlines & glass */
-  --hairline: rgba(245, 241, 230, 0.07);
-  --hairline-strong: rgba(245, 241, 230, 0.14);
+  /* Hairlines & glass — neutral, not warm */
+  --hairline: rgba(255, 255, 255, 0.05);
+  --hairline-strong: rgba(255, 255, 255, 0.10);
   --glass-tint: rgba(255, 255, 255, 0.025);
   --glass-tint-2: rgba(255, 255, 255, 0.05);
-  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
 
   /* Shadows */
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -94,46 +97,48 @@
   --shadow-lift: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
 
   /* Gradients */
-  --grad-onyx: linear-gradient(180deg, #1B1B28 0%, #13131C 100%);
-  --grad-onyx-raised: linear-gradient(180deg, #20202E 0%, #14141E 100%);
-  --grad-aurora: linear-gradient(135deg, rgba(201, 162, 75, 0.10), rgba(91, 192, 235, 0.08) 50%, rgba(139, 92, 246, 0.10));
-  --grad-vignette: radial-gradient(ellipse at top, rgba(201, 162, 75, 0.08), transparent 60%);
+  --grad-onyx: linear-gradient(180deg, #14141A 0%, #0A0A0F 100%);
+  --grad-onyx-raised: linear-gradient(180deg, #1A1A22 0%, #0E0E14 100%);
+  --grad-aurora: radial-gradient(ellipse at 70% 30%, rgba(201, 162, 75, 0.10), transparent 60%);
+  --grad-vignette: radial-gradient(ellipse at top, rgba(201, 162, 75, 0.06), transparent 60%);
   --grad-gold: linear-gradient(135deg, #E6C97A 0%, #C9A24B 45%, #8B6B2A 100%);
-  --grad-hairline-gold: linear-gradient(90deg, transparent, rgba(201, 162, 75, 0.65) 50%, transparent);
+  --grad-hairline-gold: linear-gradient(90deg, transparent, rgba(201, 162, 75, 0.45) 50%, transparent);
 
   /* shadcn token shims, all hex/rgba */
-  --background: #07070C;
-  --foreground: #F5F1E6;
-  --card: #15151F;
-  --card-foreground: #F5F1E6;
-  --popover: #1B1B28;
-  --popover-foreground: #F5F1E6;
+  --background: #050507;
+  --foreground: #F5F5F7;
+  --card: #0C0C12;
+  --card-foreground: #F5F5F7;
+  --popover: #14141A;
+  --popover-foreground: #F5F5F7;
   --primary: #C9A24B;
   --primary-foreground: #0B0B12;
-  --secondary: #20202E;
-  --secondary-foreground: #F5F1E6;
-  --muted: #14141E;
-  --muted-foreground: rgba(245, 241, 230, 0.55);
-  --accent: #1B1B28;
-  --accent-foreground: #F5F1E6;
+  --secondary: #1A1A22;
+  --secondary-foreground: #F5F5F7;
+  --muted: #0E0E14;
+  --muted-foreground: rgba(245, 245, 247, 0.55);
+
+  --accent: #14141A;
+  --accent-foreground: #F5F5F7;
   --destructive: #C0392B;
   --destructive-foreground: #FBE7E4;
 
-  --border: rgba(245, 241, 230, 0.07);
-  --input: rgba(245, 241, 230, 0.10);
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.10);
   --ring: #C9A24B;
 
-  --sidebar: #0B0B14;
-  --sidebar-foreground: #E8E2D2;
+  --sidebar: #08080C;
+  --sidebar-foreground: #F5F5F7;
   --sidebar-primary: #C9A24B;
   --sidebar-primary-foreground: #0B0B12;
-  --sidebar-accent: #15151F;
-  --sidebar-accent-foreground: #F5F1E6;
-  --sidebar-border: rgba(201, 162, 75, 0.10);
+  --sidebar-accent: #14141A;
+  --sidebar-accent-foreground: #F5F5F7;
+  --sidebar-border: rgba(255, 255, 255, 0.05);
   --sidebar-ring: #C9A24B;
 
   --surface-glass: rgba(255, 255, 255, 0.025);
-  --border-glass: rgba(245, 241, 230, 0.07);
+  --border-glass: rgba(255, 255, 255, 0.05);
+
 
   /* State defaults (IDLE) */
   --state-accent: #D4A84B;
@@ -212,7 +217,12 @@ html[data-state="CELEBRATE"] {
   .font-mono {
     font-family: var(--font-mono);
   }
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: "liga", "dlig";
+  }
 }
+
 
 /* ============================================================
    Luxury surface utilities
