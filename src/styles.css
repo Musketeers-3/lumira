@@ -217,7 +217,12 @@ html[data-state="CELEBRATE"] {
   .font-mono {
     font-family: var(--font-mono);
   }
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: "liga", "dlig";
+  }
 }
+
 
 /* ============================================================
    Luxury surface utilities
