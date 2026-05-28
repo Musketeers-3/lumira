@@ -52,41 +52,44 @@
   --color-gold-soft: var(--gold-soft);
   --color-gold-deep: var(--gold-deep);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
 }
 
 /* ============================================================
-   Noir + Jewel — luxury token system
+   Onyx & Platinum — Cinematic Editorial token system
    All values in hex / rgba (no oklch).
    ============================================================ */
 :root {
   --radius: 0.875rem;
 
-  /* Base surfaces */
-  --bg-abyss: #07070C;
-  --bg-night: #0E0E18;
-  --bg-onyx: #15151F;
-  --bg-onyx-raised: #1B1B28;
+  /* Base surfaces — cinema black */
+  --bg-abyss: #050507;
+  --bg-night: #0A0A0F;
+  --bg-onyx: #0C0C12;
+  --bg-onyx-raised: #14141A;
 
-  /* Ink */
-  --ink-primary: #F5F1E6;
-  --ink-secondary: rgba(245, 241, 230, 0.62);
-  --ink-tertiary: rgba(245, 241, 230, 0.38);
+  /* Ink — platinum white, neutral (no cream) */
+  --ink-primary: #F5F5F7;
+  --ink-secondary: rgba(245, 245, 247, 0.58);
+  --ink-tertiary: rgba(245, 245, 247, 0.34);
 
   /* Metals */
   --gold: #C9A24B;
   --gold-soft: #E6C97A;
   --gold-deep: #8B6B2A;
   --platinum: #D8DCE3;
+  --platinum-soft: #8A8F99;
   --copper: #B87333;
 
-  /* Hairlines & glass */
-  --hairline: rgba(245, 241, 230, 0.07);
-  --hairline-strong: rgba(245, 241, 230, 0.14);
+  /* Hairlines & glass — neutral, not warm */
+  --hairline: rgba(255, 255, 255, 0.05);
+  --hairline-strong: rgba(255, 255, 255, 0.10);
   --glass-tint: rgba(255, 255, 255, 0.025);
   --glass-tint-2: rgba(255, 255, 255, 0.05);
-  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
 
   /* Shadows */
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
