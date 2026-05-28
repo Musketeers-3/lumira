@@ -27,14 +27,12 @@ export function TopBar() {
 
   return (
     <header
-      className="relative flex items-center justify-between px-6 py-4 backdrop-blur-xl transition-colors duration-700 hairline-gold-bottom"
+      className="relative flex h-20 items-center justify-between px-10 transition-colors duration-700"
       style={{
-        background: "var(--grad-onyx-raised)",
         borderBottom: "1px solid var(--hairline)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
       }}
     >
-      <div>
+      <div className="space-y-0.5">
         <div
           className="font-mono text-[10px] uppercase tracking-[0.3em]"
           style={{ color: "var(--gold-soft)" }}
@@ -42,26 +40,24 @@ export function TopBar() {
           lumira
         </div>
         <h1
-          className="mt-0.5 text-lg font-semibold tracking-tight"
+          className="text-lg font-medium tracking-tight"
           style={{ color: "var(--ink-primary)" }}
         >
           {title}
         </h1>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <div
-          className="flex items-center gap-2 rounded-full px-3.5 py-1.5 font-mono text-xs tracking-wide transition-colors duration-700"
+          className="flex items-center gap-3 rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wide transition-colors duration-700"
           style={{
-            background: "var(--grad-onyx-raised)",
-            border: "1px solid rgba(201,162,75,0.25)",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.05), 0 0 16px rgba(201,162,75,0.10)",
+            background: "var(--bg-onyx)",
+            border: "1px solid var(--hairline-strong)",
           }}
         >
           <span
-            className="h-1.5 w-1.5 animate-pulse rounded-full"
-            style={{ background: "var(--state-accent)", boxShadow: "0 0 10px var(--state-glow)" }}
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ background: "var(--state-accent)", boxShadow: "0 0 8px var(--state-glow)" }}
           />
           <span style={{ color: "var(--ink-tertiary)" }}>mentor:</span>
           <span
@@ -77,13 +73,11 @@ export function TopBar() {
           onClick={toggleTheme}
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           title={theme === "dark" ? "Light mode" : "Dark mode"}
-          className="group inline-flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-300 hover:-translate-y-px active:translate-y-0"
+          className="group inline-flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-px"
           style={{
-            background: "var(--grad-onyx-raised)",
-            border: "1px solid rgba(201,162,75,0.35)",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.08), 0 0 16px rgba(201,162,75,0.18), 0 6px 18px -8px rgba(0,0,0,0.5)",
-            color: "var(--gold-soft)",
+            background: "var(--bg-onyx)",
+            border: "1px solid var(--hairline-strong)",
+            color: "var(--ink-secondary)",
           }}
         >
           {theme === "dark" ? (
