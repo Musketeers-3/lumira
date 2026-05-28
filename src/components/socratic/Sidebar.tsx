@@ -38,16 +38,16 @@ export function Sidebar() {
       <div className="mb-10">
         <div
           className="font-mono text-[10px] uppercase tracking-[0.3em]"
-          style={{ color: "rgba(245,241,230,0.45)" }}
+          style={{ color: "var(--ink-tertiary)" }}
         >
           lumira // ambient os
         </div>
-        <div className="mt-1.5 text-xl font-semibold tracking-tight" style={{ color: "#F5F1E6" }}>
+        <div className="mt-1.5 text-xl font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
           Lum<span className="text-gold">ira</span>
         </div>
         <div
           className="mt-1.5 text-[11px] italic"
-          style={{ color: "rgba(245,241,230,0.40)" }}
+          style={{ color: "var(--ink-tertiary)" }}
         >
           Learn beside someone who believes in you.
         </div>
@@ -65,7 +65,7 @@ export function Sidebar() {
                 background: active
                   ? "linear-gradient(90deg, rgba(201,162,75,0.10), rgba(255,255,255,0.02))"
                   : "transparent",
-                color: active ? "#F5F1E6" : "rgba(245,241,230,0.55)",
+                color: active ? "var(--ink-primary)" : "var(--ink-tertiary)",
                 boxShadow: active ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "none",
               }}
             >
@@ -81,7 +81,7 @@ export function Sidebar() {
               <Icon
                 className="h-4 w-4"
                 strokeWidth={1.5}
-                style={{ color: active ? "var(--gold-soft)" : "rgba(245,241,230,0.55)" }}
+                style={{ color: active ? "var(--gold-soft)" : "var(--ink-tertiary)" }}
               />
               <span className={active ? "font-medium tracking-wide" : "tracking-wide"}>
                 {label}
@@ -101,7 +101,7 @@ export function Sidebar() {
       >
         <div
           className="font-mono text-[10px] uppercase tracking-widest"
-          style={{ color: "rgba(245,241,230,0.45)" }}
+          style={{ color: "var(--ink-tertiary)" }}
         >
           Mentor state
         </div>

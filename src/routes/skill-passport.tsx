@@ -52,11 +52,11 @@ function SkillPassport() {
         </div>
         <h1
           className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl"
-          style={{ color: "#F5F1E6" }}
+          style={{ color: "var(--ink-primary)" }}
         >
           Your Light
         </h1>
-        <p className="mt-2 max-w-xl" style={{ color: "rgba(245,241,230,0.62)" }}>
+        <p className="mt-2 max-w-xl" style={{ color: "var(--ink-secondary)" }}>
           Each one of these — you weren't told. You found it. The mentor only walked beside you.
         </p>
       </header>
@@ -78,7 +78,7 @@ function SkillPassport() {
                 <div className="flex items-start justify-between">
                   <div
                     className="font-mono text-[10px] uppercase tracking-[0.2em]"
-                    style={{ color: "rgba(245,241,230,0.45)" }}
+                    style={{ color: "var(--ink-tertiary)" }}
                   >
                     {s.domain}
                   </div>
@@ -100,13 +100,13 @@ function SkillPassport() {
                     <Lock
                       className="h-4 w-4"
                       strokeWidth={1.5}
-                      style={{ color: "rgba(245,241,230,0.35)" }}
+                      style={{ color: "var(--ink-tertiary)" }}
                     />
                   )}
                 </div>
                 <h3
                   className="mt-3 text-lg font-semibold tracking-tight"
-                  style={{ color: "#F5F1E6" }}
+                  style={{ color: "var(--ink-primary)" }}
                 >
                   {s.name}
                 </h3>
@@ -128,7 +128,7 @@ function SkillPassport() {
                 </div>
                 <div
                   className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest"
-                  style={{ color: "rgba(245,241,230,0.45)" }}
+                  style={{ color: "var(--ink-tertiary)" }}
                 >
                   <span>{s.status}</span>
                   <span style={{ color: "var(--gold-soft)" }}>{s.mastery}% mastery</span>
@@ -150,13 +150,13 @@ function SkillPassport() {
                 >
                   Core insight
                 </div>
-                <p className="mt-1.5 text-sm italic" style={{ color: "#F5F1E6" }}>
+                <p className="mt-1.5 text-sm italic" style={{ color: "var(--ink-primary)" }}>
                   {s.insight}
                 </p>
                 {s.date && (
                   <div
                     className="mt-3 font-mono text-[10px] uppercase tracking-widest"
-                    style={{ color: "rgba(245,241,230,0.45)" }}
+                    style={{ color: "var(--ink-tertiary)" }}
                   >
                     discovered {s.date}
                   </div>
