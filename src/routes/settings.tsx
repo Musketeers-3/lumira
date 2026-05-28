@@ -32,17 +32,17 @@ function SettingsPage() {
         </div>
         <h1
           className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl"
-          style={{ color: "#F5F1E6" }}
+          style={{ color: "var(--ink-primary)" }}
         >
           Settings
         </h1>
       </header>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "#F5F1E6" }}>
+        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
           Feel each state
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "rgba(245,241,230,0.6)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
           The whole environment shifts with your mentor's presence.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -63,7 +63,7 @@ function SettingsPage() {
                   border: active
                     ? "1px solid var(--state-accent)"
                     : "1px solid rgba(245,241,230,0.07)",
-                  color: active ? "var(--state-accent)" : "rgba(245,241,230,0.55)",
+                  color: active ? "var(--state-accent)" : "var(--ink-tertiary)",
                   boxShadow: active
                     ? "0 0 24px var(--state-glow), inset 0 1px 0 rgba(255,255,255,0.06)"
                     : "inset 0 1px 0 rgba(255,255,255,0.04)",
@@ -77,11 +77,11 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "#F5F1E6" }}>
+        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
           Mentor voice
         </h2>
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm" style={{ color: "rgba(245,241,230,0.6)" }}>
+          <p className="text-sm" style={{ color: "var(--ink-secondary)" }}>
             A soft tone when the mentor speaks to you.
           </p>
           <button
@@ -100,7 +100,7 @@ function SettingsPage() {
             <span
               className="absolute top-1 h-5 w-5 rounded-full transition-transform duration-300"
               style={{
-                background: "#F5F1E6",
+                background: "var(--ink-primary)",
                 transform: voice ? "translateX(22px)" : "translateX(4px)",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
               }}
@@ -110,10 +110,10 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "#F5F1E6" }}>
+        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
           Mentor warmth
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "rgba(245,241,230,0.6)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
           How softly they encourage you when you're stuck.
         </p>
         <div className="mt-4">
@@ -127,7 +127,7 @@ function SettingsPage() {
           />
           <div
             className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest"
-            style={{ color: "rgba(245,241,230,0.5)" }}
+            style={{ color: "var(--ink-tertiary)" }}
           >
             <span>direct</span>
             <span style={{ color: "var(--gold-soft)" }}>{warmth}%</span>
@@ -137,7 +137,7 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "#F5F1E6" }}>
+        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
           Motion intensity
         </h2>
         <div className="mt-4">
@@ -151,7 +151,7 @@ function SettingsPage() {
           />
           <div
             className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest"
-            style={{ color: "rgba(245,241,230,0.5)" }}
+            style={{ color: "var(--ink-tertiary)" }}
           >
             <span>still</span>
             <span style={{ color: "var(--gold-soft)" }}>{motion}%</span>
@@ -161,10 +161,10 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "#F5F1E6" }}>
+        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
           Walk it again
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "rgba(245,241,230,0.6)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
           Replay the Dictionary Puzzle from the beginning.
         </p>
         <button
@@ -180,7 +180,7 @@ function SettingsPage() {
 
       <p
         className="text-center font-mono text-[10px] uppercase tracking-[0.25em]"
-        style={{ color: "rgba(245,241,230,0.35)" }}
+        style={{ color: "var(--ink-tertiary)" }}
       >
         Lumira // v0.1 // walking with you
       </p>

@@ -49,20 +49,20 @@ export function CelebrationOverlay({ onClose }: { onClose: () => void }) {
         </div>
         <h2
           className="mt-4 text-2xl font-semibold tracking-tight leading-snug"
-          style={{ color: "#F5F1E6" }}
+          style={{ color: "var(--ink-primary)" }}
         >
           You discovered it yourself.
         </h2>
         <p
           className="mt-3 text-sm leading-relaxed"
-          style={{ color: "rgba(245,241,230,0.7)" }}
+          style={{ color: "var(--ink-secondary)" }}
         >
           That understanding will stay with you now. Binary Search — halve the problem each step,
           and any lookup becomes a handful of moves.
         </p>
         <div
           className="mt-6 font-mono text-[10px] uppercase tracking-widest"
-          style={{ color: "rgba(245,241,230,0.45)" }}
+          style={{ color: "var(--ink-tertiary)" }}
         >
           tap anywhere to continue
         </div>

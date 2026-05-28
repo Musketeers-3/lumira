@@ -31,11 +31,11 @@ function ArchitectureLog() {
         </div>
         <h1
           className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl"
-          style={{ color: "#F5F1E6" }}
+          style={{ color: "var(--ink-primary)" }}
         >
           Journey Log
         </h1>
-        <p className="mt-2 max-w-xl" style={{ color: "rgba(245,241,230,0.62)" }}>
+        <p className="mt-2 max-w-xl" style={{ color: "var(--ink-secondary)" }}>
           Every session you've shared, the shape of the conversation, and the moment you found
           your light.
         </p>
@@ -67,7 +67,7 @@ function ArchitectureLog() {
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h3
                     className="text-lg font-semibold tracking-tight"
-                    style={{ color: "#F5F1E6" }}
+                    style={{ color: "var(--ink-primary)" }}
                   >
                     {s.lesson}
                   </h3>
@@ -80,7 +80,7 @@ function ArchitectureLog() {
                 </div>
                 <p
                   className="mt-2 text-sm italic"
-                  style={{ color: "rgba(245,241,230,0.7)" }}
+                  style={{ color: "var(--ink-secondary)" }}
                 >
                   {s.excerpt}
                 </p>
@@ -92,7 +92,7 @@ function ArchitectureLog() {
                       style={{
                         background: "rgba(201,162,75,0.06)",
                         border: "1px solid rgba(201,162,75,0.22)",
-                        color: "rgba(230,201,122,0.85)",
+                        color: "var(--gold-soft)",
                       }}
                     >
                       {tag}

@@ -47,12 +47,12 @@ function Dashboard() {
           </div>
           <h1
             className="mt-3 max-w-2xl text-4xl font-semibold leading-tight tracking-tight lg:text-5xl"
-            style={{ color: "#F5F1E6" }}
+            style={{ color: "var(--ink-primary)" }}
           >
             I've been waiting for you. We were close to something on{" "}
             <span className="text-gold">Binary Search</span>.
           </h1>
-          <p className="mt-3 max-w-xl" style={{ color: "rgba(245,241,230,0.62)" }}>
+          <p className="mt-3 max-w-xl" style={{ color: "var(--ink-secondary)" }}>
             Your mentor is here, patient — holding the thought right where you left it. Whenever
             you're ready, we'll continue together.
           </p>
@@ -70,7 +70,7 @@ function Dashboard() {
               style={{
                 background: "rgba(245,241,230,0.04)",
                 border: "1px solid rgba(201,162,75,0.25)",
-                color: "rgba(245,241,230,0.75)",
+                color: "var(--ink-secondary)",
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
               }}
             >
@@ -105,17 +105,17 @@ function Dashboard() {
             </div>
             <div
               className="mt-4 font-mono text-[10px] uppercase tracking-[0.25em]"
-              style={{ color: "rgba(245,241,230,0.45)" }}
+              style={{ color: "var(--ink-tertiary)" }}
             >
               {label}
             </div>
             <div
               className="mt-1 text-3xl font-semibold tracking-tight"
-              style={{ color: "#F5F1E6" }}
+              style={{ color: "var(--ink-primary)" }}
             >
               {value}
             </div>
-            <div className="text-xs" style={{ color: "rgba(245,241,230,0.5)" }}>
+            <div className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
               {sub}
             </div>
           </div>
@@ -127,17 +127,17 @@ function Dashboard() {
         <div className="surface-luxe p-6">
           <div
             className="font-mono text-[10px] uppercase tracking-[0.25em]"
-            style={{ color: "rgba(245,241,230,0.45)" }}
+            style={{ color: "var(--ink-tertiary)" }}
           >
             Where we are
           </div>
           <h3
             className="mt-2 text-xl font-semibold tracking-tight"
-            style={{ color: "#F5F1E6" }}
+            style={{ color: "var(--ink-primary)" }}
           >
             Computational Thinking
           </h3>
-          <p className="text-sm" style={{ color: "rgba(245,241,230,0.55)" }}>
+          <p className="text-sm" style={{ color: "var(--ink-tertiary)" }}>
             The Dictionary Puzzle — Step 3 of 5
           </p>
           <div className="mt-5 flex items-center gap-2">
@@ -167,26 +167,26 @@ function Dashboard() {
         <div className="surface-luxe p-6">
           <div
             className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]"
-            style={{ color: "rgba(245,241,230,0.45)" }}
+            style={{ color: "var(--ink-tertiary)" }}
           >
             <TrendingUp className="h-3.5 w-3.5" style={{ color: "var(--gold-soft)" }} />
             Light you found
           </div>
           <h3
             className="mt-2 text-xl font-semibold tracking-tight"
-            style={{ color: "#F5F1E6" }}
+            style={{ color: "var(--ink-primary)" }}
           >
             Recursion as Self-Reference
           </h3>
           <p
             className="mt-2 text-sm italic"
-            style={{ color: "rgba(245,241,230,0.62)" }}
+            style={{ color: "var(--ink-secondary)" }}
           >
             "A function that solves a smaller version of its own problem."
           </p>
           <div
             className="mt-5 font-mono text-[10px] uppercase tracking-widest"
-            style={{ color: "rgba(245,241,230,0.4)" }}
+            style={{ color: "var(--ink-tertiary)" }}
           >
             you reached this 3 days ago
           </div>
