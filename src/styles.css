@@ -118,26 +118,27 @@
   --muted: #0E0E14;
   --muted-foreground: rgba(245, 245, 247, 0.55);
 
-  --accent: #1B1B28;
-  --accent-foreground: #F5F1E6;
+  --accent: #14141A;
+  --accent-foreground: #F5F5F7;
   --destructive: #C0392B;
   --destructive-foreground: #FBE7E4;
 
-  --border: rgba(245, 241, 230, 0.07);
-  --input: rgba(245, 241, 230, 0.10);
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.10);
   --ring: #C9A24B;
 
-  --sidebar: #0B0B14;
-  --sidebar-foreground: #E8E2D2;
+  --sidebar: #08080C;
+  --sidebar-foreground: #F5F5F7;
   --sidebar-primary: #C9A24B;
   --sidebar-primary-foreground: #0B0B12;
-  --sidebar-accent: #15151F;
-  --sidebar-accent-foreground: #F5F1E6;
-  --sidebar-border: rgba(201, 162, 75, 0.10);
+  --sidebar-accent: #14141A;
+  --sidebar-accent-foreground: #F5F5F7;
+  --sidebar-border: rgba(255, 255, 255, 0.05);
   --sidebar-ring: #C9A24B;
 
   --surface-glass: rgba(255, 255, 255, 0.025);
-  --border-glass: rgba(245, 241, 230, 0.07);
+  --border-glass: rgba(255, 255, 255, 0.05);
+
 
   /* State defaults (IDLE) */
   --state-accent: #D4A84B;
