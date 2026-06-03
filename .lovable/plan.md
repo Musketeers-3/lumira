@@ -1,83 +1,88 @@
-# Build: Cinematic Editorial Grain
+## Goal
 
-Lift the chosen v3 direction into the real app. Locked: Onyx & Platinum palette, DM Serif Display + Fira Sans + JetBrains Mono accents, bento layout. Scope: shell (sidebar, topbar, ambient bg) + dashboard route. Other routes inherit tokens automatically.
+Rewrite all learner-facing content so Lumira teaches **scientific reasoning & critical thinking** for **Grades 6–12** instead of computational thinking / DSA. No architecture, mentor-state machine, 3D mentor, persistence, or UI styling changes — only content, copy, and the demo script.
 
-## Design tokens (copied from prototype, mapped to Onyx & Platinum)
+## New flagship lesson
 
-Update `src/styles.css` (dark theme block):
+Replace **Binary Search / Dictionary Puzzle** with:
 
-```
---bg-abyss: #050505
---bg-night: #0A0A0F
---bg-onyx: #0C0C12
---bg-onyx-raised: #14141A
+**"Why Doesn't the Moon Fall to Earth?"**
+- Topic: Gravity, orbits, and Newton's insight
+- Learning objective: Discover that an orbit is continuous *falling* combined with sideways motion — gravity doesn't stop, the Moon keeps missing the Earth
+- 5 Socratic steps mapped to existing FOCUS → CHALLENGE → CHALLENGE → CHALLENGE → CELEBRATE arc:
+  1. FOCUS — "If I drop an apple it falls. The Moon feels gravity too. So why doesn't it crash into us?"
+  2. CHALLENGE — Believing challenge: "What if you threw a ball so fast it never landed? Imagine throwing it from a mountain…"
+  3. CHALLENGE — Gentle push: "As it falls, the Earth curves away beneath it. What happens then?"
+  4. CHALLENGE — "So the Moon *is* falling — but always missing. Why does it never hit?"
+  5. CELEBRATE — "You discovered an orbit yourself: a perpetual fall that keeps missing the ground. That's how every planet, every satellite stays up."
 
---ink-primary: #F5F5F7
---ink-secondary: rgba(245,245,247,0.55)
---ink-tertiary: rgba(245,245,247,0.32)
+## Files to edit (content-only)
 
---platinum: #D8DCE3
---platinum-soft: #8A8F99
---hairline: rgba(255,255,255,0.05)
---hairline-strong: rgba(255,255,255,0.10)
+### 1. `src/components/socratic/engine/demoScript.ts`
+Replace all 5 steps with the Moon lesson dialogue above (keep `Step` shape, intents, and `celebrate: true` on step 5).
 
-/* keep --gold/--gold-soft as restrained spotlight only */
-```
+### 2. `src/components/socratic/engine/SocraticEngine.tsx`
+- `AI_CONTEXT.lessonTopic` → `"Why Doesn't the Moon Fall to Earth?"`
+- `AI_CONTEXT.learningObjective` → orbit-as-perpetual-falling description
+- Default props `lessonId="moon-orbit-demo"`, `topic="Newtonian Gravity & Orbits"`
+- Rewrite `INTENT_REPLIES` strings to science-reasoning tone (no "halving the search space")
 
-Light mode: keep clay tokens already in place; verify contrast.
+### 3. `src/components/socratic/engine/InteractiveDebateTerminal.tsx`
+- Lesson card: `Computational Thinking` → `Physical Reasoning`; subtitle `The Dictionary Puzzle` → `The Falling Moon`
+- 5 step hover hints rewritten:
+  1. Frame the puzzle.
+  2. Throw the ball harder.
+  3. Watch the Earth curve.
+  4. Falling, always missing.
+  5. Breakthrough — an orbit.
 
-## Typography wire-up
+### 4. `src/routes/index.tsx` (Dashboard / Your Path)
+- Hero headline: "We were close to something on **Binary Search**" → "**Why the Moon doesn't fall.**"
+- "Where we are" card: `Computational Thinking` → `Physical Reasoning`, `The Dictionary Puzzle — Step 3 of 5` → `The Falling Moon — Step 3 of 5`
+- "Light you found" card: `Recursion as Self-Reference` → `Pressure as Collisions`, italic quote → "Air isn't empty — it's countless tiny particles bumping into everything."
+- Stats sub-labels stay neutral (sessions / light found / time)
 
-Add to `__root.tsx` link rel:
-- `Cormorant Garamond` (italic + 500) — display serif for hero headline + bento numerals
-- `Outfit` (300/400/600) — body/UI sans
-- keep `JetBrains Mono` for catalog labels
+### 5. `src/routes/skill-passport.tsx`
+Replace the 6-skill array with school-level science/critical-thinking categories:
 
-Add to `@theme inline` in `styles.css`:
-```
---font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
---font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
---font-mono: "JetBrains Mono", ui-monospace, monospace;
-```
-Add utility `.font-display` for the serif hero.
+| name | domain | mastery | status | insight |
+|---|---|---|---|---|
+| Orbits & Gravity | Physical Reasoning | 92 | unlocked | An orbit is falling while moving sideways. |
+| Pressure & Particles | Matter & Energy | 78 | unlocked | Pressure is countless tiny collisions. |
+| Scientific Method | Meta-skill | 64 | in-progress | Observe, hypothesize, test, revise. |
+| Evaluating Evidence | Critical Thinking | 40 | in-progress | Distinguish correlation from cause. |
+| Energy Transfer | Physical Reasoning | 0 | locked | — |
+| Ecosystem Balance | Life Science | 0 | locked | — |
 
-## Components to edit
+Header eyebrow stays "ideas you reached on your own".
 
-### `src/components/socratic/Sidebar.tsx`
-- Wider rail (`w-72`), 8-unit padding, gap-12 sections.
-- Header: mono eyebrow `LUMIRA // AMBIENT OS`, wordmark `Lumi<span>ra</span>` (gold accent on "ra"), italic tagline.
-- Nav items: numbered catalog markers `01`–`05` in a 20px ring, label on right. Active = `bg-gold/5 + border-gold/20 + white text`. Inactive = `zinc-tertiary` with hover ring + white text.
-- Settings sits below with `mt-8` gap, marker `S`.
-- Mentor State card: `surface-luxe`-style raised tile with grain overlay, mono micro-label, pulsing dot using `--state-accent`, uppercase IDLE/FOCUS/etc.
+### 6. `src/components/socratic/Sidebar.tsx`
+Any "Computational Thinking" / "Algorithms" labels → "Physical Reasoning" / "Scientific Method". (Confirm during edit; structure untouched.)
 
-### `src/components/socratic/TopBar.tsx`
-- 80px height, 40px horizontal padding, bottom hairline.
-- Left: mono gold eyebrow `LUMIRA`, route title in white medium.
-- Right: pill `mentor: <state-accent>walking with you</>` in mono on onyx pill, then circular 40px theme toggle with hairline border.
+### 7. `src/lib/mentor-personality.ts`
+- `STATE_EXAMPLE_LINES` rewritten for science contexts (e.g., CHALLENGE example: "That works for one apple. What changes when the object is the size of the Moon, moving sideways at 1 km/s?")
+- Keep tone, length, and `STATE_PROMPT_ADDENDA` structure identical
 
-### `src/components/socratic/AmbientBackground.tsx`
-- Replace current gold orb with: (1) very faint radial spotlight top-right tinted with `--state-glow`, (2) full-viewport SVG grain at 4% opacity, (3) hairline vertical guide lines at 25% / 75% on viewports ≥ lg.
+### 8. `src/routes/engine.tsx`
+Meta description swap: "reason your way to ideas" stays, but title can remain "The Dojo — Lumira" (generic, no change needed). No edit unless `Binary Search` appears.
 
-### `src/routes/index.tsx` (Your Path)
-- Hero card: `rounded-[2.5rem]`, `bg-bg-onyx`, hairline border, padding `p-16`, internal radial spotlight + grain overlay.
-- Eyebrow chip `WELCOME BACK` in mono on `bg-white/5` rounded-md.
-- Headline: `font-display italic` for "I've been waiting for you.", then `not-italic opacity-80` for the bridge phrase, then `Outfit semibold not-italic` for the resumed-topic span with gold underline.
-- Body: Outfit light, `--ink-secondary`, max-w-2xl.
-- CTAs: primary `btn-gold` reshape — `rounded-2xl`, `px-8 py-4`, black text, `shadow-[0_0_40px_rgba(201,162,75,0.18)]`, arrow icon; secondary outline `border-white/10`, rounded-2xl.
-- Bento: 3-col grid, each tile `rounded-[2rem]`, `bg-bg-onyx-raised/30`, hairline border, icon in 48px rounded-2xl onyx well, mono micro-label, `font-display text-5xl` numeral with sub-label, hover gold underline gradient at bottom.
+### 9. `src/components/lesson-builder/*` (LessonBuilder, LessonsList)
+Update any seeded example lesson titles / placeholder copy that reference algorithms → use science examples ("Why is the sky blue?", "What keeps a boat afloat?"). Schema unchanged.
 
-### `src/components/socratic/engine/MentorGlassFrame.tsx`
-- Adopt the same vocabulary: hairline border, grain overlay, mono `MENTOR // STATE` eyebrow, numeral marker corners. Keep existing API (children).
+## Audience & tone calibration (Grades 6–12)
 
-### `src/components/socratic/engine/StateIndicatorTag.tsx`
-- Pill restyle: onyx bg, hairline border, mono uppercase state label, state-accent dot. No layout changes.
+- Vocabulary: middle-school accessible, no jargon without unpacking
+- Examples: everyday physical world (apples, balls, water, light, weather, plants)
+- Mentor restraint preserved — no hype, 1–2 questions per turn, Socratic
+- Keep the cinematic editorial typography & onyx aesthetic
 
-## Out of scope (this iteration)
+## Out of scope
 
-- Mentor 3D internals (`Mentor3D.tsx`, `MentorCanvas.tsx`, `mentor3d/**`, `.vrm`, motion files) — UNTOUCHED.
-- Server/data logic.
-- `architecture-log`, `skill-passport`, `settings` routes inherit token + font changes automatically; we won't recompose them in this pass.
+- Mentor 3D rig, lights, animations
+- `learning-state-context`, persistence hooks, AI gateway plumbing
+- Theme tokens, layout, navigation structure
+- Routes: `architecture-log`, `settings` (no learner-facing science copy there)
 
 ## Verification
 
-After edits: screenshot `/` in both themes, confirm hero serif/sans mix renders, bento tiles align, sidebar numerals render, no hardcoded cream text reintroduced, contrast passes in light mode.
+After edits: load `/`, `/engine`, `/skill-passport` in the preview; walk all 5 demo steps; confirm no remaining "Binary Search", "Dictionary", "Recursion", or "Big-O" strings via `rg`.
