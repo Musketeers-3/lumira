@@ -120,10 +120,10 @@ export function InteractiveDebateTerminal({
           className="mt-1 text-lg font-semibold tracking-tight relative z-10"
           style={{ color: "var(--ink-primary)" }}
         >
-          Computational Thinking
+          Physical Reasoning
         </h2>
         <p className="text-sm relative z-10" style={{ color: "var(--ink-secondary)" }}>
-          The Dictionary Puzzle
+          Why Doesn't the Moon Fall to Earth?
         </p>
         <div className="mt-4 flex items-center gap-2 relative z-10">
           {Array.from({ length: totalSteps }).map((_, i) => {
@@ -158,11 +158,11 @@ export function InteractiveDebateTerminal({
                     Step {i + 1} / {totalSteps}
                   </div>
                   <div className="mt-1 text-sm" style={{ color: "var(--ink-primary)" }}>
-                    {i === 0 && "Frame the problem."}
-                    {i === 1 && "Challenge the linear approach."}
-                    {i === 2 && "Discover halving."}
-                    {i === 3 && "Realize elimination."}
-                    {i === 4 && "Breakthrough — Binary Search."}
+                    {i === 0 && "Frame the puzzle."}
+                    {i === 1 && "Throw the ball harder."}
+                    {i === 2 && "Watch the Earth curve."}
+                    {i === 3 && "Falling, always missing."}
+                    {i === 4 && "Breakthrough — an orbit."}
                   </div>
                 </HoverCardContent>
               </HoverCard>

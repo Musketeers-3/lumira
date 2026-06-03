@@ -57,8 +57,8 @@ export function CelebrationOverlay({ onClose }: { onClose: () => void }) {
           className="mt-3 text-sm leading-relaxed"
           style={{ color: "var(--ink-secondary)" }}
         >
-          That understanding will stay with you now. Binary Search — halve the problem each step,
-          and any lookup becomes a handful of moves.
+          That understanding will stay with you now. An orbit is just a fall that keeps missing the
+          ground — every moon, planet, and satellite stays up the same way.
         </p>
         <div
           className="mt-6 font-mono text-[10px] uppercase tracking-widest"

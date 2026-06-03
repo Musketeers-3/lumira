@@ -35,8 +35,8 @@ export function DebateTerminal({ messages, stepIndex, totalSteps, isSpeaking }: 
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
           Current Lesson
         </div>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight">Computational Thinking</h2>
-        <p className="text-sm text-muted-foreground">The Dictionary Puzzle</p>
+        <h2 className="mt-1 text-lg font-semibold tracking-tight">Physical Reasoning</h2>
+        <p className="text-sm text-muted-foreground">Why Doesn't the Moon Fall to Earth?</p>
         <div className="mt-4 flex items-center gap-2">
           {Array.from({ length: totalSteps }).map((_, i) => {
             const reached = i <= stepIndex;
@@ -58,11 +58,11 @@ export function DebateTerminal({ messages, stepIndex, totalSteps, isSpeaking }: 
                     Step {i + 1} / {totalSteps}
                   </div>
                   <div className="mt-1 text-sm">
-                    {i === 0 && "Frame the problem."}
-                    {i === 1 && "Challenge the linear approach."}
-                    {i === 2 && "Discover halving."}
-                    {i === 3 && "Realize elimination."}
-                    {i === 4 && "Breakthrough — Binary Search."}
+                    {i === 0 && "Frame the puzzle."}
+                    {i === 1 && "Throw the ball harder."}
+                    {i === 2 && "Watch the Earth curve."}
+                    {i === 3 && "Falling, always missing."}
+                    {i === 4 && "Breakthrough — an orbit."}
                   </div>
                 </HoverCardContent>
               </HoverCard>

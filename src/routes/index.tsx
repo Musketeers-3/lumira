@@ -92,7 +92,7 @@ function Dashboard() {
                 textDecorationColor: "rgba(201,162,75,0.35)",
               }}
             >
-              Binary Search.
+              why the Moon doesn't fall.
             </span>
           </h1>
 
@@ -208,10 +208,10 @@ function Dashboard() {
             className="mt-3 font-display text-3xl leading-tight"
             style={{ color: "var(--ink-primary)" }}
           >
-            Computational Thinking
+            Physical Reasoning
           </h3>
           <p className="mt-1 text-sm" style={{ color: "var(--ink-tertiary)" }}>
-            The Dictionary Puzzle — Step 3 of 5
+            The Falling Moon — Step 3 of 5
           </p>
           <div className="mt-6 flex items-center gap-2">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -250,13 +250,13 @@ function Dashboard() {
             className="mt-3 font-display text-3xl leading-tight"
             style={{ color: "var(--ink-primary)" }}
           >
-            Recursion as Self-Reference
+            Pressure as Collisions
           </h3>
           <p
             className="mt-3 font-display italic text-lg"
             style={{ color: "var(--ink-secondary)" }}
           >
-            "A function that solves a smaller version of its own problem."
+            "Air isn't empty — it's countless tiny particles bumping into everything."
           </p>
           <div
             className="mt-6 font-mono text-[10px] uppercase tracking-widest"

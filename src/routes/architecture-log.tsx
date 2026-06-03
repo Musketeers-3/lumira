@@ -13,10 +13,10 @@ export const Route = createFileRoute("/architecture-log")({
 });
 
 const sessions = [
-  { date: "May 21, 2026", time: "19:42", lesson: "Binary Search via the Dictionary Puzzle", intents: ["Gentle Push x3", "Believing Challenge x2", "Light Found"], excerpt: '"I... don\'t need them anymore. I can throw the whole second half away."' },
-  { date: "May 18, 2026", time: "21:08", lesson: "Recursion via the Russian Doll", intents: ["Gentle Push x4", "Believing Challenge x1", "Light Found"], excerpt: '"Wait — the function is calling a smaller version of itself."' },
-  { date: "May 14, 2026", time: "08:33", lesson: "Big-O — Why doubling input matters", intents: ["Gentle Push x5", "Believing Challenge x3"], excerpt: '"It scales with the input, not with the clock."' },
-  { date: "May 09, 2026", time: "22:11", lesson: "Decomposition — Breaking the Sandwich", intents: ["Gentle Push x2", "Light Found"], excerpt: '"Every big problem is just smaller problems pretending."' },
+  { date: "May 21, 2026", time: "19:42", lesson: "Why Doesn't the Moon Fall to Earth?", intents: ["Gentle Push x3", "Believing Challenge x2", "Light Found"], excerpt: '"The Earth curves away from it… so the ball keeps falling, but the ground keeps dropping away too."' },
+  { date: "May 18, 2026", time: "21:08", lesson: "Why Does a Balloon Squish When You Squeeze It?", intents: ["Gentle Push x4", "Believing Challenge x1", "Light Found"], excerpt: '"Oh — air is made of tiny things, and they\'re all pushing back on the inside."' },
+  { date: "May 14, 2026", time: "08:33", lesson: "Why Is the Sky Blue and the Sunset Red?", intents: ["Gentle Push x5", "Believing Challenge x3"], excerpt: '"The blue light is being scattered more than the red — it bounces around the sky."' },
+  { date: "May 09, 2026", time: "22:11", lesson: "Why Does Ice Float Instead of Sinking?", intents: ["Gentle Push x2", "Light Found"], excerpt: '"Water is weird — when it freezes, the molecules spread out instead of packing tighter."' },
 ];
 
 function ArchitectureLog() {

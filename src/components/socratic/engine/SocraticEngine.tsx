@@ -21,9 +21,9 @@ interface SocraticEngineProps {
 }
 
 const AI_CONTEXT: SocraticContext = {
-  lessonTopic: "Binary Search Algorithm",
+  lessonTopic: "Why Doesn't the Moon Fall to Earth?",
   learningObjective:
-    "Understand how halving a sorted search space finds items in logarithmic steps",
+    "Discover that an orbit is continuous falling combined with sideways motion — gravity never stops, the Moon just keeps missing the Earth",
   studentAnswers: [],
   currentStep: 0,
   totalSteps: 5,
@@ -32,8 +32,8 @@ const AI_CONTEXT: SocraticContext = {
 export function SocraticEngine({
   enableAI = false,
   enablePersistence = false,
-  lessonId = "binary-search-demo",
-  topic = "Binary Search Algorithm",
+  lessonId = "moon-orbit-demo",
+  topic = "Newtonian Gravity & Orbits",
   learningObjective = AI_CONTEXT.learningObjective,
 }: SocraticEngineProps) {
   const { state, setState, isSpeaking, setIsSpeaking } = useLearningState();
@@ -180,16 +180,16 @@ export function SocraticEngine({
 
   const INTENT_REPLIES: Record<"Gentle Push" | "Believing Challenge" | "Light Found", string[]> = {
     "Gentle Push": [
-      "You're closer than you think. What happens if the list grows much larger?",
-      "Good — keep that thread. What's the first thing you'd check?",
+      "You're closer than you think. What would happen if we changed one thing about the setup?",
+      "Good — keep that thread. What does your everyday experience tell you?",
     ],
     "Believing Challenge": [
-      "I believe you can sharpen that. What assumption are you leaning on?",
-      "Push it one step further — where would this break?",
+      "I believe you can sharpen that. What assumption is hiding in your reasoning?",
+      "Push it one step further — what would have to be true for that to hold?",
     ],
     "Light Found": [
-      "That's it. You just named the idea — halving the search space.",
-      "Beautiful. Hold onto that feeling — that's the shape of insight.",
+      "That's it. You just saw it — an orbit is a fall that keeps missing the ground.",
+      "Beautiful. Hold onto that feeling — that's the shape of a real insight.",
     ],
   };
 

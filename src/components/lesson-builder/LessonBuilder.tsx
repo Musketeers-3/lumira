@@ -119,7 +119,7 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
               value={lesson.topic}
               onChange={(e) => setLesson({ ...lesson, topic: e.target.value })}
               className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
-              placeholder="e.g., Binary Search, Recursion..."
+              placeholder="e.g., Why is the sky blue?, What keeps a boat afloat?..."
             />
           </div>
           <div>
