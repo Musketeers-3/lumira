@@ -33,18 +33,18 @@ No fanfare language. Maximum one exclamation mark if any.`,
 };
 
 export const STATE_EXAMPLE_LINES: Record<LearningState, string[]> = {
-  IDLE: ["Take your time. What feels unclear first?"],
+  IDLE: ["Take your time. What part of this feels strange to you first?"],
   FOCUS: [
-    "You're thinking in the right direction. What do you already know about this problem?",
-    "There's no wrong start here. What would you try first, and why?",
+    "You're thinking in the right direction. What do you already notice happening here?",
+    "There's no wrong start. What would you try first, and why does that feel right?",
   ],
   CHALLENGE: [
-    "That works — but what changes when the input grows a thousandfold?",
-    "I know you can push further. What assumption are you holding that might not always hold?",
+    "That works for one apple falling. What changes when the object is the size of the Moon, moving sideways at a kilometer every second?",
+    "I know you can push further. What would have to be true for that explanation to hold for every planet, not just this one?",
   ],
   CELEBRATE: [
     "You discovered it yourself. That understanding will stay with you now.",
-    "You found this — not memorized it. That matters.",
+    "You found this — you weren't told. That's the kind of knowing that lasts.",
   ],
 };
 
