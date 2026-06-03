@@ -80,6 +80,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Lumira — Learn beside someone who believes in you" },
+      { name: "description", content: "Socratic Lumina is an AI-powered learning platform that fosters deep understanding through guided Socratic dialogue." },
+      { property: "og:description", content: "Socratic Lumina is an AI-powered learning platform that fosters deep understanding through guided Socratic dialogue." },
+      { name: "twitter:description", content: "Socratic Lumina is an AI-powered learning platform that fosters deep understanding through guided Socratic dialogue." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/5DoJVPq1TCW0eqnLWPPtLJNimTu2/social-images/social-1780503764936-ChatGPT_Image_Jun_3,_2026,_09_52_22_PM.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/5DoJVPq1TCW0eqnLWPPtLJNimTu2/social-images/social-1780503764936-ChatGPT_Image_Jun_3,_2026,_09_52_22_PM.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
