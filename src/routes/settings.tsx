@@ -165,7 +165,7 @@ function SettingsPage() {
           Walk it again
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
-          Replay the Dictionary Puzzle from the beginning.
+          Replay "Why Doesn't the Moon Fall to Earth?" from the beginning.
         </p>
         <button
           onClick={() => {

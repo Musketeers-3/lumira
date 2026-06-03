@@ -32,12 +32,12 @@ interface Skill {
 }
 
 const skills: Skill[] = [
-  { name: "Binary Search", domain: "Computational Thinking", mastery: 92, status: "unlocked", date: "May 21, 2026", insight: "Halving the search space at every step." },
-  { name: "Recursion", domain: "Algorithms", mastery: 78, status: "unlocked", date: "May 18, 2026", insight: "A function solving a smaller version of itself." },
-  { name: "Computational Thinking", domain: "Meta-skill", mastery: 64, status: "in-progress", insight: "Decompose, pattern, abstract, design." },
-  { name: "Big-O Intuition", domain: "Complexity", mastery: 40, status: "in-progress", insight: "Cost as input grows, not absolute time." },
-  { name: "Dynamic Programming", domain: "Algorithms", mastery: 0, status: "locked" },
-  { name: "Graph Reasoning", domain: "Discrete Math", mastery: 0, status: "locked" },
+  { name: "Orbits & Gravity", domain: "Physical Reasoning", mastery: 92, status: "unlocked", date: "May 21, 2026", insight: "An orbit is falling while moving sideways fast enough to keep missing the ground." },
+  { name: "Pressure & Particles", domain: "Matter & Energy", mastery: 78, status: "unlocked", date: "May 18, 2026", insight: "Pressure is countless tiny collisions adding up." },
+  { name: "Scientific Method", domain: "Meta-skill", mastery: 64, status: "in-progress", insight: "Observe, hypothesize, test, revise — repeat honestly." },
+  { name: "Evaluating Evidence", domain: "Critical Thinking", mastery: 40, status: "in-progress", insight: "Correlation is not cause — ask what else could explain it." },
+  { name: "Energy Transfer", domain: "Physical Reasoning", mastery: 0, status: "locked" },
+  { name: "Ecosystem Balance", domain: "Life Science", mastery: 0, status: "locked" },
 ];
 
 function SkillPassport() {
