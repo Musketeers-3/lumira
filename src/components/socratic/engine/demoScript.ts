@@ -8,7 +8,7 @@ export const demoScript: Step[] = [
         id: "1a",
         speaker: "mentor",
         intent: "Gentle Push",
-        text: "If I drop an apple, it falls to the ground. The Moon feels Earth's gravity too — it's pulled toward us with the same force. So tell me… why doesn't the Moon just fall down and crash into Earth? Take your time.",
+        text: "hii!! If I drop an apple, it falls to the ground. The Moon feels Earth's gravity too — it's pulled toward us with the same force. So tell me… why doesn't the Moon just fall down and crash into Earth? Take your time.",
       },
       {
         id: "1b",
