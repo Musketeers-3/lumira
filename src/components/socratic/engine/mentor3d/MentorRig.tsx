@@ -1,5 +1,5 @@
 import type { LearningState } from "../../types";
-import { LumiraCharacter } from "./LumiraCharacter";
+import { MentorModel } from "./MentorModel";
 
 interface Props {
   state: LearningState;
@@ -8,9 +8,9 @@ interface Props {
 }
 
 /**
- * Renders the live Lumira mentor character (procedural 3D + animation system).
- * GLB at /models/mentor/lumira.glb remains available for a future art swap via docs/mentor-asset-spec.md.
+ * Renders the live Lumira mentor character.
+ * We have officially swapped from the procedural fallback to the high-fidelity VRM pipeline.
  */
 export function MentorRig({ state, isSpeaking, isPausing }: Props) {
-  return <LumiraCharacter state={state} isSpeaking={isSpeaking} isPausing={isPausing} />;
+  return <MentorModel state={state} isSpeaking={isSpeaking} isPausing={isPausing} />;
 }

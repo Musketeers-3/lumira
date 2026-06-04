@@ -13,6 +13,7 @@
     "generate:mentor": "bun run scripts/generate-mentor-glb.mjs"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.67",
     "@ai-sdk/react": "^3.0.187",
     "@cloudflare/vite-plugin": "^1.25.5",
     "@hookform/resolvers": "^5.2.2",

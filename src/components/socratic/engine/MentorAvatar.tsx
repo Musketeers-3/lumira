@@ -1,4 +1,5 @@
 import type { LearningState } from "../types";
+import { useMentorSettingsOptional } from "@/lib/mentor-settings-hooks";
 
 interface Props {
   state: LearningState;
@@ -7,9 +8,17 @@ interface Props {
 }
 
 export function MentorAvatar({ state, isSpeaking, isPausing = false }: Props) {
+  const settings = useMentorSettingsOptional();
+
+  // Extract motion settings to respect user accessibility and UI preferences
+  const motionMult = settings?.motionMultiplier ?? 1;
+  const isReducedMotion = settings?.reducedMotion ?? false;
+
   const leanX = state === "FOCUS" ? 5 : 0;
   const handsOnDesk = state === "CHALLENGE" || state === "FOCUS";
-  const breathing = state === "IDLE" || state === "FOCUS";
+
+  // Disable heavy breathing if user requested reduced motion
+  const breathing = (state === "IDLE" || state === "FOCUS") && !isReducedMotion;
 
   return (
     <svg
@@ -17,7 +26,8 @@ export function MentorAvatar({ state, isSpeaking, isPausing = false }: Props) {
       className="h-full w-full transition-all duration-700 ease-in-out"
       style={{
         filter: "drop-shadow(0 0 20px var(--state-glow))",
-        animation: breathing ? "breathe 4s ease-in-out infinite" : undefined,
+        // Scale the breathing animation duration based on the user's motion preferences
+        animation: breathing ? `breathe ${4 / motionMult}s ease-in-out infinite` : undefined,
       }}
     >
       <defs>
@@ -98,7 +108,8 @@ export function MentorAvatar({ state, isSpeaking, isPausing = false }: Props) {
         )}
       </g>
 
-      {isSpeaking && !isPausing && (
+      {/* Disable the ripple if reduced motion is active */}
+      {isSpeaking && !isPausing && !isReducedMotion && (
         <circle
           cx="100"
           cy="70"
@@ -107,7 +118,7 @@ export function MentorAvatar({ state, isSpeaking, isPausing = false }: Props) {
           stroke="var(--state-accent)"
           strokeWidth="0.8"
           opacity="0.35"
-          style={{ animation: "ripple 2s ease-out infinite" }}
+          style={{ animation: `ripple ${2 / motionMult}s ease-out infinite` }}
         />
       )}
     </svg>

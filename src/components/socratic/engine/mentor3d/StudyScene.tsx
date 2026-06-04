@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -6,21 +6,16 @@ import type { LearningState } from "../../types";
 
 const LAMP_WARM = "#fff4e0";
 
+const FALLBACK_COLORS: Record<LearningState, string> = {
+  IDLE: "#f4d9a8",
+  FOCUS: "#7fb3ff",
+  CHALLENGE: "#c87850",
+  CELEBRATE: "#ffd97a",
+};
+
 interface Props {
   state: LearningState;
   warmthBias?: number;
-}
-
-function readAccent(): THREE.Color {
-  if (typeof document === "undefined") return new THREE.Color("#f4d9a8");
-  const accent = getComputedStyle(document.documentElement)
-    .getPropertyValue("--state-accent")
-    .trim();
-  try {
-    return new THREE.Color(accent || "#f4d9a8");
-  } catch {
-    return new THREE.Color("#f4d9a8");
-  }
 }
 
 export function StudyScene({ state, warmthBias = 0.6 }: Props) {
@@ -28,8 +23,22 @@ export function StudyScene({ state, warmthBias = 0.6 }: Props) {
   const clone = useMemo(() => scene.clone(), [scene]);
 
   const lampLightRef = useRef<THREE.PointLight>(null!);
-  const accentRef = useRef(new THREE.Color());
+  const accentRef = useRef(new THREE.Color(FALLBACK_COLORS.IDLE));
   const lampMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+
+  // CRITICAL FIX: Read the DOM exactly ONCE per state change, keeping the render loop clean.
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      try {
+        const hex = getComputedStyle(document.documentElement)
+          .getPropertyValue("--state-accent")
+          .trim();
+        accentRef.current.set(hex || FALLBACK_COLORS[state]);
+      } catch {
+        accentRef.current.set(FALLBACK_COLORS[state]);
+      }
+    }
+  }, [state]);
 
   useMemo(() => {
     clone.traverse((child) => {
@@ -49,8 +58,6 @@ export function StudyScene({ state, warmthBias = 0.6 }: Props) {
   }, [clone]);
 
   useFrame(() => {
-    accentRef.current = readAccent();
-
     const intensity =
       state === "CHALLENGE"
         ? 0.55 + warmthBias * 0.15
@@ -60,7 +67,7 @@ export function StudyScene({ state, warmthBias = 0.6 }: Props) {
             ? 0.45 + warmthBias * 0.1
             : 0.4 + warmthBias * 0.1;
 
-    // Smoothly animate the physical light source
+    // Smoothly animate the physical light source on the GPU thread
     if (lampLightRef.current) {
       lampLightRef.current.intensity = THREE.MathUtils.lerp(
         lampLightRef.current.intensity,

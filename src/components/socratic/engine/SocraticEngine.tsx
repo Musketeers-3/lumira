@@ -4,9 +4,7 @@ import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { useSocraticDialogue } from "@/hooks/useSocraticDialogue";
 import { getThinkingPauseMs, getSpeakDurationMs } from "@/lib/mentor-personality";
 import type { SocraticContext } from "@/lib/ai-mentor";
-import { demoScript } from "./demoScript";
 import type { LearningState, Message } from "../types";
-import { StepperBar } from "./StepperBar";
 import { MentorCanvas } from "./MentorCanvas";
 import { MentorGlassFrame } from "./MentorGlassFrame";
 import { InteractiveDebateTerminal } from "./InteractiveDebateTerminal";
@@ -20,55 +18,49 @@ interface SocraticEngineProps {
   learningObjective?: string;
 }
 
-const AI_CONTEXT: SocraticContext = {
-  lessonTopic: "Why Doesn't the Moon Fall to Earth?",
-  learningObjective:
-    "Discover that an orbit is continuous falling combined with sideways motion — gravity never stops, the Moon just keeps missing the Earth",
-  studentAnswers: [],
-  currentStep: 0,
-  totalSteps: 5,
-};
-
 export function SocraticEngine({
-  enableAI = false,
-  enablePersistence = false,
-  lessonId = "moon-orbit-demo",
-  topic = "Newtonian Gravity & Orbits",
-  learningObjective = AI_CONTEXT.learningObjective,
+  enableAI = true, // Defaults to true in production
+  enablePersistence = true,
+  lessonId = "dynamic-session",
+  topic = "Cognitive Pathway",
+  learningObjective = "Discover the structural principles of the system through guided reasoning.",
 }: SocraticEngineProps) {
   const { state, setState, isSpeaking, setIsSpeaking } = useLearningState();
-  const { sessionId, startSession, updateSession, markBreakthrough, endSession } =
+  const { sessionId, startSession, updateSession, markBreakthrough, endSession, logMessage } =
     useSessionPersistence();
+
+  // Initialize the live AI context
+  const AI_CONTEXT: SocraticContext = {
+    lessonTopic: topic,
+    learningObjective: learningObjective,
+    studentAnswers: [],
+    currentStep: 0,
+    totalSteps: 5,
+  };
+
   const {
     messages: aiMessages,
     submitAnswer,
     isLoading: aiLoading,
-  } = useSocraticDialogue({
-    ...AI_CONTEXT,
-    lessonTopic: topic,
-    learningObjective,
-  });
+  } = useSocraticDialogue(AI_CONTEXT);
 
-  const [stepIndex, setStepIndex] = useState(-1);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [stepIndex, setStepIndex] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
   const [isPausing, setIsPausing] = useState(false);
+
   const speakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const stateProgressionRef = useRef<string[]>(["IDLE"]);
 
-  const total = demoScript.length;
-  const started = stepIndex >= 0;
-
+  // Mount the persistent session
   useEffect(() => {
     if (enablePersistence) {
       startSession(lessonId, topic);
       startTimeRef.current = Date.now();
     }
     return () => {
-      if (speakTimer.current) clearTimeout(speakTimer.current);
-      if (pauseTimer.current) clearTimeout(pauseTimer.current);
+      clearTimers();
     };
   }, [enablePersistence, lessonId, topic, startSession]);
 
@@ -77,6 +69,7 @@ export function SocraticEngine({
     if (pauseTimer.current) clearTimeout(pauseTimer.current);
   };
 
+  // Maps AI state shifts to physical 3D and UI changes
   const playMentorPresence = useCallback(
     (mentorState: LearningState, textLength = 120) => {
       clearTimers();
@@ -106,176 +99,85 @@ export function SocraticEngine({
     [setState, setIsSpeaking],
   );
 
-  const reset = async () => {
-    if (enablePersistence && sessionId && startTimeRef.current) {
-      const durationSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      const performanceScore = Math.min(100, Math.floor((stepIndex / total) * 100));
-      await endSession(sessionId, durationSeconds, performanceScore);
-    }
-
-    clearTimers();
-    setStepIndex(-1);
-    setMessages([]);
-    setState("IDLE");
-    setCelebrate(false);
-    setIsPausing(false);
-    setIsSpeaking(false);
-    stateProgressionRef.current = ["IDLE"];
-    startTimeRef.current = null;
-
-    if (enablePersistence) {
-      startSession(lessonId, topic);
-      startTimeRef.current = Date.now();
-    }
+  const intentFromAi = (type?: string): Message["intent"] => {
+    if (type === "revealing_challenge" || type === "challenge") return "Believing Challenge";
+    if (type === "breakthrough_confirmation" || type === "breakthrough") return "Light Found";
+    return "Gentle Push";
   };
 
-  const goTo = async (idx: number) => {
-    const step = demoScript[idx];
-    if (!step) return;
-    setStepIndex(idx);
-
-    if (!stateProgressionRef.current.includes(step.state)) {
-      stateProgressionRef.current.push(step.state);
-    }
-
-    setMessages(() => {
-      const all: Message[] = [];
-      for (let i = 0; i <= idx; i++) all.push(...demoScript[i].messages);
-      return all;
-    });
-
-    const lastMentor = [...step.messages].reverse().find((m) => m.speaker === "mentor");
-    playMentorPresence(step.state, lastMentor?.text.length ?? 120);
-
-    if (enablePersistence && sessionId) {
-      const messageCount = demoScript
-        .slice(0, idx + 1)
-        .reduce((sum, s) => sum + s.messages.length, 0);
-      await updateSession(sessionId, stateProgressionRef.current, messageCount);
-    }
-
-    if (step.celebrate) {
-      if (enablePersistence && sessionId) {
-        await markBreakthrough(sessionId);
-      }
-      setTimeout(() => setCelebrate(true), 800);
-    }
-  };
-
-  const handleAiAnswer = async (answer: string, intent?: Message["intent"]) => {
+  // Main interaction loop
+  const handleAiAnswer = async (answer: string) => {
     try {
+      if (enablePersistence && sessionId) {
+        await logMessage(sessionId, state, {
+          id: `stud-${Date.now()}`,
+          speaker: "student",
+          intent: "You",
+          text: answer,
+        });
+      }
+
       const result = await submitAnswer(answer);
       if (!result?.response) return;
 
       const { response } = result;
+
+      // Advance UI progress bar safely
+      setStepIndex((prev) => Math.min(prev + 1, AI_CONTEXT.totalSteps - 1));
+
       playMentorPresence(response.estimated_state, response.mentor_response.length);
 
+      if (enablePersistence && sessionId) {
+        await logMessage(sessionId, response.estimated_state, {
+          id: `ment-${Date.now()}`,
+          speaker: "mentor",
+          intent: intentFromAi(response.question_type),
+          text: response.mentor_response,
+        });
+        await updateSession(
+          sessionId,
+          [...stateProgressionRef.current, response.estimated_state],
+          aiMessages.length + 2,
+        );
+      }
+
       if (response.question_type === "breakthrough_confirmation") {
+        if (enablePersistence && sessionId) {
+          await markBreakthrough(sessionId);
+        }
         setTimeout(() => setCelebrate(true), 900);
       }
     } catch (error) {
-      console.error("[AI Mentor]", error);
+      console.error("[AI Mentor Core Execution Failure]", error);
     }
   };
 
-  const INTENT_REPLIES: Record<"Gentle Push" | "Believing Challenge" | "Light Found", string[]> = {
-    "Gentle Push": [
-      "You're closer than you think. What would happen if we changed one thing about the setup?",
-      "Good — keep that thread. What does your everyday experience tell you?",
-    ],
-    "Believing Challenge": [
-      "I believe you can sharpen that. What assumption is hiding in your reasoning?",
-      "Push it one step further — what would have to be true for that to hold?",
-    ],
-    "Light Found": [
-      "That's it. You just saw it — an orbit is a fall that keeps missing the ground.",
-      "Beautiful. Hold onto that feeling — that's the shape of a real insight.",
-    ],
-  };
-
-  const INTENT_TO_STATE: Record<
-    "Gentle Push" | "Believing Challenge" | "Light Found",
-    LearningState
-  > = {
-    "Gentle Push": "FOCUS",
-    "Believing Challenge": "CHALLENGE",
-    "Light Found": "CELEBRATE",
-  };
-
-  const handleStudentSpeak = async (answer: string, intent?: Message["intent"]) => {
-    const chosen = (intent && intent !== "You" ? intent : "Gentle Push") as
-      | "Gentle Push"
-      | "Believing Challenge"
-      | "Light Found";
-
-    const studentMsg: Message = {
-      id: `student-${Date.now()}`,
-      speaker: "student",
-      intent: "You",
-      text: answer,
-    };
-    const replies = INTENT_REPLIES[chosen];
-    const mentorMsg: Message = {
-      id: `mentor-${Date.now()}`,
-      speaker: "mentor",
-      intent: chosen,
-      text: replies[Math.floor(Math.random() * replies.length)],
-    };
-
-    setMessages((prev) => [...prev, studentMsg, mentorMsg]);
-    const mentorState = INTENT_TO_STATE[chosen];
-    playMentorPresence(mentorState, mentorMsg.text.length);
-    if (chosen === "Light Found") {
-      setTimeout(() => setCelebrate(true), 900);
-    }
-  };
-
-  const intentFromAi = (
-    type?: "gentle_push" | "revealing_challenge" | "breakthrough_confirmation",
-  ): Message["intent"] => {
-    if (type === "revealing_challenge") return "Believing Challenge";
-    if (type === "breakthrough_confirmation") return "Light Found";
-    return "Gentle Push";
-  };
-
-  const terminalMessages: Message[] = enableAI
-    ? aiMessages.map((m) => ({
-        id: m.id,
-        speaker: m.role === "user" ? "student" : "mentor",
-        intent: m.role === "user" ? "You" : intentFromAi(m.type),
-        text: m.content,
-      }))
-    : messages;
-
-  const onNext = () => {
-    if (!started) return goTo(0);
-    if (stepIndex >= total - 1) return reset();
-    goTo(stepIndex + 1);
-  };
-  const onPrev = () => started && stepIndex > 0 && goTo(stepIndex - 1);
+  const terminalMessages: Message[] = aiMessages.map((m) => ({
+    id: m.id,
+    speaker: m.role === "user" ? "student" : "mentor",
+    intent: m.role === "user" ? "You" : intentFromAi(m.type),
+    text: m.content,
+  }));
 
   return (
-    <div className="flex flex-col gap-5">
-      <StepperBar
-        stepIndex={Math.max(0, stepIndex)}
-        total={total}
-        onPrev={onPrev}
-        onNext={onNext}
-        onReset={reset}
-        started={started}
-      />
+    <div className="flex flex-col gap-5 pt-8 pb-12">
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
+        {/* Left: Mentor Visual Presence */}
         <MentorGlassFrame isSpeaking={isSpeaking} isPausing={isPausing}>
           <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
         </MentorGlassFrame>
+
+        {/* Right: Interaction Terminal */}
         <InteractiveDebateTerminal
           messages={terminalMessages}
-          stepIndex={Math.max(0, stepIndex)}
-          totalSteps={total}
+          stepIndex={stepIndex}
+          totalSteps={AI_CONTEXT.totalSteps}
           isSpeaking={isSpeaking}
-          isLoading={aiLoading}
+          isLoading={aiLoading || isPausing}
           enableAI={enableAI}
-          onSubmitAnswer={enableAI ? handleAiAnswer : handleStudentSpeak}
+          onSubmitAnswer={handleAiAnswer}
+          topic={topic}
+          lessonTitle={learningObjective}
         />
       </div>
       {celebrate && <CelebrationOverlay onClose={() => setCelebrate(false)} />}

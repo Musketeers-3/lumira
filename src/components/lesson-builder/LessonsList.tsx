@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Edit, Trash2, Eye, Lock } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Lock, Play } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { LessonDraft } from "@/types/lesson";
 
 interface LessonsListProps {
@@ -40,19 +41,30 @@ export function LessonsList({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 p-6">
+    // Removed opaque background to let the Ambient OS shine through
+    <div className="p-6 pt-12">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-foreground">My Lessons</h1>
-            <p className="text-muted-foreground">
-              Create and manage your Socratic learning lessons
+            <h1
+              className="font-display text-4xl font-bold tracking-tight"
+              style={{ color: "var(--ink-primary)" }}
+            >
+              My Lessons
+            </h1>
+            <p className="mt-2 text-sm" style={{ color: "var(--ink-secondary)" }}>
+              Construct and manage your Socratic learning pathways.
             </p>
           </div>
           <button
             onClick={onNewLesson}
-            className="flex items-center gap-2 rounded-lg bg-state-accent px-4 py-2 text-sm font-medium text-black transition-all hover:brightness-110"
+            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide transition-all hover:scale-105"
+            style={{
+              background: "var(--gold-soft)",
+              color: "#0B0B12",
+              boxShadow: "0 0 20px rgba(201,162,75,0.2)",
+            }}
           >
             <Plus className="h-4 w-4" />
             New Lesson
@@ -60,76 +72,107 @@ export function LessonsList({
         </div>
 
         {lessons.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-glass-border bg-white/[0.02] p-12 text-center backdrop-blur-xl">
-            <p className="mb-4 text-muted-foreground">No lessons yet. Create your first one!</p>
+          <div className="surface-luxe rounded-[2rem] border border-dashed border-glass-border p-12 text-center">
+            <p className="mb-6 text-sm" style={{ color: "var(--ink-secondary)" }}>
+              The vault is empty. Construct your first learning pathway.
+            </p>
             <button
               onClick={onNewLesson}
-              className="inline-flex items-center gap-2 rounded-lg bg-state-accent px-4 py-2 text-sm font-medium text-black transition-all hover:brightness-110"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide transition-all hover:scale-105"
+              style={{
+                background: "var(--gold-soft)",
+                color: "#0B0B12",
+                boxShadow: "0 0 20px rgba(201,162,75,0.2)",
+              }}
             >
               <Plus className="h-4 w-4" />
               Create Lesson
             </button>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-5">
             {lessons.map((lesson) => (
               <div
                 key={lesson.id}
-                className="rounded-xl border border-glass-border bg-white/[0.03] p-4 backdrop-blur-xl transition-all hover:bg-white/[0.05]"
+                className="surface-luxe group rounded-2xl p-5 transition-all duration-500 hover:-translate-y-1"
+                style={{
+                  background: "var(--bg-onyx-raised)",
+                  border: "1px solid var(--hairline)",
+                }}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold text-foreground">{lesson.title}</h3>
+                    <div className="flex items-center gap-3">
+                      <h3
+                        className="text-xl font-semibold tracking-tight"
+                        style={{ color: "var(--ink-primary)" }}
+                      >
+                        {lesson.title}
+                      </h3>
                       {lesson.isPublished ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-state-accent/20 px-2 py-1 text-xs font-medium text-state-accent">
-                          <Eye className="h-3 w-3" />
-                          Published
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4FA64A]/10 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-widest text-[#4FA64A] border border-[#4FA64A]/20">
+                          <Eye className="h-3 w-3" /> Published
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-muted/20 px-2 py-1 text-xs font-medium text-muted-foreground">
-                          <Lock className="h-3 w-3" />
-                          Draft
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground border border-white/10">
+                          <Lock className="h-3 w-3" /> Draft
                         </span>
                       )}
-                      <span className="text-xs text-muted-foreground">
-                        {lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                        {lesson.difficulty}
                       </span>
                     </div>
-                    <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
-                      {lesson.description}
+                    <p
+                      className="mb-4 mt-2 line-clamp-2 text-sm leading-relaxed"
+                      style={{ color: "var(--ink-secondary)" }}
+                    >
+                      {lesson.description || "No description provided."}
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="text-xs text-muted-foreground">📚 {lesson.topic}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ⏱️ {lesson.estimatedDuration} min
+                    <div className="flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      <span style={{ color: "var(--gold-soft)" }}>
+                        [{lesson.topic || "Untopical"}]
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        🎯 {lesson.steps.length} steps
-                      </span>
+                      <span>{lesson.estimatedDuration} min</span>
+                      <span>{lesson.steps.length} steps</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 opacity-80 transition-opacity group-hover:opacity-100">
+                    {/* The Functional Bridge -> Send the user to play their lesson */}
+                    <Link
+                      to="/engine"
+                      search={{
+                        lessonId: lesson.id,
+                        topic: lesson.topic,
+                        objective: lesson.description,
+                      }}
+                      className="rounded-xl bg-white/[0.03] p-2.5 text-muted-foreground transition-all hover:bg-white/[0.08] hover:text-[#5BC0EB]"
+                      title="Test in Dojo"
+                    >
+                      <Play className="h-4 w-4" />
+                    </Link>
+
                     <button
                       onClick={() => onEditLesson(lesson)}
-                      className="rounded-lg bg-white/[0.05] p-2 text-muted-foreground transition-all hover:bg-white/[0.1] hover:text-foreground"
+                      className="rounded-xl bg-white/[0.03] p-2.5 text-muted-foreground transition-all hover:bg-white/[0.08] hover:text-foreground"
                       title="Edit lesson"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
+
                     <button
                       onClick={() => handlePublish(lesson.id)}
                       disabled={publishing === lesson.id || lesson.isPublished}
-                      className="rounded-lg bg-state-accent/10 p-2 text-state-accent transition-all hover:bg-state-accent/20 disabled:opacity-50"
+                      className="rounded-xl bg-white/[0.03] p-2.5 text-muted-foreground transition-all hover:bg-white/[0.08] hover:text-[#4FA64A] disabled:opacity-30"
                       title={lesson.isPublished ? "Already published" : "Publish lesson"}
                     >
                       <Eye className="h-4 w-4" />
                     </button>
+
                     <button
                       onClick={() => handleDelete(lesson.id)}
                       disabled={deleting === lesson.id}
-                      className="rounded-lg bg-destructive/10 p-2 text-destructive transition-all hover:bg-destructive/20 disabled:opacity-50"
+                      className="rounded-xl bg-white/[0.03] p-2.5 text-muted-foreground transition-all hover:bg-[rgba(255,50,50,0.1)] hover:text-red-400 disabled:opacity-30"
                       title="Delete lesson"
                     >
                       <Trash2 className="h-4 w-4" />

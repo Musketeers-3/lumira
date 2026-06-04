@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   Outlet,
   Link,
@@ -9,26 +10,49 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { LearningStateProvider } from "@/lib/learning-state-context";
+import { LearningStateProvider, useLearningState } from "@/lib/learning-state-context";
 import { MentorSettingsProvider } from "@/lib/mentor-settings-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { AmbientBackground } from "@/components/socratic/AmbientBackground";
 import { Sidebar } from "@/components/socratic/Sidebar";
 import { TopBar } from "@/components/socratic/TopBar";
+import { AssetPreloader } from "@/lib/AssetPreloader";
 
+// --- Headless Synchronizer for Global CSS Variables ---
+function DocumentStateSync() {
+  const { state } = useLearningState();
+
+  useEffect(() => {
+    // Dynamically update the root HTML tag so global CSS selectors function correctly
+    document.documentElement.setAttribute("data-state", state);
+  }, [state]);
+
+  return null;
+}
+
+// --- Error Boundaries ---
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-mono text-7xl font-bold">404</h1>
-        <h2 className="mt-4 text-xl font-semibold">A path that isn't here yet</h2>
+        <h1 className="font-display text-7xl font-bold" style={{ color: "var(--ink-primary)" }}>
+          404
+        </h1>
+        <h2 className="mt-4 text-xl font-semibold" style={{ color: "var(--ink-secondary)" }}>
+          A path that isn't here yet
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">No worries — let's walk back together.</p>
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide transition-all hover:scale-105"
+            style={{
+              background: "var(--gold-soft)",
+              color: "#0B0B12",
+              boxShadow: "0 0 20px rgba(201,162,75,0.2)",
+            }}
           >
-            Return home
+            Return Home
           </Link>
         </div>
       </div>
@@ -37,22 +61,27 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("[Router Boundary Error]", error);
   const router = useRouter();
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold">This page didn't load</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Something went sideways.</p>
+        <h1 className="text-xl font-semibold" style={{ color: "var(--ink-primary)" }}>
+          This page didn't load
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Something went sideways in the environment.
+        </p>
         <div className="mt-6">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="rounded-xl bg-white/[0.05] px-5 py-2.5 text-sm font-medium transition-all hover:bg-white/[0.1]"
+            style={{ color: "var(--ink-primary)", border: "1px solid var(--hairline-strong)" }}
           >
-            Try again
+            Try Again
           </button>
         </div>
       </div>
@@ -60,6 +89,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// --- Root Configuration ---
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -79,13 +109,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "An AI-native, empathetic learning OS. A patient mentor that helps you invent ideas, not memorize them.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Lumira — Learn beside someone who believes in you" },
-      { name: "description", content: "Socratic Lumina is an AI-powered learning platform that fosters deep understanding through guided Socratic dialogue." },
-      { property: "og:description", content: "Socratic Lumina is an AI-powered learning platform that fosters deep understanding through guided Socratic dialogue." },
-      { name: "twitter:description", content: "Socratic Lumina is an AI-powered learning platform that fosters deep understanding through guided Socratic dialogue." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/5DoJVPq1TCW0eqnLWPPtLJNimTu2/social-images/social-1780503764936-ChatGPT_Image_Jun_3,_2026,_09_52_22_PM.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/5DoJVPq1TCW0eqnLWPPtLJNimTu2/social-images/social-1780503764936-ChatGPT_Image_Jun_3,_2026,_09_52_22_PM.webp" },
+      {
+        name: "twitter:description",
+        content:
+          "An AI-native, empathetic learning OS. A patient mentor that helps you invent ideas, not memorize them.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/5DoJVPq1TCW0eqnLWPPtLJNimTu2/social-images/social-1780503764936-ChatGPT_Image_Jun_3,_2026,_09_52_22_PM.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/5DoJVPq1TCW0eqnLWPPtLJNimTu2/social-images/social-1780503764936-ChatGPT_Image_Jun_3,_2026,_09_52_22_PM.webp",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -95,7 +135,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
       },
-
     ],
   }),
   shellComponent: RootShell,
@@ -105,8 +144,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  // We remove the hardcoded data-state="IDLE". The DocumentStateSync will handle this.
   return (
-    <html lang="en" data-state="IDLE">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -124,7 +164,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LearningStateProvider>
+          {/* Automatically syncs state changes to HTML DOM */}
+          <DocumentStateSync />
           <MentorSettingsProvider>
+            <AssetPreloader />
             <AmbientBackground />
             <div className="relative flex min-h-screen w-full">
               <Sidebar />

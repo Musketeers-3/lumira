@@ -3,13 +3,13 @@ import { Moon, Sun } from "lucide-react";
 import { useLearningState } from "@/lib/learning-state-context";
 import { useTheme } from "@/lib/theme-context";
 
-const titles: Record<string, string> = {
+const baseTitles: Record<string, string> = {
   "/": "Your Path",
   "/engine": "The Dojo",
   "/skill-passport": "Your Light",
   "/architecture-log": "Journey Log",
   "/settings": "Settings",
-  "/lesson-builder": "Create Lesson",
+  "/lesson-builder": "Lesson Builder",
 };
 
 const subtitleFor = (state: string) => {
@@ -20,10 +20,23 @@ const subtitleFor = (state: string) => {
 };
 
 export function TopBar() {
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  // Extract both pathname and dynamic search parameters
+  const { pathname, search } = useRouterState({
+    select: (r) => ({
+      pathname: r.location.pathname,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      search: r.location.search as Record<string, any>,
+    }),
+  });
+
   const { state } = useLearningState();
   const { theme, toggleTheme } = useTheme();
-  const title = titles[pathname] ?? "Lumira";
+
+  // Dynamically inject the active lesson topic into the header if in the Dojo
+  let title = baseTitles[pathname] ?? "Lumira";
+  if (pathname === "/engine" && search?.topic) {
+    title = `The Dojo: ${search.topic}`;
+  }
 
   return (
     <header
@@ -40,7 +53,7 @@ export function TopBar() {
           lumira
         </div>
         <h1
-          className="text-lg font-medium tracking-tight"
+          className="text-lg font-medium tracking-tight transition-all duration-500"
           style={{ color: "var(--ink-primary)" }}
         >
           {title}
@@ -60,10 +73,7 @@ export function TopBar() {
             style={{ background: "var(--state-accent)", boxShadow: "0 0 8px var(--state-glow)" }}
           />
           <span style={{ color: "var(--ink-tertiary)" }}>mentor:</span>
-          <span
-            className="transition-colors duration-700"
-            style={{ color: "var(--state-accent)" }}
-          >
+          <span className="transition-colors duration-700" style={{ color: "var(--state-accent)" }}>
             {subtitleFor(state)}
           </span>
         </div>

@@ -7,9 +7,15 @@ export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Lumira" },
-      { name: "description", content: "Tune the warmth, motion, and presence of your learning companion." },
+      {
+        name: "description",
+        content: "Tune the warmth, motion, and presence of your learning companion.",
+      },
       { property: "og:title", content: "Settings — Lumira" },
-      { property: "og:description", content: "Tune the warmth, motion, and presence of your learning companion." },
+      {
+        property: "og:description",
+        content: "Tune the warmth, motion, and presence of your learning companion.",
+      },
     ],
   }),
   component: SettingsPage,
@@ -39,7 +45,10 @@ function SettingsPage() {
       </header>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
+        <h2
+          className="text-lg font-semibold tracking-tight"
+          style={{ color: "var(--ink-primary)" }}
+        >
           Feel each state
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
@@ -77,7 +86,10 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
+        <h2
+          className="text-lg font-semibold tracking-tight"
+          style={{ color: "var(--ink-primary)" }}
+        >
           Mentor voice
         </h2>
         <div className="mt-4 flex items-center justify-between">
@@ -110,7 +122,10 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
+        <h2
+          className="text-lg font-semibold tracking-tight"
+          style={{ color: "var(--ink-primary)" }}
+        >
           Mentor warmth
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
@@ -137,7 +152,10 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
+        <h2
+          className="text-lg font-semibold tracking-tight"
+          style={{ color: "var(--ink-primary)" }}
+        >
           Motion intensity
         </h2>
         <div className="mt-4">
@@ -161,20 +179,30 @@ function SettingsPage() {
       </section>
 
       <section className="surface-luxe p-6">
-        <h2 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
-          Walk it again
+        <h2
+          className="text-lg font-semibold tracking-tight"
+          style={{ color: "var(--ink-primary)" }}
+        >
+          Restart Active Walk
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
-          Replay "Why Doesn't the Moon Fall to Earth?" from the beginning.
+          Clear your current cognitive progress and restart the active Socratic session from the
+          very beginning.
         </p>
         <button
           onClick={() => {
             setState("IDLE");
-            navigate({ to: "/engine" });
+            // Navigate back to the engine with a clean slate
+            navigate({ to: "/engine", search: { reset: true } });
           }}
-          className="btn-gold mt-4 rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide"
+          className="mt-4 rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide transition-all hover:scale-105"
+          style={{
+            background: "var(--gold-soft)",
+            color: "#0B0B12",
+            boxShadow: "0 0 20px rgba(201,162,75,0.2)",
+          }}
         >
-          Walk it again
+          Begin Again
         </button>
       </section>
 

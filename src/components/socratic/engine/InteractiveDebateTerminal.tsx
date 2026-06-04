@@ -15,7 +15,10 @@ interface Props {
   isSpeaking: boolean;
   onSubmitAnswer?: (answer: string, intent?: MentorIntent) => Promise<void>;
   isLoading?: boolean;
-  enableAI?: boolean; // Flag to enable real AI or keep demo
+  enableAI?: boolean;
+  // Dynamic Context Injections
+  topic?: string;
+  lessonTitle?: string;
 }
 
 const INTENT_OPTIONS: { value: MentorIntent; label: string; hint: string }[] = [
@@ -32,6 +35,8 @@ export function InteractiveDebateTerminal({
   onSubmitAnswer,
   isLoading = false,
   enableAI = false,
+  topic = "Cognitive Pathway",
+  lessonTitle = "Active Exploration",
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,25 +113,25 @@ export function InteractiveDebateTerminal({
 
   return (
     <div className="flex h-full min-h-[520px] flex-col gap-4">
-      {/* Lesson card */}
+      {/* Lesson card — Now fully dynamic */}
       <div className="surface-luxe p-5 transition-colors duration-700">
         <div
           className="font-mono text-[10px] uppercase tracking-[0.25em] relative z-10"
           style={{ color: "var(--gold-soft)" }}
         >
-          Current Lesson
+          Active Environment
         </div>
         <h2
           className="mt-1 text-lg font-semibold tracking-tight relative z-10"
           style={{ color: "var(--ink-primary)" }}
         >
-          Physical Reasoning
+          {topic}
         </h2>
         <p className="text-sm relative z-10" style={{ color: "var(--ink-secondary)" }}>
-          Why Doesn't the Moon Fall to Earth?
+          {lessonTitle}
         </p>
         <div className="mt-4 flex items-center gap-2 relative z-10">
-          {Array.from({ length: totalSteps }).map((_, i) => {
+          {Array.from({ length: Math.max(totalSteps, 1) }).map((_, i) => {
             const reached = i <= stepIndex;
             return (
               <HoverCard key={i} openDelay={120}>
@@ -155,14 +160,12 @@ export function InteractiveDebateTerminal({
                     className="font-mono text-[10px] uppercase tracking-widest"
                     style={{ color: "var(--gold-soft)" }}
                   >
-                    Step {i + 1} / {totalSteps}
+                    Step {i + 1} / {Math.max(totalSteps, 1)}
                   </div>
                   <div className="mt-1 text-sm" style={{ color: "var(--ink-primary)" }}>
-                    {i === 0 && "Frame the puzzle."}
-                    {i === 1 && "Throw the ball harder."}
-                    {i === 2 && "Watch the Earth curve."}
-                    {i === 3 && "Falling, always missing."}
-                    {i === 4 && "Breakthrough — an orbit."}
+                    {i === 0 && "Establish baseline understanding."}
+                    {i > 0 && i < totalSteps - 1 && "Applying Socratic friction."}
+                    {i === totalSteps - 1 && "Breakthrough verification."}
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -176,8 +179,7 @@ export function InteractiveDebateTerminal({
         ref={scrollRef}
         className="flex-1 overflow-y-auto rounded-2xl p-5 backdrop-blur-xl transition-colors duration-700 relative"
         style={{
-          background:
-            "linear-gradient(180deg, rgba(11,11,18,0.85) 0%, rgba(7,7,12,0.7) 100%)",
+          background: "linear-gradient(180deg, rgba(11,11,18,0.85) 0%, rgba(7,7,12,0.7) 100%)",
           border: "1px solid rgba(245,241,230,0.06)",
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 60px rgba(0,0,0,0.45), 0 16px 40px -16px rgba(0,0,0,0.6)",
@@ -250,9 +252,7 @@ export function InteractiveDebateTerminal({
         className="flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl transition-all duration-500"
         style={{
           background: "linear-gradient(180deg, #1B1B28 0%, #13131C 100%)",
-          border: inputActive
-            ? "1px solid var(--state-accent)"
-            : "1px solid rgba(201,162,75,0.18)",
+          border: inputActive ? "1px solid var(--state-accent)" : "1px solid rgba(201,162,75,0.18)",
           boxShadow: inputActive
             ? "0 0 28px var(--state-glow), inset 0 1px 0 rgba(255,255,255,0.05)"
             : "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.4)",

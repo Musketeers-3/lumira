@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LearningState } from "../../types";
@@ -6,14 +6,6 @@ import type { LearningState } from "../../types";
 interface Props {
   state: LearningState;
   warmthBias?: number;
-}
-
-function readAccentHex(): string {
-  if (typeof document === "undefined") return "#f4d9a8";
-  const accent = getComputedStyle(document.documentElement)
-    .getPropertyValue("--state-accent")
-    .trim();
-  return accent || "#f4d9a8";
 }
 
 const FALLBACK: Record<LearningState, string> = {
@@ -26,16 +18,23 @@ const FALLBACK: Record<LearningState, string> = {
 export function MentorSceneLights({ state, warmthBias = 0.6 }: Props) {
   const keyRef = useRef<THREE.DirectionalLight>(null!);
   const fillRef = useRef<THREE.DirectionalLight>(null!);
-  const targetColor = useRef(new THREE.Color());
+  const targetColor = useRef(new THREE.Color(FALLBACK["IDLE"]));
+
+  // CRITICAL FIX: Read the DOM exactly ONCE per state change, not 60 times a second.
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      try {
+        const hex = getComputedStyle(document.documentElement)
+          .getPropertyValue("--state-accent")
+          .trim();
+        targetColor.current.set(hex || FALLBACK[state]);
+      } catch {
+        targetColor.current.set(FALLBACK[state]);
+      }
+    }
+  }, [state]);
 
   useFrame(() => {
-    const hex = readAccentHex();
-    try {
-      targetColor.current.set(hex);
-    } catch {
-      targetColor.current.set(FALLBACK[state]);
-    }
-
     const keyIntensity =
       state === "CHALLENGE"
         ? 1.0 + warmthBias * 0.15
@@ -48,6 +47,7 @@ export function MentorSceneLights({ state, warmthBias = 0.6 }: Props) {
     const fillIntensity =
       state === "CHALLENGE" ? 0.28 : state === "CELEBRATE" ? 0.38 + warmthBias * 0.1 : 0.42;
 
+    // Smoothly interpolate the lights on the GPU thread without locking the DOM
     if (keyRef.current) {
       keyRef.current.color.lerp(targetColor.current, 0.04);
       keyRef.current.intensity = THREE.MathUtils.lerp(keyRef.current.intensity, keyIntensity, 0.05);

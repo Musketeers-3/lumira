@@ -28,8 +28,7 @@ export function CelebrationOverlay({ onClose }: { onClose: () => void }) {
       <div
         className="relative max-w-lg rounded-3xl p-10 text-center animate-in zoom-in-95 duration-700"
         style={{
-          background:
-            "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
+          background: "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
           border: "1px solid rgba(201,162,75,0.45)",
           boxShadow:
             "0 0 80px var(--state-glow), 0 0 120px rgba(201,162,75,0.25), inset 0 1px 0 rgba(255,255,255,0.07)",
@@ -53,10 +52,7 @@ export function CelebrationOverlay({ onClose }: { onClose: () => void }) {
         >
           You discovered it yourself.
         </h2>
-        <p
-          className="mt-3 text-sm leading-relaxed"
-          style={{ color: "var(--ink-secondary)" }}
-        >
+        <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--ink-secondary)" }}>
           That understanding will stay with you now. An orbit is just a fall that keeps missing the
           ground — every moon, planet, and satellite stays up the same way.
         </p>

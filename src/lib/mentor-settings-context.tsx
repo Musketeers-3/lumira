@@ -19,11 +19,16 @@ function loadSettings(): MentorSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULTS;
-    const parsed = JSON.parse(raw) as Partial<MentorSettings>;
+
+    const parsed = JSON.parse(raw);
+
+    // Defend against corrupted JSON or altered schemas in local storage
+    if (typeof parsed !== "object" || parsed === null) return DEFAULTS;
+
     return {
-      warmth: parsed.warmth ?? DEFAULTS.warmth,
-      motion: parsed.motion ?? DEFAULTS.motion,
-      voice: parsed.voice ?? DEFAULTS.voice,
+      warmth: typeof parsed.warmth === "number" ? parsed.warmth : DEFAULTS.warmth,
+      motion: typeof parsed.motion === "number" ? parsed.motion : DEFAULTS.motion,
+      voice: typeof parsed.voice === "boolean" ? parsed.voice : DEFAULTS.voice,
     };
   } catch {
     return DEFAULTS;
@@ -47,7 +52,11 @@ export function MentorSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<MentorSettings>(loadSettings);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      console.warn("Local storage is locked; mentor settings will not persist.");
+    }
   }, [settings]);
 
   const setWarmth = useCallback((warmth: number) => {

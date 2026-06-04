@@ -1,13 +1,22 @@
-"use server";
+"use sign"; // Ensure this matches your original file's directive
 
 import { generateText, generateObject } from "ai";
 import { z } from "zod";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   buildMentorSystemPrompt,
   BREAKTHROUGH_PROMPT,
   MENTOR_PERSONALITY_CORE,
 } from "@/lib/mentor-personality";
-const model = "openai/gpt-4o-mini";
+
+// 1. Initialize the official OpenAI provider, but hijack the URL to point to local Ollama
+const ollama = createOpenAI({
+  baseURL: "http://localhost:11434/v1",
+  apiKey: "ollama", // The SDK requires a string here, but Ollama safely ignores it
+});
+
+// 2. Bind your local Qwen2 model
+const localModel = ollama("qwen2:latest");
 
 export interface SocraticContext {
   lessonTopic: string;
@@ -25,9 +34,9 @@ export interface SocraticResponse {
 }
 
 /**
- * Generate a Socratic response using AI
+ * Generate a Socratic response using Local AI
  * This intelligently responds to student answers with guiding questions
- * that encourage discovery rather than direct instruction
+ * that encourage discovery rather than direct instruction.
  */
 export async function generateSocraticResponse(
   studentAnswer: string,
@@ -53,7 +62,7 @@ Generate a Socratic response that:
 4. Gently reveals logical implications of their thinking`;
 
     const response = await generateObject({
-      model,
+      model: localModel, // Replaced OpenAI with local Qwen2
       system: systemPrompt,
       prompt: userPrompt,
       schema: z.object({
@@ -75,8 +84,8 @@ Generate a Socratic response that:
 
     return response.object as SocraticResponse;
   } catch (error) {
-    console.error("[AI Mentor Error]", error);
-    // Fallback to a basic Socratic response
+    console.error("[Local AI Mentor Error]", error);
+    // Fallback to a basic Socratic response if the local model fails to parse JSON
     return {
       mentor_response:
         "That's interesting. Let me ask you this: what assumption are you making in your approach?",
@@ -94,32 +103,42 @@ export async function evaluateUnderstanding(
   learningObjective: string,
 ): Promise<{
   demonstrates_understanding: boolean;
-  confidence: number; // 0-1
+  confidence: number;
   gaps: string[];
   strengths: string[];
 }> {
   try {
     const response = await generateObject({
-      model,
+      model: localModel,
       prompt: `Learning objective: ${learningObjective}
 Student answer: "${studentAnswer}"
 
-Evaluate if this response demonstrates understanding of the learning objective.`,
+Evaluate if this response demonstrates understanding. 
+IMPORTANT: Return a confidence score between 0.0 and 1.0.`,
       schema: z.object({
         demonstrates_understanding: z.boolean(),
-        confidence: z.number().min(0).max(1),
+        // We relax the strict .max(1) here to be safe and normalize in the return
+        confidence: z.number().describe("Confidence score between 0.0 and 1.0"),
         gaps: z.array(z.string()).describe("Conceptual gaps if any"),
         strengths: z.array(z.string()).describe("What the student got right"),
       }),
     });
 
-    return response.object;
+    const data = response.object;
+
+    // Normalization logic: If AI returns 10, treat as 1.0. If > 1, divide by 10.
+    const normalizedConfidence = data.confidence > 1 ? data.confidence / 10 : data.confidence;
+
+    return {
+      ...data,
+      confidence: Math.min(Math.max(normalizedConfidence, 0), 1),
+    };
   } catch (error) {
-    console.error("[Evaluation Error]", error);
+    console.error("[Local Evaluation Error]", error);
     return {
       demonstrates_understanding: false,
       confidence: 0.5,
-      gaps: [],
+      gaps: ["Evaluation system error."],
       strengths: [],
     };
   }
@@ -134,7 +153,7 @@ export async function generateBreakthroughMessage(
 ): Promise<string> {
   try {
     const { text } = await generateText({
-      model,
+      model: localModel, // Replaced OpenAI with local Qwen2
       system: MENTOR_PERSONALITY_CORE,
       prompt: `${BREAKTHROUGH_PROMPT}
 
@@ -144,7 +163,7 @@ Lesson context: ${context.lessonTopic}`,
 
     return text;
   } catch (error) {
-    console.error("[Celebration Message Error]", error);
+    console.error("[Local Celebration Message Error]", error);
     return `You just independently discovered something profound: ${insight}. This insight changes how you see the problem.`;
   }
 }

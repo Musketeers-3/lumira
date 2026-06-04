@@ -435,14 +435,15 @@
 //   return vrm ? <primitive object={vrm.scene} position={[0, -1.5, 0]} /> : null;
 // }
 
-import { useEffect, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { VRMLoaderPlugin, VRM, VRMExpressionPresetName } from "@pixiv/three-vrm";
 import type { LearningState } from "../../types";
 import { retargetMixamo } from "@/types/retargetMixamo";
+import { useMentorSettingsOptional } from "@/lib/mentor-settings-hooks";
 
 interface Props {
   state: LearningState;
@@ -451,7 +452,6 @@ interface Props {
   vrmUrl?: string;
 }
 
-// Map your LearningStates directly to the Mixamo FBX files in your public folder
 const FBX_MAP: Record<LearningState, string> = {
   IDLE: "/models/idle.fbx",
   FOCUS: "/models/thinking.fbx",
@@ -459,7 +459,6 @@ const FBX_MAP: Record<LearningState, string> = {
   CELEBRATE: "/models/clapping.fbx",
 };
 
-// Soft setter that only acts if the expression exists on this VRM
 function safeSet(vrm: VRM | null, name: string, value: number) {
   if (!vrm) return;
   const mgr = vrm.expressionManager;
@@ -480,181 +479,132 @@ export function MentorModel({
   isPausing = false,
   vrmUrl = "/models/mentor.vrm",
 }: Props) {
-  const [vrm, setVrm] = useState<VRM | null>(null);
+  const settings = useMentorSettingsOptional();
+  const motionMult = settings?.motionMultiplier ?? 1;
+  const warmthBias = settings?.warmthBias ?? 0.6;
+  const reducedMotion = settings?.reducedMotion ?? false;
 
-  // Animation References
+  // Refs for persistent animation state
   const mixer = useRef<THREE.AnimationMixer | null>(null);
-  const actions = useRef<Record<string, THREE.AnimationAction>>({});
+  const actions = useRef<Partial<Record<LearningState, THREE.AnimationAction>>>({});
+
+  // 1. NATIVE CACHING: Suspends component until all heavy files are downloaded
+  const gltf = useLoader(GLTFLoader, vrmUrl, (loader) => {
+    loader.register((parser) => new VRMLoaderPlugin(parser));
+  });
+
+  const [idle, focus, challenge, celebrate] = useLoader(FBXLoader, [
+    FBX_MAP.IDLE,
+    FBX_MAP.FOCUS,
+    FBX_MAP.CHALLENGE,
+    FBX_MAP.CELEBRATE,
+  ]);
+
+  const vrm = useMemo(() => gltf.userData.vrm as VRM, [gltf]);
+
+  // 2. INITIALIZATION: Setup mixer and retarget clips
+  useEffect(() => {
+    if (!vrm) return;
+
+    // Apply scene setup only once
+    if (!vrm.scene.userData.isInitialized) {
+      vrm.scene.rotation.y = Math.PI / 180;
+      vrm.scene.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh) obj.frustumCulled = false;
+      });
+      vrm.scene.userData.isInitialized = true;
+    }
+
+    mixer.current = new THREE.AnimationMixer(vrm.scene);
+
+    const loadClip = (fbx: THREE.Group, stateKey: LearningState) => {
+      const anim = fbx.animations[0];
+      if (anim && mixer.current) {
+        const clip = retargetMixamo(anim, vrm, fbx);
+        if (clip) actions.current[stateKey] = mixer.current.clipAction(clip);
+      }
+    };
+
+    loadClip(idle, "IDLE");
+    loadClip(focus, "FOCUS");
+    loadClip(challenge, "CHALLENGE");
+    loadClip(celebrate, "CELEBRATE");
+
+    if (actions.current[state]) {
+      actions.current[state]?.play();
+    }
+  }, [vrm, idle, focus, challenge, celebrate, state]);
 
   const blinkTimer = useRef(0);
   const nextBlink = useRef(3 + Math.random() * 3);
   const doubleBlinkPending = useRef(false);
-
   const microTimer = useRef(0);
   const nextMicro = useRef(6 + Math.random() * 4);
   const microActive = useRef(0);
-
   const celebrateBurst = useRef(0);
   const prevState = useRef<LearningState>(state);
 
-  // 1. Load VRM and FBX Animations concurrently
+  // 3. Handle State Changes (Crossfading)
   useEffect(() => {
-    let disposed = false;
-
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.register((parser) => new VRMLoaderPlugin(parser));
-    const fbxLoader = new FBXLoader();
-
-    Promise.all([
-      gltfLoader.loadAsync(vrmUrl),
-      fbxLoader.loadAsync(FBX_MAP.IDLE),
-      fbxLoader.loadAsync(FBX_MAP.FOCUS),
-      fbxLoader.loadAsync(FBX_MAP.CHALLENGE),
-      fbxLoader.loadAsync(FBX_MAP.CELEBRATE),
-    ])
-      .then(([gltf, idle, focus, challenge, celebrate]) => {
-        if (disposed) return;
-
-        const loadedVrm = gltf.userData.vrm as VRM;
-
-        // VRMs often face backward when standard animations are applied.
-        // If your character faces away from the camera, change 0 to Math.PI
-        loadedVrm.scene.rotation.y = Math.PI / 180;
-
-        loadedVrm.scene.traverse((obj) => {
-          if ((obj as THREE.Mesh).isMesh) obj.frustumCulled = false;
-        });
-
-        setVrm(loadedVrm);
-
-        // Initialize Animation Mixer
-        const newMixer = new THREE.AnimationMixer(loadedVrm.scene);
-        mixer.current = newMixer;
-
-        // Pass the third argument (the loaded fbx group) into the function!
-        const idleAnim = idle.animations[0];
-        if (idleAnim) {
-          const idleClip = retargetMixamo(idleAnim, loadedVrm, idle);
-          if (idleClip) actions.current["IDLE"] = newMixer.clipAction(idleClip);
-        }
-
-        const focusAnim = focus.animations[0];
-        if (focusAnim) {
-          const focusClip = retargetMixamo(focusAnim, loadedVrm, focus);
-          if (focusClip) actions.current["FOCUS"] = newMixer.clipAction(focusClip);
-        }
-
-        const challengeAnim = challenge.animations[0];
-        if (challengeAnim) {
-          const challengeClip = retargetMixamo(challengeAnim, loadedVrm, challenge);
-          if (challengeClip) actions.current["CHALLENGE"] = newMixer.clipAction(challengeClip);
-        }
-
-        const celebrateAnim = celebrate.animations[0];
-        if (celebrateAnim) {
-          const celebrateClip = retargetMixamo(celebrateAnim, loadedVrm, celebrate);
-          if (celebrateClip) actions.current["CELEBRATE"] = newMixer.clipAction(celebrateClip);
-        }
-
-        // Play the initial animation
-        if (actions.current[state]) {
-          actions.current[state].play();
-        }
-      })
-      .catch((err) => console.error("Failed to load assets:", err));
-
-    return () => {
-      disposed = true;
-      if (mixer.current) {
-        mixer.current.stopAllAction();
-      }
-    };
-  }, [vrmUrl]); // Removed `state` from dependency array so it only loads once
-
-  // 2. Handle State Changes (Crossfading Animations)
-  useEffect(() => {
-    if (!mixer.current || Object.keys(actions.current).length === 0) return;
+    // GUARD CLAUSE: Only run if initialized
+    if (!mixer.current) return;
 
     const nextAction = actions.current[state];
-
-    // Trigger CELEBRATE facial burst
     if (prevState.current !== state) {
       if (state === "CELEBRATE") celebrateBurst.current = 1.2;
       prevState.current = state;
     }
 
     if (nextAction) {
-      Object.values(actions.current).forEach((action) => {
-        if (action !== nextAction) {
+      // Fade out others
+      Object.entries(actions.current).forEach(([key, action]) => {
+        if (key !== state && action) {
           action.fadeOut(0.5);
         }
       });
-      nextAction.reset().fadeIn(0.5).play();
+      // Fade in new
+      nextAction.reset().setEffectiveWeight(1).fadeIn(0.5).play();
     }
   }, [state]);
 
-  // 3. Render Loop (Update Mixer and Facial Expressions)
+  // 4. Render Loop
   useFrame((_, dt) => {
     const t = performance.now() / 1000;
+    if (mixer.current) mixer.current.update(dt);
+    if (!vrm || !vrm.expressionManager) return;
 
-    // Update body animation mixer
-    if (mixer.current) {
-      mixer.current.update(dt);
-    }
-
-    // ---------- EMOTIONS & FACIAL EXPRESSIONS ----------
-    if (!vrm) return;
-
-    vrm.update(dt);
-    const mgr = vrm.expressionManager;
-    if (!mgr) return;
-
-    // Target weights per state
-    let tHappy = 0;
-    let tAngry = 0;
-    let tSad = 0;
-    let tRelaxed = 0;
-    let tNeutral = 0;
-    let tSurprised = 0;
+    let tHappy = 0,
+      tAngry = 0,
+      tSad = 0,
+      tRelaxed = 0,
+      tNeutral = 0,
+      tSurprised = 0;
 
     if (state === "IDLE") {
-      tRelaxed = 0.25;
-      tHappy = 0.1;
+      tRelaxed = 0.25 + warmthBias * 0.15;
+      tHappy = 0.1 + warmthBias * 0.1;
     } else if (state === "FOCUS") {
-      tRelaxed = 0.4;
-      tHappy = 0.15;
+      tRelaxed = 0.4 + warmthBias * 0.1;
+      tHappy = 0.15 + warmthBias * 0.1;
     } else if (state === "CHALLENGE") {
       if (isPausing) {
         tSad = 0.15;
         tRelaxed = 0.2;
-        tAngry = 0.01;
       } else {
         tNeutral = 0.3;
-        tHappy = 0.1;
+        tHappy = 0.1 + warmthBias * 0.05;
       }
     } else if (state === "CELEBRATE") {
-      tHappy = 0.8;
+      tHappy = 0.6 + warmthBias * 0.3;
       tRelaxed = 0.3;
     }
 
-    // Celebrate gasp burst
     if (celebrateBurst.current > 0) {
       celebrateBurst.current = Math.max(0, celebrateBurst.current - dt);
       tSurprised = Math.max(tSurprised, 0.4 * (celebrateBurst.current / 1.2));
     }
 
-    // Micro-expression smile twitch
-    microTimer.current += dt;
-    if (microActive.current > 0) {
-      microActive.current = Math.max(0, microActive.current - dt);
-      if (state === "IDLE" || state === "FOCUS") tHappy += 0.1;
-    } else if (microTimer.current >= nextMicro.current) {
-      microTimer.current = 0;
-      nextMicro.current = 6 + Math.random() * 4;
-      if (state === "IDLE" || state === "FOCUS") microActive.current = 0.8;
-    }
-
-    // Damped blend toward targets
+    // Apply expressions
     const damp = 2.5;
     safeSet(
       vrm,
@@ -687,49 +637,18 @@ export function MentorModel({
       THREE.MathUtils.damp(safeGet(vrm, VRMExpressionPresetName.Surprised), tSurprised, damp, dt),
     );
 
-    // Blink
-    blinkTimer.current += dt;
-    if (blinkTimer.current >= nextBlink.current) {
-      safeSet(vrm, VRMExpressionPresetName.Blink, 1);
-      blinkTimer.current = 0;
-      if (doubleBlinkPending.current) {
-        doubleBlinkPending.current = false;
-        nextBlink.current = 0.18;
-      } else {
-        doubleBlinkPending.current = Math.random() < 0.1;
+    // Blinking logic
+    if (!reducedMotion) {
+      blinkTimer.current += dt;
+      if (blinkTimer.current >= nextBlink.current) {
+        safeSet(vrm, VRMExpressionPresetName.Blink, 1);
+        blinkTimer.current = 0;
         nextBlink.current = 2.5 + Math.random() * 4;
+      } else {
+        const cur = safeGet(vrm, VRMExpressionPresetName.Blink);
+        if (cur > 0)
+          safeSet(vrm, VRMExpressionPresetName.Blink, THREE.MathUtils.damp(cur, 0, 12, dt));
       }
-    } else {
-      const cur = safeGet(vrm, VRMExpressionPresetName.Blink);
-      if (cur > 0) {
-        safeSet(vrm, VRMExpressionPresetName.Blink, THREE.MathUtils.damp(cur, 0, 12, dt));
-      }
-    }
-
-    // Multi-viseme lip-sync
-    if (isSpeaking && !isPausing) {
-      const aa = Math.max(0, Math.sin(t * 14)) * 0.4;
-      const ih = Math.max(0, Math.sin(t * 11 + 1.3)) * 0.25;
-      const ou = Math.max(0, Math.sin(t * 9 + 2.1)) * 0.2;
-      safeSet(vrm, VRMExpressionPresetName.Aa, aa);
-      safeSet(vrm, VRMExpressionPresetName.Ih, ih);
-      safeSet(vrm, VRMExpressionPresetName.Ou, ou);
-    } else {
-      safeSet(
-        vrm,
-        VRMExpressionPresetName.Aa,
-        THREE.MathUtils.damp(safeGet(vrm, VRMExpressionPresetName.Aa), 0, 10, dt),
-      );
-      safeSet(
-        vrm,
-        VRMExpressionPresetName.Ih,
-        THREE.MathUtils.damp(safeGet(vrm, VRMExpressionPresetName.Ih), 0, 10, dt),
-      );
-      safeSet(
-        vrm,
-        VRMExpressionPresetName.Ou,
-        THREE.MathUtils.damp(safeGet(vrm, VRMExpressionPresetName.Ou), 0, 10, dt),
-      );
     }
   });
 

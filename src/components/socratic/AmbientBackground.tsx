@@ -27,8 +27,20 @@ export function AmbientBackground() {
       />
 
       {/* Editorial vertical guide hairlines (desktop only) */}
-      <div className="hidden lg:block absolute inset-y-0 left-1/4 w-px" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.035) 30%, rgba(255,255,255,0.035) 70%, transparent)" }} />
-      <div className="hidden lg:block absolute inset-y-0 left-3/4 w-px" style={{ background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.035) 30%, rgba(255,255,255,0.035) 70%, transparent)" }} />
+      <div
+        className="hidden lg:block absolute inset-y-0 left-1/4 w-px"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent, rgba(255,255,255,0.035) 30%, rgba(255,255,255,0.035) 70%, transparent)",
+        }}
+      />
+      <div
+        className="hidden lg:block absolute inset-y-0 left-3/4 w-px"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent, rgba(255,255,255,0.035) 30%, rgba(255,255,255,0.035) 70%, transparent)",
+        }}
+      />
 
       {/* Subtle 4K grain across viewport */}
       <div

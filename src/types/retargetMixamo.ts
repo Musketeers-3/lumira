@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { VRM } from "@pixiv/three-vrm";
+import type { VRM, VRMHumanBoneName } from "@pixiv/three-vrm";
 
 const mixamoVRMRigMap: Record<string, string> = {
   mixamorigHips: "hips",
@@ -29,11 +29,11 @@ const mixamoVRMRigMap: Record<string, string> = {
 export function retargetMixamo(
   clip: THREE.AnimationClip,
   vrm: VRM,
-  fbxGroup: THREE.Group, // We now require the original FBX group to measure its bones
+  fbxGroup: THREE.Group,
 ): THREE.AnimationClip | null {
   const tracks: THREE.KeyframeTrack[] = [];
 
-  // Calculate world matrices so we can measure the resting bone angles
+  // Calculate world matrices to measure the resting bone angles
   fbxGroup.updateMatrixWorld(true);
 
   clip.tracks.forEach((track) => {
@@ -41,16 +41,38 @@ export function retargetMixamo(
     const mixamoBoneName = trackSplits[0];
     const propertyName = trackSplits[1];
 
-    const vrmBoneName = mixamoVRMRigMap[mixamoBoneName];
+    const vrmBoneName = mixamoVRMRigMap[mixamoBoneName] as VRMHumanBoneName;
     if (!vrmBoneName) return;
 
-    const vrmNode = vrm.humanoid?.getNormalizedBoneNode(vrmBoneName as any);
+    const vrmNode = vrm.humanoid?.getNormalizedBoneNode(vrmBoneName);
     const mixamoNode = fbxGroup.getObjectByName(mixamoBoneName);
 
     if (vrmNode && mixamoNode) {
-      // Ignore position tracks to prevent teleporting
-      if (propertyName === "position") return;
+      // --------------------------------------------------------
+      // CRITICAL FIX: HIPS POSITION SCALING (Weight Shifting)
+      // --------------------------------------------------------
+      if (propertyName === "position") {
+        if (mixamoBoneName === "mixamorigHips") {
+          // Calculate the scale difference between the FBX skeleton and VRM skeleton
+          const mixamoY = mixamoNode.position.y;
+          const vrmY = vrmNode.position.y;
+          const scaleFactor = mixamoY !== 0 ? vrmY / mixamoY : 1;
 
+          const values = [...track.values];
+          for (let i = 0; i < values.length; i++) {
+            values[i] = values[i] * scaleFactor;
+          }
+
+          tracks.push(
+            new THREE.VectorKeyframeTrack(`${vrmNode.name}.position`, track.times, values),
+          );
+        }
+        return; // Reject all other position tracks to prevent limb tearing
+      }
+
+      // --------------------------------------------------------
+      // QUATERNION RETARGETING (Rotational Math)
+      // --------------------------------------------------------
       if (propertyName === "quaternion") {
         // Measure Mixamo's exact resting angle in 3D space
         const restWorldRotation = new THREE.Quaternion();

@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, Clock, Compass, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, Compass, TrendingUp, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,7 +21,71 @@ export const Route = createFileRoute("/")({
 const NOISE_URL =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
 
+// --- Strict Data Contracts ---
+interface SessionRecord {
+  id: string;
+  lesson_id?: string;
+  topic?: string;
+  started_at: string;
+  duration_seconds?: number;
+  breakthrough?: boolean;
+}
+
+interface SkillRecord {
+  id?: string;
+  name?: string;
+  skill_name?: string;
+  domain?: string;
+  skill_category?: string;
+  mastery?: number;
+  mastery_score?: number;
+  status?: "unlocked" | "in-progress" | "locked";
+  unlocked_at?: string;
+  last_practiced?: string;
+  insight?: string;
+}
+
 function Dashboard() {
+  const { fetchRecentSessions, fetchSkills } = useSessionPersistence();
+
+  // 1. Fetch live historical session streams
+  const { data: rawSessions, isLoading: loadingSessions } = useQuery<SessionRecord[] | null>({
+    queryKey: ["dashboard-sessions"],
+    queryFn: () => fetchRecentSessions(50) as Promise<SessionRecord[] | null>,
+    staleTime: 1000 * 60,
+  });
+
+  // 2. Fetch live masteries to dynamically extract genuine user discoveries
+  const { data: rawSkills, isLoading: loadingSkills } = useQuery<SkillRecord[] | null>({
+    queryKey: ["dashboard-skills"],
+    queryFn: () => fetchSkills() as Promise<SkillRecord[] | null>,
+    staleTime: 1000 * 60,
+  });
+
+  const isLoading = loadingSessions || loadingSkills;
+
+  // --- Type-Safe Dynamic Analytics Aggregator ---
+  // Safely fallback to empty arrays if database returns null
+  const sessions = rawSessions ?? [];
+  const skills = rawSkills ?? [];
+
+  const totalSessionsCount = sessions.length;
+
+  // Calculate real historical hours spent in the dojo
+  const totalSeconds = sessions.reduce((sum, s) => sum + (s.duration_seconds ?? 0), 0);
+  const totalHoursFormatted = (totalSeconds / 3600).toFixed(1);
+
+  // Filter skills to find only those the user has unlocked independently
+  const discoveredSkills = skills.filter((s) => s.status === "unlocked");
+  const breakthroughsCount = discoveredSkills.length;
+
+  // Dynamically extract the single most recently unlocked discovery card
+  const latestDiscovery = discoveredSkills.sort((a, b) => {
+    const timeA = new Date(a.last_practiced ?? a.unlocked_at ?? 0).getTime();
+    const timeB = new Date(b.last_practiced ?? b.unlocked_at ?? 0).getTime();
+    return timeB - timeA;
+  })[0] as SkillRecord | undefined;
+
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       {/* Hero — editorial cinema card */}
@@ -28,241 +94,189 @@ function Dashboard() {
         style={{
           background: "var(--bg-onyx)",
           border: "1px solid var(--hairline-strong)",
-          boxShadow: "0 30px 80px -20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)",
+          boxShadow: "var(--shadow-deep), var(--inset-highlight)",
         }}
       >
-        {/* radial state spotlight */}
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 50% at 70% 25%, var(--state-glow), transparent 60%)",
-            opacity: 0.55,
-          }}
-        />
-        {/* gold accent radial */}
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 40% 40% at 90% 0%, rgba(201,162,75,0.10), transparent 60%)",
-          }}
-        />
-        {/* grain */}
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-[0.10] mix-blend-overlay"
-          style={{ backgroundImage: NOISE_URL, backgroundSize: "200px 200px" }}
+          className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay"
+          style={{ backgroundImage: NOISE_URL }}
         />
 
-        <div className="relative z-10 max-w-3xl space-y-8">
-          {/* eyebrow chip */}
+        <div className="relative z-10 max-w-2xl space-y-4">
           <div
-            className="inline-block rounded-md px-3 py-1"
-            style={{
-              background: "var(--glass-tint-2)",
-              border: "1px solid var(--hairline-strong)",
-            }}
+            className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em]"
+            style={{ color: "var(--gold-soft)" }}
           >
-            <span
-              className="font-mono text-[10px] tracking-[0.35em] uppercase"
-              style={{ color: "var(--ink-secondary)" }}
-            >
-              Welcome back
-            </span>
+            <Sparkles className="h-3 w-3" /> Welcome Back, Learner
           </div>
-
-          {/* serif/sans hybrid headline */}
-          <h1
-            className="font-display italic leading-[1.05] text-5xl md:text-6xl lg:text-7xl"
+          <h2
+            className="text-4xl font-semibold tracking-tight lg:text-5xl"
             style={{ color: "var(--ink-primary)" }}
           >
-            I've been waiting for you.
-            <br />
-            <span className="not-italic font-normal" style={{ opacity: 0.8 }}>
-              We were close to something on{" "}
-            </span>
-            <span
-              className="not-italic font-semibold tracking-tight underline underline-offset-[10px]"
-              style={{
-                fontFamily: "var(--font-sans)",
-                color: "var(--gold-soft)",
-                textDecorationColor: "rgba(201,162,75,0.35)",
-              }}
-            >
-              why the Moon doesn't fall.
-            </span>
-          </h1>
-
+            Resume Your Socratic Walk.
+          </h2>
           <p
-            className="text-lg font-light leading-relaxed max-w-2xl"
+            className="text-base leading-relaxed max-w-lg"
             style={{ color: "var(--ink-secondary)" }}
           >
-            Your mentor is here, patient — holding the thought right where you left it. Whenever
-            you're ready, we'll continue together.
+            No lectures. No fast answers. Step back into the environment and uncover structural
+            principles through deliberate, guided reasoning.
           </p>
-
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="pt-4">
             <Link
               to="/engine"
-              className="group inline-flex items-center gap-3 rounded-2xl px-8 py-4 text-sm font-semibold tracking-wide transition-all hover:-translate-y-px"
-              style={{
-                background: "var(--gold-soft)",
-                color: "#0B0B12",
-                boxShadow:
-                  "0 0 40px rgba(201,162,75,0.22), 0 10px 28px -8px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.25)",
-              }}
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-[var(--gold-deep)] to-[var(--gold-soft)] px-6 text-sm font-medium text-black transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_24px_rgba(201,162,75,0.3)]"
             >
-              Enter the Dojo
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              to="/skill-passport"
-              className="inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-sm font-medium transition-all"
-              style={{
-                background: "transparent",
-                border: "1px solid var(--hairline-strong)",
-                color: "var(--ink-primary)",
-              }}
-            >
-              See Your Light
+              Enter The Dojo
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Stats bento — serif numerals */}
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* Metrics Row */}
+      <div className="grid gap-4 sm:grid-cols-3">
         {[
-          { icon: Compass, label: "Sessions", value: "24", sub: "walks together" },
-          { icon: Sparkles, label: "Light Found", value: "07", sub: "ideas you invented" },
-          { icon: Clock, label: "Time Present", value: "11.4", unit: "h", sub: "patient, focused" },
-        ].map(({ icon: Icon, label, value, unit, sub }) => (
+          {
+            label: "Total Sessions",
+            value: isLoading ? "..." : String(totalSessionsCount).padStart(2, "0"),
+            icon: Compass,
+          },
+          {
+            label: "Light Found",
+            value: isLoading ? "..." : String(breakthroughsCount).padStart(2, "0"),
+            icon: TrendingUp,
+          },
+          {
+            label: "Hours Present",
+            value: isLoading ? "..." : `${totalHoursFormatted}h`,
+            icon: Clock,
+          },
+        ].map((m, idx) => (
           <div
-            key={label}
-            className="group relative overflow-hidden rounded-[2rem] p-8 transition-colors duration-500"
-            style={{
-              background: "var(--bg-onyx-raised)",
-              border: "1px solid var(--hairline)",
-            }}
+            key={idx}
+            className="surface-luxe p-6 flex items-center justify-between"
+            style={{ background: "var(--bg-onyx-raised)", border: "1px solid var(--hairline)" }}
           >
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-2xl"
-              style={{
-                background: "var(--bg-onyx)",
-                border: "1px solid var(--hairline-strong)",
-                color: "var(--gold-soft)",
-              }}
-            >
-              <Icon className="h-5 w-5" strokeWidth={1.5} />
-            </div>
-
-            <div className="mt-6 space-y-1">
-              <p
-                className="font-mono text-[10px] tracking-[0.25em] uppercase"
+            <div className="space-y-1">
+              <span
+                className="font-mono text-[10px] uppercase tracking-[0.2em]"
                 style={{ color: "var(--ink-tertiary)" }}
               >
-                {label}
-              </p>
-              <div className="flex items-baseline gap-2">
-                <span
-                  className="font-display text-5xl leading-none"
-                  style={{ color: "var(--ink-primary)" }}
-                >
-                  {value}
-                  {unit && <span className="text-3xl">{unit}</span>}
-                </span>
-                <span className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
-                  {sub}
-                </span>
-              </div>
+                {m.label}
+              </span>
+              <h4
+                className="text-3xl font-semibold tracking-tight"
+                style={{ color: "var(--ink-primary)" }}
+              >
+                {m.value}
+              </h4>
             </div>
-
-            <div
-              aria-hidden
-              className="absolute bottom-0 left-0 h-px w-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(201,162,75,0.55), transparent)",
-              }}
-            />
+            <m.icon className="h-5 w-5 opacity-40" style={{ color: "var(--gold-soft)" }} />
           </div>
         ))}
       </div>
 
-      {/* Continuity row */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Primary Status Split Panel */}
+      <div className="grid gap-6 md:grid-cols-2">
         <div
-          className="relative overflow-hidden rounded-[2rem] p-8"
+          className="relative overflow-hidden rounded-[2rem] p-8 flex flex-col justify-between min-h-[280px]"
           style={{ background: "var(--bg-onyx-raised)", border: "1px solid var(--hairline)" }}
         >
-          <div
-            className="font-mono text-[10px] uppercase tracking-[0.25em]"
-            style={{ color: "var(--ink-tertiary)" }}
-          >
-            Where we are
+          <div className="space-y-3">
+            <div
+              className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
+              <TrendingUp className="h-3.5 w-3.5" style={{ color: "var(--gold-soft)" }} />
+              Latest Unlocked Insight
+            </div>
+
+            {isLoading ? (
+              <div className="flex items-center gap-2 font-mono text-xs py-4 text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Resolving history...
+              </div>
+            ) : latestDiscovery ? (
+              <>
+                <h3
+                  className="text-2xl font-semibold tracking-tight mt-2"
+                  style={{ color: "var(--ink-primary)" }}
+                >
+                  {latestDiscovery.skill_name ?? latestDiscovery.name}
+                </h3>
+                <p
+                  className="font-display italic text-lg leading-relaxed pt-2"
+                  style={{ color: "var(--ink-secondary)" }}
+                >
+                  "
+                  {latestDiscovery.insight ??
+                    "You independently reached this conceptual milestone."}
+                  "
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-xl font-medium tracking-tight mt-2 text-muted-foreground">
+                  The Light is Waiting
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-secondary)" }}>
+                  You haven't recorded any breakthroughs yet. Step into the dojo to begin parsing
+                  your first core concepts.
+                </p>
+              </>
+            )}
           </div>
-          <h3
-            className="mt-3 font-display text-3xl leading-tight"
-            style={{ color: "var(--ink-primary)" }}
-          >
-            Physical Reasoning
-          </h3>
-          <p className="mt-1 text-sm" style={{ color: "var(--ink-tertiary)" }}>
-            The Falling Moon — Step 3 of 5
-          </p>
-          <div className="mt-6 flex items-center gap-2">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <span
-                key={i}
-                className="h-[3px] flex-1 rounded-full transition-all duration-500"
-                style={{
-                  background:
-                    i < 3 ? "var(--gold-soft)" : "rgba(255,255,255,0.06)",
-                  boxShadow: i < 3 ? "0 0 10px rgba(201,162,75,0.45)" : "none",
-                }}
-              />
-            ))}
+
+          <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+            <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+              {latestDiscovery?.unlocked_at
+                ? `Discovered ${new Date(latestDiscovery.unlocked_at).toLocaleDateString()}`
+                : "System Primed"}
+            </span>
+            <Link
+              to="/skill-passport"
+              className="inline-flex items-center gap-1.5 text-xs transition-colors duration-300"
+              style={{ color: "var(--gold-soft)" }}
+            >
+              View Skill Passport <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <Link
-            to="/engine"
-            className="mt-6 inline-flex items-center gap-1.5 text-sm transition-colors duration-500"
-            style={{ color: "var(--gold-soft)" }}
-          >
-            Continue together <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
         </div>
 
+        {/* Path Card */}
         <div
-          className="relative overflow-hidden rounded-[2rem] p-8"
+          className="rounded-[2rem] p-8 flex flex-col justify-between min-h-[280px]"
           style={{ background: "var(--bg-onyx-raised)", border: "1px solid var(--hairline)" }}
         >
-          <div
-            className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em]"
-            style={{ color: "var(--ink-tertiary)" }}
-          >
-            <TrendingUp className="h-3.5 w-3.5" style={{ color: "var(--gold-soft)" }} />
-            Light you found
+          <div className="space-y-2">
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.2em]"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
+              Active Environment
+            </span>
+            <h3
+              className="text-2xl font-semibold tracking-tight"
+              style={{ color: "var(--ink-primary)" }}
+            >
+              Newtonian Gravity & Orbits
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--ink-secondary)" }}>
+              Analyze the geometric paths of bodies in motion. Prove why massive items constantly
+              fall toward a center point but never crash.
+            </p>
           </div>
-          <h3
-            className="mt-3 font-display text-3xl leading-tight"
-            style={{ color: "var(--ink-primary)" }}
-          >
-            Pressure as Collisions
-          </h3>
-          <p
-            className="mt-3 font-display italic text-lg"
-            style={{ color: "var(--ink-secondary)" }}
-          >
-            "Air isn't empty — it's countless tiny particles bumping into everything."
-          </p>
-          <div
-            className="mt-6 font-mono text-[10px] uppercase tracking-widest"
-            style={{ color: "var(--ink-tertiary)" }}
-          >
-            you reached this 3 days ago
+          <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-amber-500/80 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
+              In Progress
+            </span>
+            <Link
+              to="/engine"
+              className="inline-flex items-center gap-1.5 text-xs transition-colors duration-300"
+              style={{ color: "var(--gold-soft)" }}
+            >
+              Resume Walk <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </div>

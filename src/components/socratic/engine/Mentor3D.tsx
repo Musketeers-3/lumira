@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment } from "@react-three/drei";
+import { PCFShadowMap } from "three";
 import type { LearningState } from "../types";
 import { MentorAvatar } from "./MentorAvatar";
 import { MentorRig } from "./mentor3d/MentorRig";
@@ -34,11 +35,7 @@ function SceneContent({ state, isSpeaking, isPausing }: Props) {
     <>
       <MentorSceneLights state={state} warmthBias={warmthBias} />
       <StudyScene state={state} warmthBias={warmthBias} />
-      <Suspense
-        fallback={
-          <MentorRig state={state} isSpeaking={isSpeaking} isPausing={isPausing ?? false} />
-        }
-      >
+      <Suspense fallback={null}>
         <MentorRig state={state} isSpeaking={isSpeaking} isPausing={isPausing ?? false} />
       </Suspense>
       <ContactShadows position={[0, -0.92, 0]} opacity={0.4} scale={5} blur={2.5} far={2} />
@@ -70,14 +67,16 @@ export function Mentor3D({ state, isSpeaking, isPausing = false }: Props) {
 
   return (
     <Canvas
-      shadows
+      shadows={{ type: PCFShadowMap }}
       dpr={[1, 1.5]}
       camera={{ position: [0, 0.62, 2.15], fov: 36 }}
-      gl={{ antialias: true, alpha: false }}
-      style={{ width: "100%", height: "100%" }}
+      // ENABLING ALPHA TRANSPARENCY: The canvas is now glass.
+      gl={{ antialias: true, alpha: true }}
+      style={{ width: "100%", height: "100%", background: "transparent" }}
     >
-      <color attach="background" args={["#141210"]} />
-      <fog attach="fog" args={["#141210", 4, 9]} />
+      {/* Removed hardcoded <color> and <fog> layers. 
+        The 3D rig now floats natively inside the Ambient OS environment.
+      */}
       <SceneContent state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
     </Canvas>
   );

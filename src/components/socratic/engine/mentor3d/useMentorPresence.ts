@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LearningState } from "../../types";
@@ -47,6 +47,16 @@ export function useMentorPresence({
   const nextBlink = useRef(3 + Math.random() * 3);
   const gazePhase = useRef(0);
 
+  // CRITICAL FIX: Cache the morph target dictionary indices to prevent 60fps array allocations
+  const cachedMorphs = useMemo(() => {
+    if (!headMesh?.morphTargetDictionary) return null;
+    const dict = headMesh.morphTargetDictionary;
+    return {
+      indices: Object.values(dict),
+      dict: dict,
+    };
+  }, [headMesh]);
+
   const crossfadeTo = useCallback(
     (name: string, duration = 1.5) => {
       const next = actions[name];
@@ -92,20 +102,24 @@ export function useMentorPresence({
     if (mixer) mixer.update(dt);
     gazePhase.current += dt * (reducedMotion ? 0.3 : 0.6);
 
-    // Morph expression bias
-    if (headMesh?.morphTargetDictionary && headMesh.morphTargetInfluences) {
-      const dict = headMesh.morphTargetDictionary;
+    // Optimized Morph Expression Bias
+    if (cachedMorphs && headMesh?.morphTargetInfluences) {
+      const { dict, indices } = cachedMorphs;
       const inf = headMesh.morphTargetInfluences;
       const targetName = MORPH_BY_STATE[state];
-      const encouragingIdx = dict.encouraging;
+      const activeIdx = dict[targetName];
+      const encouragingIdx = dict["encouraging"];
+      const blinkIdx = dict["blink"];
 
-      Object.keys(dict).forEach((key) => {
-        const i = dict[key];
-        if (key === "blink") return;
-        const isTarget = key === targetName;
-        const target = isTarget ? 0.12 + warmthBias * 0.13 : 0;
-        inf[i] = THREE.MathUtils.damp(inf[i] ?? 0, target, 3, dt);
-      });
+      // Process cached numeric indices rapidly
+      for (let i = 0; i < indices.length; i++) {
+        const idx = indices[i];
+        if (idx === blinkIdx) continue;
+
+        const isTarget = idx === activeIdx;
+        const targetValue = isTarget ? 0.12 + warmthBias * 0.13 : 0;
+        inf[idx] = THREE.MathUtils.damp(inf[idx] ?? 0, targetValue, 3, dt);
+      }
 
       if (encouragingIdx !== undefined && state === "FOCUS") {
         inf[encouragingIdx] = THREE.MathUtils.damp(
@@ -116,17 +130,16 @@ export function useMentorPresence({
         );
       }
 
-      // Blink
-      if (!reducedMotion && dict.blink !== undefined) {
+      // Blink Logic
+      if (!reducedMotion && blinkIdx !== undefined) {
         blinkTimer.current += dt;
         if (blinkTimer.current >= nextBlink.current) {
           blinkTimer.current = 0;
           nextBlink.current = 3 + Math.random() * 3;
-          const blinkIdx = dict.blink;
           inf[blinkIdx] = 1;
         }
-        if (inf[dict.blink] > 0) {
-          inf[dict.blink] = THREE.MathUtils.damp(inf[dict.blink], 0, 12, dt);
+        if (inf[blinkIdx] > 0) {
+          inf[blinkIdx] = THREE.MathUtils.damp(inf[blinkIdx], 0, 12, dt);
         }
       }
     }

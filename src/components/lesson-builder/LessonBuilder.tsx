@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Plus, Trash2, Eye, Save } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Save } from "lucide-react";
 import type { LessonDraft, LessonStep } from "@/types/lesson";
 
 interface LessonBuilderProps {
@@ -62,10 +62,11 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
       ...prev,
       steps: [...prev.steps, newStep],
     }));
+    setExpandedStep(newStep.id);
   };
 
   const deleteStep = (stepId: string) => {
-    if (lesson.steps.length === 1) return; // Don't delete if only one step
+    if (lesson.steps.length === 1) return;
     setLesson((prev) => ({
       ...prev,
       steps: prev.steps.filter((s) => s.id !== stepId),
@@ -86,71 +87,89 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 p-6">
+    // Removed blocking background wrapper
+    <div className="p-6 pt-24 pb-32">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
+        <div className="mb-10 flex items-start justify-between">
           <div className="flex-1">
             <input
               type="text"
               value={lesson.title}
               onChange={(e) => setLesson({ ...lesson, title: e.target.value })}
-              className="mb-2 bg-transparent text-4xl font-bold text-foreground outline-none"
+              className="mb-2 w-full bg-transparent font-display text-5xl font-bold tracking-tight outline-none"
+              style={{ color: "var(--ink-primary)" }}
               placeholder="Lesson Title"
             />
-            <p className="text-muted-foreground">Create an engaging Socratic learning experience</p>
+            <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              Socratic Pathway Architect
+            </p>
           </div>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-lg bg-state-accent px-4 py-2 text-sm font-medium text-black transition-all hover:brightness-110 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold tracking-wide transition-all hover:scale-105 disabled:opacity-50"
+            style={{
+              background: "var(--gold-soft)",
+              color: "#0B0B12",
+              boxShadow: "0 0 20px rgba(201,162,75,0.2)",
+            }}
           >
             <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Lesson"}
+            {isSaving ? "Saving..." : "Save Draft"}
           </button>
         </div>
 
         {/* Metadata Section */}
-        <div className="mb-8 grid gap-6 rounded-2xl border border-glass-border bg-white/[0.03] p-6 backdrop-blur-xl md:grid-cols-2">
+        <div className="surface-luxe mb-8 grid gap-6 p-8 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Topic</label>
+            <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Topic Domain
+            </label>
             <input
               type="text"
               value={lesson.topic}
               onChange={(e) => setLesson({ ...lesson, topic: e.target.value })}
-              className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
-              placeholder="e.g., Why is the sky blue?, What keeps a boat afloat?..."
+              className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+              style={{ color: "var(--ink-primary)", border: "1px solid var(--hairline-strong)" }}
+              placeholder="e.g., Pressure & Particles"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Difficulty</label>
+            <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Difficulty Layer
+            </label>
             <select
               value={lesson.difficulty}
               onChange={(e) =>
                 setLesson({ ...lesson, difficulty: e.target.value as LessonDraft["difficulty"] })
               }
-              className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
+              className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+              style={{ color: "var(--ink-primary)", border: "1px solid var(--hairline-strong)" }}
             >
               {DIFFICULTIES.map((d) => (
-                <option key={d} value={d} className="bg-background">
+                <option key={d} value={d} className="bg-[#1B1B28]">
                   {d.charAt(0).toUpperCase() + d.slice(1)}
                 </option>
               ))}
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-foreground mb-2">Description</label>
+            <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Learning Objective
+            </label>
             <textarea
               value={lesson.description}
               onChange={(e) => setLesson({ ...lesson, description: e.target.value })}
-              className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
-              placeholder="What will students learn?"
+              className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+              style={{ color: "var(--ink-primary)", border: "1px solid var(--hairline-strong)" }}
+              placeholder="What core insight should the student reach independently?"
               rows={3}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Duration (minutes)
+            <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Estimated Duration (Min)
             </label>
             <input
               type="number"
@@ -158,7 +177,8 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
               onChange={(e) =>
                 setLesson({ ...lesson, estimatedDuration: parseInt(e.target.value) || 15 })
               }
-              className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
+              className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+              style={{ color: "var(--ink-primary)", border: "1px solid var(--hairline-strong)" }}
               min="5"
               max="120"
             />
@@ -167,60 +187,83 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
 
         {/* Steps Section */}
         <div className="mb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground">Dialogue Steps</h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2
+              className="text-2xl font-semibold tracking-tight"
+              style={{ color: "var(--ink-primary)" }}
+            >
+              Socratic Dialogue Chain
+            </h2>
             <button
               onClick={addStep}
-              className="flex items-center gap-2 rounded-lg bg-white/[0.05] px-3 py-2 text-sm text-muted-foreground transition-all hover:bg-white/[0.08] hover:text-foreground"
+              className="flex items-center gap-2 rounded-xl border border-[var(--hairline-strong)] bg-white/[0.03] px-4 py-2 text-sm transition-all hover:bg-white/[0.08]"
+              style={{ color: "var(--ink-secondary)" }}
             >
               <Plus className="h-4 w-4" />
-              Add Step
+              Add Node
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {lesson.steps.map((step, idx) => (
               <div
                 key={step.id}
-                className="rounded-xl border border-glass-border bg-white/[0.02] backdrop-blur-xl transition-all"
+                className="surface-luxe overflow-hidden rounded-2xl transition-all duration-300"
+                style={{
+                  background: expandedStep === step.id ? "var(--bg-onyx-raised)" : "var(--bg-onyx)",
+                  border:
+                    expandedStep === step.id
+                      ? "1px solid var(--gold-soft)"
+                      : "1px solid var(--hairline-strong)",
+                }}
               >
                 <button
                   onClick={() => setExpandedStep(expandedStep === step.id ? null : step.id)}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/[0.04] transition-colors"
+                  className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-white/[0.02]"
                 >
-                  <div className="flex items-center gap-3 text-left">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-state-accent/20 text-sm font-semibold text-state-accent">
-                      {idx + 1}
+                  <div className="flex items-center gap-4 text-left">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-full font-mono text-[10px] font-bold"
+                      style={{ background: "rgba(201,162,75,0.15)", color: "var(--gold-soft)" }}
+                    >
+                      {String(idx + 1).padStart(2, "0")}
                     </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-foreground">
-                        Step {idx + 1} • {step.state}
+                    <div>
+                      <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                        State <span style={{ color: "var(--state-accent)" }}>// {step.state}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {step.mentorMessage || "Click to edit"}
+                      <p
+                        className="mt-1 text-sm line-clamp-1"
+                        style={{ color: "var(--ink-secondary)" }}
+                      >
+                        {step.mentorMessage || "Empty node. Click to edit."}
                       </p>
                     </div>
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform ${expandedStep === step.id ? "rotate-180" : ""}`}
+                    className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${expandedStep === step.id ? "rotate-180" : ""}`}
                   />
                 </button>
 
                 {expandedStep === step.id && (
-                  <div className="border-t border-glass-border px-4 py-4 space-y-4">
+                  <div className="border-t border-[var(--hairline)] p-6 space-y-6 bg-black/10">
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        State
+                      <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        Cognitive State Trigger
                       </label>
                       <select
                         value={step.state}
                         onChange={(e) =>
                           updateStep(step.id, { state: e.target.value as LessonStep["state"] })
                         }
-                        className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
+                        className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+                        style={{
+                          color: "var(--ink-primary)",
+                          border: "1px solid var(--hairline-strong)",
+                        }}
                       >
                         {STATES.map((s) => (
-                          <option key={s} value={s} className="bg-background">
+                          <option key={s} value={s} className="bg-[#1B1B28]">
                             {s}
                           </option>
                         ))}
@@ -228,52 +271,64 @@ export function LessonBuilder({ initialLesson, onSave }: LessonBuilderProps) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Mentor Message
+                      <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        Mentor Initial Prompt
                       </label>
                       <textarea
                         value={step.mentorMessage}
                         onChange={(e) => updateStep(step.id, { mentorMessage: e.target.value })}
-                        className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
-                        placeholder="What should the mentor say?"
+                        className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+                        style={{
+                          color: "var(--ink-primary)",
+                          border: "1px solid var(--hairline-strong)",
+                        }}
+                        placeholder="What should the mentor say to open this thought loop?"
                         rows={3}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Student Prompt
+                      <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        Expected Student Response (AI Target)
                       </label>
                       <textarea
                         value={step.studentPrompt}
                         onChange={(e) => updateStep(step.id, { studentPrompt: e.target.value })}
-                        className="w-full rounded-lg bg-white/[0.05] px-3 py-2 text-foreground outline-none transition-colors focus:bg-white/[0.08]"
-                        placeholder="What question should the student answer?"
+                        className="w-full rounded-xl bg-white/[0.03] px-4 py-3 text-sm outline-none transition-all focus:bg-white/[0.06] focus:ring-1 focus:ring-[var(--gold-soft)]"
+                        style={{
+                          color: "var(--ink-primary)",
+                          border: "1px solid var(--hairline-strong)",
+                        }}
+                        placeholder="What logical conclusion should the AI try to guide them toward?"
                         rows={2}
                       />
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 py-2">
                       <input
                         type="checkbox"
                         id={`celebrate-${step.id}`}
                         checked={step.celebrate}
                         onChange={(e) => updateStep(step.id, { celebrate: e.target.checked })}
-                        className="rounded border-glass-border"
+                        className="h-4 w-4 rounded border-[var(--hairline-strong)] bg-white/5 accent-[#C9A24B]"
                       />
-                      <label htmlFor={`celebrate-${step.id}`} className="text-sm text-foreground">
-                        Show celebration on completion
+                      <label
+                        htmlFor={`celebrate-${step.id}`}
+                        className="text-sm cursor-pointer select-none"
+                        style={{ color: "var(--ink-secondary)" }}
+                      >
+                        Trigger Breakthrough Validation UI (Light Found)
                       </label>
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2 border-t border-glass-border">
+                    <div className="flex justify-end pt-4 border-t border-[var(--hairline)]">
                       <button
                         onClick={() => deleteStep(step.id)}
                         disabled={lesson.steps.length === 1}
-                        className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive transition-all hover:bg-destructive/20 disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-xl bg-[rgba(255,50,50,0.1)] px-4 py-2 text-sm text-red-400 transition-all hover:bg-[rgba(255,50,50,0.2)] disabled:opacity-30"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Delete
+                        Delete Node
                       </button>
                     </div>
                   </div>
