@@ -11,8 +11,11 @@ import {
 
 import appCss from "../styles.css?url";
 import { LearningStateProvider, useLearningState } from "@/lib/learning-state-context";
+import { MentorAnimationProvider } from "@/lib/mentor-animation-context";
 import { MentorSettingsProvider } from "@/lib/mentor-settings-context";
 import { ThemeProvider } from "@/lib/theme-context";
+import { RealmProvider, DocumentRealmSync } from "@/lib/realm-context";
+import { RealmAudioProvider } from "@/lib/useRealmAudio";
 import { AmbientBackground } from "@/components/socratic/AmbientBackground";
 import { Sidebar } from "@/components/socratic/Sidebar";
 import { TopBar } from "@/components/socratic/TopBar";
@@ -95,11 +98,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumira — Learn beside someone who believes in you" },
+      { title: "Lumira — Academy of Discovery" },
       {
         name: "description",
         content:
-          "An AI-native, empathetic learning OS. A patient mentor that helps you invent ideas, not memorize them.",
+          "A magical academy where understanding is discovered. Explore worlds, reason with your mentor, and build your constellation.",
       },
       { name: "author", content: "Lumira" },
       { property: "og:title", content: "Lumira — Learn beside someone who believes in you" },
@@ -133,7 +136,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
       },
     ],
   }),
@@ -163,23 +166,29 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <LearningStateProvider>
-          {/* Automatically syncs state changes to HTML DOM */}
-          <DocumentStateSync />
-          <MentorSettingsProvider>
-            <AssetPreloader />
-            <AmbientBackground />
-            <div className="relative flex min-h-screen w-full">
-              <Sidebar />
-              <div className="flex min-h-screen flex-1 flex-col">
-                <TopBar />
-                <main className="flex-1 p-5 lg:p-8">
-                  <Outlet />
-                </main>
-              </div>
-            </div>
-          </MentorSettingsProvider>
-        </LearningStateProvider>
+        <RealmProvider>
+          <RealmAudioProvider>
+            <LearningStateProvider>
+              <MentorAnimationProvider>
+              <DocumentRealmSync />
+              <DocumentStateSync />
+              <MentorSettingsProvider>
+                <AssetPreloader />
+                <AmbientBackground />
+                <div className="relative flex min-h-screen w-full">
+                  <Sidebar />
+                  <div className="flex min-h-screen flex-1 flex-col">
+                    <TopBar />
+                    <main className="flex-1 p-5 lg:p-10 xl:p-12">
+                      <Outlet />
+                    </main>
+                  </div>
+                </div>
+              </MentorSettingsProvider>
+              </MentorAnimationProvider>
+            </LearningStateProvider>
+          </RealmAudioProvider>
+        </RealmProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

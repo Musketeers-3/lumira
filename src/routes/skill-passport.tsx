@@ -1,23 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Lock, BadgeCheck, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Lock, Star, Loader2 } from "lucide-react";
+import { discoveryTitle } from "@/lib/realms";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useQuery } from "@tanstack/react-query";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
+import { ConstellationGraph, type ConstellationStar } from "@/components/socratic/ConstellationGraph";
+import { DiscoveryJournal } from "@/components/socratic/DiscoveryJournal";
+import { ARTIFACTS } from "@/lib/artifacts";
+import { Reveal } from "@/components/socratic/premium/Reveal";
 
 export const Route = createFileRoute("/skill-passport")({
   head: () => ({
     meta: [
-      { title: "Your Light — Lumira" },
+      { title: "Your Constellation — Lumira" },
       {
         name: "description",
         content:
-          "Every idea here is one you found on your own, beside a mentor who believed you could.",
+          "Every star here is a discovery you made on your own, beside a mentor who believed you could.",
       },
-      { property: "og:title", content: "Your Light — Lumira" },
+      { property: "og:title", content: "Your Constellation — Lumira" },
       {
         property: "og:description",
         content:
-          "Every idea here is one you found on your own, beside a mentor who believed you could.",
+          "Every star here is a discovery you made on your own, beside a mentor who believed you could.",
       },
     ],
   }),
@@ -36,6 +42,7 @@ export interface Skill {
 
 function SkillPassport() {
   const { fetchSkills } = useSessionPersistence();
+  const [selectedStar, setSelectedStar] = useState<ConstellationStar | null>(null);
 
   const {
     data: skills = [],
@@ -47,7 +54,6 @@ function SkillPassport() {
       try {
         const rawData = await fetchSkills();
 
-        // If database is empty or unauthenticated during development, seed mock data
         const dataToMap =
           rawData && rawData.length > 0
             ? rawData
@@ -88,67 +94,135 @@ function SkillPassport() {
         }));
       } catch (err) {
         console.error("Database connection failed, running fallback mock engine", err);
-        // Returning dummy array here clears the error banner on localhost
         return [];
       }
     },
   });
 
+  const constellationStars: ConstellationStar[] = skills.map((s) => ({
+    id: s.id,
+    name: s.name,
+    domain: s.domain,
+    unlocked: s.status === "unlocked",
+    insight: s.insight,
+    date: s.date,
+  }));
+
+  const unlockedArtifacts = ARTIFACTS.filter((a) =>
+    skills.some((s) => s.status === "unlocked" && s.name.toLowerCase().includes(a.skillName.toLowerCase().split(" ")[0])),
+  );
+
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-10">
       <header>
         <div
-          className="font-mono text-[11px] uppercase tracking-[0.3em]"
-          style={{ color: "var(--gold-soft)" }}
+          className="text-xs font-medium uppercase tracking-[0.2em]"
+          style={{ color: "var(--realm-accent)" }}
         >
-          ideas you reached on your own
+          Constellation of Understanding
         </div>
         <h1
-          className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl"
+          className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl font-display"
           style={{ color: "var(--ink-primary)" }}
         >
-          Your Light
+          Your Constellation
         </h1>
         <p className="mt-2 max-w-xl" style={{ color: "var(--ink-secondary)" }}>
-          Each one of these — you weren't told. You found it. The mentor only walked beside you.
+          Each star is something you discovered yourself. Tap a star to read its memory.
         </p>
       </header>
 
+      <Reveal>
+        <ConstellationGraph
+          stars={constellationStars}
+          selectedId={selectedStar?.id}
+          onSelectStar={setSelectedStar}
+        />
+      </Reveal>
+
+      {selectedStar?.insight && (
+        <Reveal delay={100}>
+          <div
+            className="rounded-2xl p-6"
+            style={{
+              background: "var(--realm-glow)",
+              border: "1px solid var(--realm-accent)",
+            }}
+          >
+            <div className="text-xs uppercase tracking-[0.15em] font-medium" style={{ color: "var(--realm-accent)" }}>
+              Memory · {discoveryTitle(selectedStar.name)}
+            </div>
+            <p className="mt-3 font-display italic text-lg leading-relaxed" style={{ color: "var(--ink-primary)" }}>
+              &ldquo;{selectedStar.insight}&rdquo;
+            </p>
+            {selectedStar.date && (
+              <p className="mt-2 text-xs" style={{ color: "var(--ink-tertiary)" }}>
+                Discovered {new Date(selectedStar.date).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+        </Reveal>
+      )}
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <Reveal delay={150}>
+          <DiscoveryJournal highlightSkill={selectedStar?.name ?? null} />
+        </Reveal>
+
+        <Reveal delay={200}>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold font-display" style={{ color: "var(--ink-primary)" }}>
+              Artifacts
+            </h3>
+            <p className="text-sm" style={{ color: "var(--ink-secondary)" }}>
+              Objects collected from your adventures, resting in your worlds.
+            </p>
+            <div className="grid gap-3">
+              {unlockedArtifacts.length === 0 ? (
+                <p className="text-sm font-display italic" style={{ color: "var(--ink-tertiary)" }}>
+                  No artifacts yet. Discover something new to collect your first treasure.
+                </p>
+              ) : (
+                unlockedArtifacts.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-3 rounded-xl p-4"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <span className="text-2xl">{a.emoji}</span>
+                    <div>
+                      <div className="text-sm font-semibold" style={{ color: "var(--ink-primary)" }}>
+                        {a.name}
+                      </div>
+                      <div className="text-xs mt-0.5" style={{ color: "var(--ink-tertiary)" }}>
+                        {a.description}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Cinematic Loading Skeletons */}
         {isLoading &&
           Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="surface-luxe p-5"
-              style={{
-                background: "var(--grad-onyx)",
-                borderColor: "var(--glass-tint-2)",
-              }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="h-3 w-24 animate-pulse rounded bg-white/5" />
-                <div className="h-4 w-4 animate-pulse rounded-full bg-white/5" />
-              </div>
-              <div className="mt-4 h-6 w-3/4 animate-pulse rounded bg-white/10" />
-              <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-                <div className="h-full w-1/3 animate-pulse rounded-full bg-white/10" />
-              </div>
-              <div className="mt-2 flex justify-between">
-                <div className="h-3 w-16 animate-pulse rounded bg-white/5" />
-                <div className="h-3 w-20 animate-pulse rounded bg-white/5" />
-              </div>
+            <div key={i} className="surface-luxe p-5">
+              <div className="h-6 w-3/4 animate-pulse rounded bg-white/10" />
             </div>
           ))}
 
-        {/* Error Handling */}
         {isError && (
           <div className="col-span-full rounded-2xl border border-destructive/20 bg-destructive/5 p-8 text-center text-destructive">
             Failed to load your discoveries. The connection might be unstable.
           </div>
         )}
 
-        {/* Safe Data Render */}
         {!isLoading &&
           skills.map((s) => (
             <HoverCard key={s.id} openDelay={120}>
@@ -159,99 +233,47 @@ function SkillPassport() {
                   }`}
                   style={
                     s.status === "unlocked"
-                      ? {
-                          boxShadow:
-                            "var(--shadow-deep), var(--inset-highlight), 0 0 0 1px rgba(201,162,75,0.18)",
-                        }
+                      ? { boxShadow: "var(--shadow-deep), 0 0 0 1px var(--realm-accent)" }
                       : undefined
                   }
                 >
                   <div className="flex items-start justify-between">
-                    <div
-                      className="font-mono text-[10px] uppercase tracking-[0.2em]"
-                      style={{ color: "var(--ink-tertiary)" }}
-                    >
+                    <div className="text-[10px] font-medium uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
                       {s.domain}
                     </div>
                     {s.status === "unlocked" && (
-                      <BadgeCheck
-                        className="h-4 w-4"
-                        strokeWidth={1.5}
-                        style={{ color: "var(--gold-soft)" }}
-                      />
+                      <Star className="h-4 w-4" style={{ color: "var(--realm-accent)" }} fill="var(--realm-accent)" />
                     )}
                     {s.status === "in-progress" && (
-                      <Loader2
-                        className="h-4 w-4 animate-spin"
-                        strokeWidth={1.5}
-                        style={{ color: "var(--state-accent)" }}
-                      />
+                      <Loader2 className="h-4 w-4 animate-spin" style={{ color: "var(--realm-accent)" }} />
                     )}
                     {s.status === "locked" && (
-                      <Lock
-                        className="h-4 w-4"
-                        strokeWidth={1.5}
-                        style={{ color: "var(--ink-tertiary)" }}
-                      />
+                      <Lock className="h-4 w-4" style={{ color: "var(--ink-tertiary)" }} />
                     )}
                   </div>
-                  <h3
-                    className="mt-3 text-lg font-semibold tracking-tight"
-                    style={{ color: "var(--ink-primary)" }}
-                  >
-                    {s.name}
+                  <h3 className="mt-3 text-lg font-semibold tracking-tight font-display" style={{ color: "var(--ink-primary)" }}>
+                    {s.status === "unlocked" ? discoveryTitle(s.name) : s.name}
                   </h3>
-                  <div
-                    className="mt-4 h-1.5 overflow-hidden rounded-full"
-                    style={{ background: "rgba(245,241,230,0.06)" }}
-                  >
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${s.mastery}%`,
-                        background:
-                          s.status === "unlocked"
-                            ? "linear-gradient(90deg, var(--gold-deep), var(--gold-soft))"
-                            : "linear-gradient(90deg, var(--state-accent), var(--gold-soft))",
-                        boxShadow: s.mastery > 0 ? "0 0 12px var(--state-glow)" : "none",
-                      }}
-                    />
-                  </div>
-                  <div
-                    className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest"
-                    style={{ color: "var(--ink-tertiary)" }}
-                  >
-                    <span>{s.status}</span>
-                    <span style={{ color: "var(--gold-soft)" }}>{s.mastery}% mastery</span>
-                  </div>
+                  {s.status === "unlocked" && (
+                    <div className="mt-3 text-xs" style={{ color: "var(--realm-accent)" }}>
+                      ✦ Discovered
+                    </div>
+                  )}
+                  {s.status === "in-progress" && (
+                    <div className="mt-3 text-xs" style={{ color: "var(--ink-tertiary)" }}>
+                      Forming...
+                    </div>
+                  )}
                 </div>
               </HoverCardTrigger>
               {s.insight && (
-                <HoverCardContent
-                  className="w-72 backdrop-blur-xl"
-                  style={{
-                    background: "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
-                    border: "1px solid rgba(201,162,75,0.25)",
-                    boxShadow: "var(--shadow-deep), var(--inset-highlight)",
-                  }}
-                >
-                  <div
-                    className="font-mono text-[10px] uppercase tracking-widest"
-                    style={{ color: "var(--gold-soft)" }}
-                  >
-                    Core insight
+                <HoverCardContent className="w-72 backdrop-blur-xl" style={{ border: "1px solid var(--realm-accent)" }}>
+                  <div className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--realm-accent)" }}>
+                    Memory
                   </div>
                   <p className="mt-1.5 text-sm italic" style={{ color: "var(--ink-primary)" }}>
                     {s.insight}
                   </p>
-                  {s.date && (
-                    <div
-                      className="mt-3 font-mono text-[10px] uppercase tracking-widest"
-                      style={{ color: "var(--ink-tertiary)" }}
-                    >
-                      discovered {s.date}
-                    </div>
-                  )}
                 </HoverCardContent>
               )}
             </HoverCard>

@@ -1,38 +1,39 @@
 import type { Message } from "../types";
 
-// Map intents directly to your global semantic tokens rather than arbitrary hex codes
-const getIntentStyle = (intent: Message["intent"]) => {
-  if (intent === "Believing Challenge") return { color: "var(--state-accent)" }; // Adapts to "CHALLENGE" state
-  if (intent === "Light Found")
-    return { color: "var(--gold-soft)", textShadow: "0 0 8px rgba(201,162,75,0.4)" };
-  if (intent === "Gentle Push") return { color: "var(--ink-secondary)" };
-  return { color: "var(--ink-tertiary)" };
+const INTENT_LABELS: Record<string, string> = {
+  "Gentle Push": "A gentle nudge",
+  "Believing Challenge": "Believing in you",
+  "Light Found": "A discovery!",
 };
 
 export function TerminalMessage({ message }: { message: Message }) {
   const isMentor = message.speaker === "mentor";
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span>{isMentor ? "mentor@lumira:~$" : "you@lumira:~$"}</span>
-        {isMentor && message.intent && (
-          <span
-            className="transition-all duration-700 font-semibold"
-            style={getIntentStyle(message.intent)}
+    <div
+      className={`animate-in fade-in slide-in-from-bottom-2 duration-500 flex ${isMentor ? "justify-start" : "justify-end"}`}
+    >
+      <div className={`max-w-[90%] space-y-1.5 ${isMentor ? "" : "text-right"}`}>
+        <div
+          className="text-xs font-medium tracking-wide"
+          style={{ color: isMentor ? "var(--realm-accent)" : "var(--ink-tertiary)" }}
+        >
+          {isMentor ? "Your Mentor" : "You"}
+          {isMentor && message.intent && message.intent !== "You" && (
+            <span className="ml-2 opacity-70">
+              · {INTENT_LABELS[message.intent] ?? message.intent}
+            </span>
+          )}
+        </div>
+        <div className={isMentor ? "dialogue-mentor" : "dialogue-student"}>
+          <p
+            className={`px-4 py-3 text-[15px] leading-relaxed ${isMentor ? "font-display" : "italic"}`}
+            style={{ color: isMentor ? "var(--ink-primary)" : "var(--ink-secondary)" }}
           >
-            [{message.intent}]
-          </span>
-        )}
+            {message.text}
+          </p>
+        </div>
       </div>
-      <p
-        className={`mt-1.5 text-[15px] leading-relaxed ${
-          isMentor ? "text-foreground" : "text-muted-foreground italic"
-        }`}
-        style={{ color: isMentor ? "var(--ink-primary)" : "var(--ink-secondary)" }}
-      >
-        {message.text}
-      </p>
     </div>
   );
 }

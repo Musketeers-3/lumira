@@ -5,15 +5,15 @@ import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 export const Route = createFileRoute("/architecture-log")({
   head: () => ({
     meta: [
-      { title: "Journey Log — Lumira" },
+      { title: "Journal — Lumira" },
       {
         name: "description",
-        content: "A quiet record of every walk you and your mentor have taken together.",
+        content: "A record of every adventure you and your mentor have shared together.",
       },
-      { property: "og:title", content: "Journey Log — Lumira" },
+      { property: "og:title", content: "Journal — Lumira" },
       {
         property: "og:description",
-        content: "A quiet record of every walk you and your mentor have taken together.",
+        content: "A record of every adventure you and your mentor have shared together.",
       },
     ],
   }),
@@ -55,31 +55,31 @@ function ArchitectureLog() {
     }, {});
 
     const tags: string[] = [];
-    if (counts["FOCUS"]) tags.push(`Gentle Push x${counts["FOCUS"]}`);
-    if (counts["CHALLENGE"]) tags.push(`Believing Challenge x${counts["CHALLENGE"]}`);
-    if (hasBreakthrough || counts["CELEBRATE"]) tags.push("Light Found");
+    if (counts["FOCUS"]) tags.push(`Hints x${counts["FOCUS"]}`);
+    if (counts["CHALLENGE"]) tags.push(`Challenges x${counts["CHALLENGE"]}`);
+    if (hasBreakthrough || counts["CELEBRATE"]) tags.push("Star born");
 
-    return tags.length > 0 ? tags : ["System Primed"];
+    return tags.length > 0 ? tags : ["Adventure begun"];
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <header>
         <div
-          className="font-mono text-[11px] uppercase tracking-[0.3em]"
-          style={{ color: "var(--gold-soft)" }}
+          className="text-xs font-medium uppercase tracking-[0.2em]"
+          style={{ color: "var(--realm-accent)" }}
         >
-          the walks you've taken
+          Mentorship moments
         </div>
         <h1
-          className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl"
+          className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl font-display"
           style={{ color: "var(--ink-primary)" }}
         >
-          Journey Log
+          Your Journal
         </h1>
         <p className="mt-2 max-w-xl" style={{ color: "var(--ink-secondary)" }}>
-          Every session you've shared, the shape of the conversation, and the moment you found your
-          light.
+          Every adventure you've shared with your mentor — the questions, the challenges, and the
+          moments a new star was born.
         </p>
       </header>
 
@@ -126,8 +126,8 @@ function ArchitectureLog() {
 
           {/* Empty State */}
           {!isLoading && sessions.length === 0 && !isError && (
-            <div className="relative p-6 text-sm italic text-muted-foreground">
-              The log is quiet. Enter the Dojo to begin your first walk.
+            <div className="relative p-6 text-sm italic font-display" style={{ color: "var(--ink-tertiary)" }}>
+              Your journal is blank. Step into a world to begin your first adventure.
             </div>
           )}
 
@@ -171,26 +171,26 @@ function ArchitectureLog() {
                         {s.topic || s.lesson_id}
                       </h3>
                       <div
-                        className="font-mono text-[10px] uppercase tracking-widest"
-                        style={{ color: "var(--gold-soft)" }}
+                        className="text-[10px] uppercase tracking-widest"
+                        style={{ color: "var(--realm-accent)" }}
                       >
                         {formattedDate} · {formattedTime}
                       </div>
                     </div>
-                    <p className="mt-2 text-sm italic" style={{ color: "var(--ink-secondary)" }}>
+                    <p className="mt-2 text-sm italic font-display" style={{ color: "var(--ink-secondary)" }}>
                       {s.breakthrough
-                        ? '"A cognitive breakthrough was verified during this session."'
-                        : '"Explored foundational concepts through guided Socratic reasoning."'}
+                        ? '"A new star joined your constellation during this adventure."'
+                        : '"Explored mysteries through guided discovery and reasoning."'}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {intents.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest"
+                          className="rounded-full px-2.5 py-1 text-[10px] uppercase tracking-widest"
                           style={{
-                            background: "rgba(201,162,75,0.06)",
-                            border: "1px solid rgba(201,162,75,0.22)",
-                            color: "var(--gold-soft)",
+                            background: "var(--realm-glow)",
+                            border: "1px solid var(--realm-accent)",
+                            color: "var(--realm-accent)",
                           }}
                         >
                           {tag}

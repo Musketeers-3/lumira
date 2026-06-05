@@ -1,35 +1,50 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLearningState } from "@/lib/learning-state-context";
+import { useMentorAnimationState } from "@/lib/mentor-animation-context";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { useSocraticDialogue } from "@/hooks/useSocraticDialogue";
 import { getThinkingPauseMs, getSpeakDurationMs } from "@/lib/mentor-personality";
 import type { SocraticContext } from "@/lib/ai-mentor";
 import type { LearningState, Message } from "../types";
-import { MentorCanvas } from "./MentorCanvas";
-import { MentorGlassFrame } from "./MentorGlassFrame";
-import { InteractiveDebateTerminal } from "./InteractiveDebateTerminal";
+import { ExplorationEnvironment } from "./ExplorationEnvironment";
 import { CelebrationOverlay } from "./CelebrationOverlay";
-
+import { discoveryTitle, type RealmId } from "@/lib/realms";
+import { getUnlockedArtifacts, persistArtifact } from "@/lib/artifacts";
+import { useRealmAudio } from "@/lib/useRealmAudio";
 interface SocraticEngineProps {
   enableAI?: boolean;
   enablePersistence?: boolean;
   lessonId?: string;
   topic?: string;
   learningObjective?: string;
+  realm?: RealmId;
 }
 
+/** Triggers mentor glance toward the world panel (not world-space coords). */
+const LOOK_TARGETS: Record<string, [number, number, number]> = {
+  Earth: [1, 1, 1],
+  Moon: [1, 1, 1],
+  Particles: [1, 1, 1],
+  "Living Cell": [1, 1, 1],
+  Pattern: [1, 1, 1],
+  "Ancient Scroll": [1, 1, 1],
+};
+
 export function SocraticEngine({
-  enableAI = true, // Defaults to true in production
+  enableAI = true,
   enablePersistence = true,
   lessonId = "dynamic-session",
   topic = "Cognitive Pathway",
   learningObjective = "Discover the structural principles of the system through guided reasoning.",
+  realm = "physics",
 }: SocraticEngineProps) {
   const { state, setState, isSpeaking, setIsSpeaking } = useLearningState();
-  const { sessionId, startSession, updateSession, markBreakthrough, endSession, logMessage } =
+  const { setMentorState } = useMentorAnimationState();
+  const { setRealm: setAudioRealm } = useRealmAudio();
+  const { sessionId, startSession, updateSession, markBreakthrough, logMessage, fetchSkills } =
     useSessionPersistence();
 
-  // Initialize the live AI context
   const AI_CONTEXT: SocraticContext = {
     lessonTopic: topic,
     learningObjective: learningObjective,
@@ -47,21 +62,35 @@ export function SocraticEngine({
   const [stepIndex, setStepIndex] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
   const [isPausing, setIsPausing] = useState(false);
+  const [explorationHint, setExplorationHint] = useState<string | null>(null);
+  const [lookTarget, setLookTarget] = useState<[number, number, number] | null>(null);
 
   const speakTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startTimeRef = useRef<number | null>(null);
   const stateProgressionRef = useRef<string[]>(["IDLE"]);
 
-  // Mount the persistent session
+  const { data: skills = [] } = useQuery({
+    queryKey: ["engine-artifacts"],
+    queryFn: () => fetchSkills(),
+    staleTime: 1000 * 60,
+  });
+
+  const unlockedSkillNames = (skills ?? [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .filter((s: any) => s.status === "unlocked")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((s: any) => s.skill_name ?? s.name ?? "");
+  const artifacts = getUnlockedArtifacts(unlockedSkillNames);
+
+  useEffect(() => {
+    setAudioRealm(realm);
+  }, [realm, setAudioRealm]);
+
   useEffect(() => {
     if (enablePersistence) {
       startSession(lessonId, topic);
-      startTimeRef.current = Date.now();
     }
-    return () => {
-      clearTimers();
-    };
+    return () => clearTimers();
   }, [enablePersistence, lessonId, topic, startSession]);
 
   const clearTimers = () => {
@@ -69,7 +98,6 @@ export function SocraticEngine({
     if (pauseTimer.current) clearTimeout(pauseTimer.current);
   };
 
-  // Maps AI state shifts to physical 3D and UI changes
   const playMentorPresence = useCallback(
     (mentorState: LearningState, textLength = 120) => {
       clearTimers();
@@ -105,7 +133,17 @@ export function SocraticEngine({
     return "Gentle Push";
   };
 
-  // Main interaction loop
+  const handleObjectInteract = useCallback((label: string, hint: string) => {
+    setExplorationHint(hint);
+    setLookTarget(LOOK_TARGETS[label] ?? null);
+    setState("FOCUS");
+    setMentorState("thinking");
+    setTimeout(() => {
+      setState("IDLE");
+      setMentorState("idle");
+    }, 2000);
+  }, [setState, setMentorState]);
+
   const handleAiAnswer = async (answer: string) => {
     try {
       if (enablePersistence && sessionId) {
@@ -121,10 +159,7 @@ export function SocraticEngine({
       if (!result?.response) return;
 
       const { response } = result;
-
-      // Advance UI progress bar safely
       setStepIndex((prev) => Math.min(prev + 1, AI_CONTEXT.totalSteps - 1));
-
       playMentorPresence(response.estimated_state, response.mentor_response.length);
 
       if (enablePersistence && sessionId) {
@@ -142,9 +177,11 @@ export function SocraticEngine({
       }
 
       if (response.question_type === "breakthrough_confirmation") {
+        setMentorState("clapping");
         if (enablePersistence && sessionId) {
           await markBreakthrough(sessionId);
         }
+        persistArtifact("orbit-ring");
         setTimeout(() => setCelebrate(true), 900);
       }
     } catch (error) {
@@ -159,28 +196,35 @@ export function SocraticEngine({
     text: m.content,
   }));
 
-  return (
-    <div className="flex flex-col gap-5 pt-8 pb-12">
-      <div className="grid gap-5 lg:grid-cols-[3fr_2fr]">
-        {/* Left: Mentor Visual Presence */}
-        <MentorGlassFrame isSpeaking={isSpeaking} isPausing={isPausing}>
-          <MentorCanvas state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
-        </MentorGlassFrame>
+  const breakthroughInsight =
+    terminalMessages.filter((m) => m.speaker === "student").at(-1)?.text ??
+    "That understanding will stay with you now — you found it yourself.";
 
-        {/* Right: Interaction Terminal */}
-        <InteractiveDebateTerminal
-          messages={terminalMessages}
-          stepIndex={stepIndex}
-          totalSteps={AI_CONTEXT.totalSteps}
-          isSpeaking={isSpeaking}
-          isLoading={aiLoading || isPausing}
-          enableAI={enableAI}
-          onSubmitAnswer={handleAiAnswer}
-          topic={topic}
-          lessonTitle={learningObjective}
+  return (
+    <div className="flex flex-col gap-5 pt-4 pb-12">
+      <ExplorationEnvironment
+        state={state}
+        isSpeaking={isSpeaking}
+        isPausing={isPausing}
+        realm={realm}
+        artifacts={artifacts}
+        messages={terminalMessages}
+        stepIndex={stepIndex}
+        totalSteps={AI_CONTEXT.totalSteps}
+        topic={topic}
+        isLoading={aiLoading || isPausing}
+        explorationHint={explorationHint}
+        lookTarget={lookTarget}
+        onObjectInteract={handleObjectInteract}
+        onSubmitAnswer={handleAiAnswer}
+      />
+      {celebrate && (
+        <CelebrationOverlay
+          onClose={() => setCelebrate(false)}
+          discoveryTitle={discoveryTitle(topic)}
+          insight={breakthroughInsight}
         />
-      </div>
-      {celebrate && <CelebrationOverlay onClose={() => setCelebrate(false)} />}
+      )}
     </div>
   );
 }

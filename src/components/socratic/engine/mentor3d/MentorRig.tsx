@@ -1,16 +1,14 @@
-import type { LearningState } from "../../types";
 import { MentorModel } from "./MentorModel";
 
 interface Props {
-  state: LearningState;
   isSpeaking: boolean;
   isPausing: boolean;
+  lookTarget?: [number, number, number] | null;
 }
 
 /**
- * Renders the live Lumira mentor character.
- * We have officially swapped from the procedural fallback to the high-fidelity VRM pipeline.
+ * Renders the live Lumira mentor character with FBX-driven VRM animations.
  */
-export function MentorRig({ state, isSpeaking, isPausing }: Props) {
-  return <MentorModel state={state} isSpeaking={isSpeaking} isPausing={isPausing} />;
+export function MentorRig({ isSpeaking, isPausing, lookTarget }: Props) {
+  return <MentorModel isSpeaking={isSpeaking} isPausing={isPausing} lookTarget={lookTarget} />;
 }

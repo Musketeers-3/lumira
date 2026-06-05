@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorldsRouteImport } from './routes/worlds'
 import { Route as SkillPassportRouteImport } from './routes/skill-passport'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as LessonBuilderRouteImport } from './routes/lesson-builder'
@@ -16,6 +17,11 @@ import { Route as EngineRouteImport } from './routes/engine'
 import { Route as ArchitectureLogRouteImport } from './routes/architecture-log'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorldsRoute = WorldsRouteImport.update({
+  id: '/worlds',
+  path: '/worlds',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SkillPassportRoute = SkillPassportRouteImport.update({
   id: '/skill-passport',
   path: '/skill-passport',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/lesson-builder': typeof LessonBuilderRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/worlds': typeof WorldsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/lesson-builder': typeof LessonBuilderRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/worlds': typeof WorldsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/lesson-builder': typeof LessonBuilderRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/worlds': typeof WorldsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/lesson-builder'
     | '/settings'
     | '/skill-passport'
+    | '/worlds'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/lesson-builder'
     | '/settings'
     | '/skill-passport'
+    | '/worlds'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/lesson-builder'
     | '/settings'
     | '/skill-passport'
+    | '/worlds'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,10 +118,18 @@ export interface RootRouteChildren {
   LessonBuilderRoute: typeof LessonBuilderRoute
   SettingsRoute: typeof SettingsRoute
   SkillPassportRoute: typeof SkillPassportRoute
+  WorldsRoute: typeof WorldsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/worlds': {
+      id: '/worlds'
+      path: '/worlds'
+      fullPath: '/worlds'
+      preLoaderRoute: typeof WorldsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/skill-passport': {
       id: '/skill-passport'
       path: '/skill-passport'
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   LessonBuilderRoute: LessonBuilderRoute,
   SettingsRoute: SettingsRoute,
   SkillPassportRoute: SkillPassportRoute,
+  WorldsRoute: WorldsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

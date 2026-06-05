@@ -5,6 +5,7 @@ import type { Message } from "../types";
 import { TerminalMessage } from "./TerminalMessage";
 import { MicButton } from "./MicButton";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { QUEST_BEATS } from "@/lib/realms";
 
 type MentorIntent = "Gentle Push" | "Believing Challenge" | "Light Found";
 
@@ -16,27 +17,26 @@ interface Props {
   onSubmitAnswer?: (answer: string, intent?: MentorIntent) => Promise<void>;
   isLoading?: boolean;
   enableAI?: boolean;
-  // Dynamic Context Injections
   topic?: string;
   lessonTitle?: string;
 }
 
 const INTENT_OPTIONS: { value: MentorIntent; label: string; hint: string }[] = [
-  { value: "Gentle Push", label: "Gentle Push", hint: "Nudge me forward" },
-  { value: "Believing Challenge", label: "Believing Challenge", hint: "Press my thinking" },
-  { value: "Light Found", label: "Light Found", hint: "Celebrate the insight" },
+  { value: "Gentle Push", label: "Give me a hint", hint: "Nudge forward" },
+  { value: "Believing Challenge", label: "Challenge me", hint: "Push my thinking" },
+  { value: "Light Found", label: "I think I found it!", hint: "Share a discovery" },
 ];
 
 export function InteractiveDebateTerminal({
   messages,
   stepIndex,
-  totalSteps,
+  totalSteps: _totalSteps,
   isSpeaking,
   onSubmitAnswer,
   isLoading = false,
   enableAI = false,
-  topic = "Cognitive Pathway",
-  lessonTitle = "Active Exploration",
+  topic = "Exploration",
+  lessonTitle = "Active Adventure",
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,14 +56,12 @@ export function InteractiveDebateTerminal({
   }, [messages.length]);
 
   useEffect(() => {
-    // Auto-focus input when messages arrive and not speaking
     if (messages.length > 0 && !isSpeaking && !isListening && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 300);
       setInputActive(true);
     }
   }, [messages.length, isSpeaking, isListening]);
 
-  // Sync speech transcript to input
   useEffect(() => {
     if (isListening && transcript) {
       setInputValue(transcript);
@@ -113,16 +111,16 @@ export function InteractiveDebateTerminal({
 
   return (
     <div className="flex h-full min-h-[520px] flex-col gap-4">
-      {/* Lesson card — Now fully dynamic */}
+      {/* Quest context card */}
       <div className="surface-luxe p-5 transition-colors duration-700">
         <div
-          className="font-mono text-[10px] uppercase tracking-[0.25em] relative z-10"
-          style={{ color: "var(--gold-soft)" }}
+          className="text-xs font-medium uppercase tracking-[0.2em] relative z-10"
+          style={{ color: "var(--realm-accent)" }}
         >
-          Active Environment
+          You are exploring
         </div>
         <h2
-          className="mt-1 text-lg font-semibold tracking-tight relative z-10"
+          className="mt-1 text-lg font-semibold tracking-tight relative z-10 font-display"
           style={{ color: "var(--ink-primary)" }}
         >
           {topic}
@@ -130,42 +128,52 @@ export function InteractiveDebateTerminal({
         <p className="text-sm relative z-10" style={{ color: "var(--ink-secondary)" }}>
           {lessonTitle}
         </p>
-        <div className="mt-4 flex items-center gap-2 relative z-10">
-          {Array.from({ length: Math.max(totalSteps, 1) }).map((_, i) => {
+
+        {/* Quest arc */}
+        <div className="mt-4 flex items-center gap-1.5 relative z-10">
+          {QUEST_BEATS.map((beat, i) => {
             const reached = i <= stepIndex;
+            const active = i === stepIndex;
             return (
-              <HoverCard key={i} openDelay={120}>
+              <HoverCard key={beat.label} openDelay={120}>
                 <HoverCardTrigger asChild>
                   <button
                     type="button"
-                    className="h-2 flex-1 rounded-full transition-all duration-500"
-                    style={{
-                      background: reached
-                        ? "linear-gradient(90deg, var(--state-accent), var(--gold-soft))"
-                        : "rgba(245,241,230,0.06)",
-                      boxShadow: reached ? "0 0 12px var(--state-glow)" : "none",
-                    }}
-                    aria-label={`Step ${i + 1}`}
-                  />
+                    className="flex flex-col items-center flex-1 gap-1 transition-all duration-500"
+                    aria-label={beat.label}
+                  >
+                    <div
+                      className="h-2.5 w-2.5 rounded-full transition-all duration-500"
+                      style={{
+                        background: reached
+                          ? active
+                            ? "var(--realm-accent)"
+                            : "var(--gold-soft)"
+                          : "rgba(255,255,255,0.08)",
+                        boxShadow: active ? "0 0 14px var(--realm-glow)" : reached ? "0 0 8px var(--realm-glow)" : "none",
+                        transform: active ? "scale(1.3)" : "scale(1)",
+                      }}
+                    />
+                    <span
+                      className="text-[9px] font-medium uppercase tracking-wider hidden sm:block"
+                      style={{ color: active ? "var(--realm-accent)" : "var(--ink-tertiary)" }}
+                    >
+                      {beat.label}
+                    </span>
+                  </button>
                 </HoverCardTrigger>
                 <HoverCardContent
-                  className="w-56 backdrop-blur-xl"
+                  className="w-52 backdrop-blur-xl"
                   style={{
                     background: "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
-                    border: "1px solid rgba(201,162,75,0.25)",
-                    boxShadow: "var(--shadow-deep), var(--inset-highlight)",
+                    border: "1px solid rgba(255,255,255,0.1)",
                   }}
                 >
-                  <div
-                    className="font-mono text-[10px] uppercase tracking-widest"
-                    style={{ color: "var(--gold-soft)" }}
-                  >
-                    Step {i + 1} / {Math.max(totalSteps, 1)}
+                  <div className="text-xs font-medium" style={{ color: "var(--realm-accent)" }}>
+                    {beat.label}
                   </div>
                   <div className="mt-1 text-sm" style={{ color: "var(--ink-primary)" }}>
-                    {i === 0 && "Establish baseline understanding."}
-                    {i > 0 && i < totalSteps - 1 && "Applying Socratic friction."}
-                    {i === totalSteps - 1 && "Breakthrough verification."}
+                    {beat.hint}
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -174,29 +182,29 @@ export function InteractiveDebateTerminal({
         </div>
       </div>
 
-      {/* Terminal feed */}
+      {/* Dialogue feed */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto rounded-2xl p-5 backdrop-blur-xl transition-colors duration-700 relative"
         style={{
-          background: "linear-gradient(180deg, rgba(11,11,18,0.85) 0%, rgba(7,7,12,0.7) 100%)",
-          border: "1px solid rgba(245,241,230,0.06)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 60px rgba(0,0,0,0.45), 0 16px 40px -16px rgba(0,0,0,0.6)",
+          background: "linear-gradient(180deg, rgba(11,11,24,0.85) 0%, rgba(7,7,14,0.7) 100%)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -16px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Top gold hairline */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-6 right-6 top-0 h-px"
-          style={{ background: "var(--grad-hairline-gold)" }}
-        />
         {messages.length === 0 ? (
           <div
-            className="flex h-full items-center justify-center font-mono text-xs uppercase tracking-[0.3em]"
-            style={{ color: "var(--ink-tertiary)" }}
+            className="flex h-full flex-col items-center justify-center gap-3 text-center px-6"
           >
-            // session idle — press start
+            <div
+              className="text-3xl animate-pulse"
+              style={{ animation: "discovery-pulse 2s ease-in-out infinite" }}
+            >
+              ✦
+            </div>
+            <p className="font-display italic text-base" style={{ color: "var(--ink-secondary)" }}>
+              Your mentor is ready. Share your first thought when the moment feels right.
+            </p>
           </div>
         ) : (
           <div className="space-y-5">
@@ -207,13 +215,13 @@ export function InteractiveDebateTerminal({
         )}
       </div>
 
-      {/* Intent selector */}
+      {/* Mentor tone chips */}
       <div className="surface-luxe p-3.5">
         <div
-          className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] relative z-10"
-          style={{ color: "var(--gold-soft)" }}
+          className="mb-2 text-xs font-medium relative z-10"
+          style={{ color: "var(--ink-tertiary)" }}
         >
-          Ask Lumira to respond with…
+          How should your mentor respond?
         </div>
         <div className="flex flex-wrap gap-2 relative z-10">
           {INTENT_OPTIONS.map((opt) => {
@@ -228,33 +236,30 @@ export function InteractiveDebateTerminal({
                 className="rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide transition-all duration-300"
                 style={{
                   border: active
-                    ? "1px solid var(--state-accent)"
-                    : "1px solid rgba(245,241,230,0.10)",
+                    ? "1px solid var(--realm-accent)"
+                    : "1px solid rgba(255,255,255,0.1)",
                   background: active
-                    ? "linear-gradient(180deg, rgba(201,162,75,0.16), rgba(20,20,30,0.4))"
-                    : "rgba(245,241,230,0.03)",
-                  color: active ? "var(--state-accent)" : "rgba(245,241,230,0.6)",
-                  boxShadow: active
-                    ? "0 0 18px var(--state-glow), inset 0 1px 0 rgba(255,255,255,0.06)"
-                    : "inset 0 1px 0 rgba(255,255,255,0.03)",
+                    ? "var(--realm-glow)"
+                    : "rgba(255,255,255,0.03)",
+                  color: active ? "var(--realm-accent)" : "var(--ink-secondary)",
+                  boxShadow: active ? "0 0 18px var(--realm-glow)" : "none",
                 }}
               >
                 {opt.label}
-                <span className="ml-2 opacity-60">{opt.hint}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Input dock */}
+      {/* Thought input */}
       <div
         className="flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl transition-all duration-500"
         style={{
           background: "linear-gradient(180deg, #1B1B28 0%, #13131C 100%)",
-          border: inputActive ? "1px solid var(--state-accent)" : "1px solid rgba(201,162,75,0.18)",
+          border: inputActive ? "1px solid var(--realm-accent)" : "1px solid rgba(255,255,255,0.08)",
           boxShadow: inputActive
-            ? "0 0 28px var(--state-glow), inset 0 1px 0 rgba(255,255,255,0.05)"
+            ? "0 0 28px var(--realm-glow), inset 0 1px 0 rgba(255,255,255,0.05)"
             : "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.4)",
         }}
       >
@@ -274,14 +279,13 @@ export function InteractiveDebateTerminal({
           onKeyDown={handleKeyDown}
           onFocus={() => setInputActive(true)}
           onBlur={() => setInputActive(false)}
-          placeholder="type or speak your reasoning_"
+          placeholder="Share your thinking..."
           disabled={isSubmitting || isLoading}
-          className="flex flex-1 items-center gap-2 rounded-xl px-4 py-3 font-mono text-sm outline-none transition-all duration-500 disabled:opacity-50"
+          className="flex flex-1 items-center gap-2 rounded-xl px-4 py-3 text-sm outline-none transition-all duration-500 disabled:opacity-50"
           style={{
             background: inputActive ? "rgba(7,7,12,0.7)" : "rgba(7,7,12,0.5)",
             color: "var(--ink-primary)",
-            border: "1px solid rgba(245,241,230,0.06)",
-            boxShadow: "inset 0 2px 4px rgba(0,0,0,0.4)",
+            border: "1px solid rgba(255,255,255,0.06)",
           }}
         />
         <button
@@ -289,8 +293,8 @@ export function InteractiveDebateTerminal({
           onClick={handleSubmit}
           disabled={!inputValue.trim() || isSubmitting || isLoading}
           className="flex-shrink-0 transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ color: "var(--gold-soft)", filter: "drop-shadow(0 0 6px var(--state-glow))" }}
-          aria-label="Submit answer"
+          style={{ color: "var(--realm-accent)", filter: "drop-shadow(0 0 6px var(--realm-glow))" }}
+          aria-label="Share thought"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

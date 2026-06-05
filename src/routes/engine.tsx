@@ -10,17 +10,21 @@ const engineSearchSchema = z.object({
     .string()
     .optional()
     .default("Discover that an orbit is continuous falling combined with sideways motion."),
+  realm: z
+    .enum(["hub", "physics", "chemistry", "biology", "math", "history"])
+    .optional()
+    .default("physics"),
 });
 
 export const Route = createFileRoute("/engine")({
   validateSearch: engineSearchSchema,
   head: () => ({
     meta: [
-      { title: "The Dojo — Lumira" },
+      { title: "Exploration — Lumira" },
       {
         name: "description",
         content:
-          "Step into the dojo. A patient mentor walks beside you while you reason your way to ideas.",
+          "Step into a living world. Explore, reason, and discover understanding beside your mentor.",
       },
     ],
   }),
@@ -34,11 +38,12 @@ function EnginePage() {
   return (
     <div className="mx-auto max-w-7xl animate-in fade-in duration-700">
       <SocraticEngine
-        enableAI={true} // Force the live Socratic loop
-        enablePersistence={true} // Ensure the walks are saved to the Journey Log
+        enableAI={true}
+        enablePersistence={true}
         lessonId={search.lessonId}
         topic={search.topic}
         learningObjective={search.objective}
+        realm={search.realm}
       />
     </div>
   );

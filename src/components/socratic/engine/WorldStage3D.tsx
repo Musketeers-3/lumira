@@ -5,23 +5,43 @@ import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import type { LearningState } from "../types";
 import type { RealmId } from "@/lib/realms";
 import type { Artifact } from "@/lib/artifacts";
-import { MentorAvatar } from "./MentorAvatar";
-import { MentorRig } from "./mentor3d/MentorRig";
-import { MentorCamera } from "./mentor3d/MentorCamera";
-import { MentorAnimationBridgeWithPause } from "./mentor3d/MentorAnimationBridge";
+import { WorldStageCamera } from "./mentor3d/WorldStageCamera";
 import { MentorSceneLights } from "./mentor3d/MentorSceneLights";
 import { RealmEnvironmentScene } from "./environments/RealmEnvironmentScene";
-import { MENTOR_LAYOUT, WORLD_LAYOUT } from "./mentor3d/mentorLayout";
+import { WORLD_STAGE } from "./mentor3d/mentorLayout";
 import { useMentorSettingsOptional } from "@/lib/mentor-settings-hooks";
 
 interface Props {
   state: LearningState;
-  isSpeaking: boolean;
-  isPausing?: boolean;
   realm?: RealmId;
   artifacts?: Artifact[];
-  lookTarget?: [number, number, number] | null;
   onObjectInteract?: (label: string, hint: string) => void;
+}
+
+function StageContent({
+  state,
+  realm,
+  artifacts,
+  onObjectInteract,
+}: Required<Pick<Props, "state" | "realm" | "artifacts">> & Pick<Props, "onObjectInteract">) {
+  const settings = useMentorSettingsOptional();
+  const warmthBias = settings?.warmthBias ?? 0.6;
+
+  return (
+    <>
+      <WorldStageCamera />
+      <MentorSceneLights state={state} warmthBias={warmthBias} />
+      <Suspense fallback={null}>
+        <RealmEnvironmentScene
+          realm={realm}
+          state={state}
+          onObjectInteract={onObjectInteract ?? (() => {})}
+          artifacts={artifacts}
+        />
+      </Suspense>
+      <Environment preset="night" />
+    </>
+  );
 }
 
 function detectWebGL(): boolean {
@@ -36,47 +56,10 @@ function detectWebGL(): boolean {
   }
 }
 
-function SceneContent({
+export function WorldStage3D({
   state,
-  isSpeaking,
-  isPausing,
-  realm,
-  artifacts,
-  lookTarget,
-  onObjectInteract,
-}: Required<Pick<Props, "state" | "isSpeaking" | "isPausing" | "realm" | "artifacts">> &
-  Pick<Props, "lookTarget" | "onObjectInteract">) {
-  const settings = useMentorSettingsOptional();
-  const warmthBias = settings?.warmthBias ?? 0.6;
-
-  return (
-    <>
-      <MentorCamera />
-      <MentorAnimationBridgeWithPause isPausing={isPausing ?? false} />
-      <MentorSceneLights state={state} warmthBias={warmthBias} />
-      <group position={WORLD_LAYOUT.offset} scale={WORLD_LAYOUT.scale}>
-        <RealmEnvironmentScene
-          realm={realm}
-          state={state}
-          onObjectInteract={onObjectInteract ?? (() => {})}
-          artifacts={artifacts}
-        />
-      </group>
-      <Suspense fallback={null}>
-        <MentorRig isSpeaking={isSpeaking} isPausing={isPausing ?? false} lookTarget={lookTarget} />
-      </Suspense>
-      <Environment preset="night" />
-    </>
-  );
-}
-
-export function Mentor3D({
-  state,
-  isSpeaking,
-  isPausing = false,
   realm = "physics",
   artifacts = [],
-  lookTarget = null,
   onObjectInteract,
 }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -87,23 +70,14 @@ export function Mentor3D({
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return <div className="h-full w-full" aria-hidden />;
-  }
-
-  if (!webgl) {
-    return (
-      <div className="h-full w-full">
-        <MentorAvatar state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
-      </div>
-    );
-  }
+  if (!mounted) return <div className="h-full w-full" aria-hidden />;
+  if (!webgl) return <div className="h-full w-full bg-[#050507]" aria-hidden />;
 
   return (
     <Canvas
       shadows={{ type: PCFShadowMap }}
       dpr={1}
-      camera={{ position: MENTOR_LAYOUT.cameraPosition, fov: MENTOR_LAYOUT.fov }}
+      camera={{ position: WORLD_STAGE.cameraPosition, fov: WORLD_STAGE.fov }}
       gl={{
         antialias: true,
         alpha: true,
@@ -112,13 +86,10 @@ export function Mentor3D({
       }}
       style={{ touchAction: "none" }}
     >
-      <SceneContent
+      <StageContent
         state={state}
-        isSpeaking={isSpeaking}
-        isPausing={isPausing}
         realm={realm}
         artifacts={artifacts}
-        lookTarget={lookTarget}
         onObjectInteract={onObjectInteract}
       />
     </Canvas>

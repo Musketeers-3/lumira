@@ -1,35 +1,53 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useLearningState } from "@/lib/learning-state-context";
+import { cn } from "@/lib/utils";
+import { Compass, Map, Star, BookOpen, PenLine, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-// Pure visual component to keep styling DRY without triggering TanStack Router's union errors
+const NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: "/", label: "Discovery Hub", icon: Compass },
+  { to: "/worlds", label: "Worlds", icon: Map },
+  { to: "/engine", label: "Explore", icon: Compass },
+  { to: "/skill-passport", label: "Constellation", icon: Star },
+  { to: "/architecture-log", label: "Journal", icon: BookOpen },
+  { to: "/lesson-builder", label: "Create Lesson", icon: PenLine },
+];
+
 function NavItemContent({
   label,
-  marker,
+  icon: Icon,
   active,
 }: {
   label: string;
-  marker: string;
+  icon: LucideIcon;
   active: boolean;
 }) {
   return (
     <div
-      className="group flex items-center gap-4 py-3 px-4 rounded-xl transition-all duration-300"
+      className={cn(
+        "group flex items-center gap-3.5 py-3.5 px-4 rounded-xl transition-all duration-400",
+        active && "glass-glow",
+      )}
       style={{
-        background: active ? "rgba(201,162,75,0.06)" : "transparent",
-        border: `1px solid ${active ? "rgba(201,162,75,0.22)" : "transparent"}`,
+        background: active ? "var(--realm-glow)" : "transparent",
+        border: `1px solid ${active ? "var(--realm-accent)" : "transparent"}`,
         color: active ? "var(--ink-primary)" : "var(--ink-tertiary)",
       }}
     >
-      <span
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px]"
-        style={{
-          border: `1px solid ${active ? "rgba(201,162,75,0.5)" : "var(--hairline-strong)"}`,
-          color: active ? "var(--gold-soft)" : "var(--ink-tertiary)",
-        }}
-      >
-        {marker}
+      <Icon
+        className="h-4 w-4 shrink-0 transition-all duration-300 group-hover:scale-110"
+        style={{ color: active ? "var(--realm-accent)" : "var(--ink-tertiary)" }}
+        strokeWidth={active ? 2 : 1.5}
+      />
+      <span className="text-sm font-medium tracking-wide transition-colors duration-300 group-hover:text-[var(--ink-primary)]">
+        {label}
       </span>
-      <span className="text-sm font-medium tracking-wide">{label}</span>
+      {active && (
+        <span
+          className="ml-auto h-1.5 w-1.5 rounded-full"
+          style={{ background: "var(--realm-accent)", boxShadow: "0 0 8px var(--realm-glow)" }}
+        />
+      )}
     </div>
   );
 }
@@ -38,103 +56,70 @@ export function Sidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const { state } = useLearningState();
 
+  const stateLabel =
+    state === "IDLE"
+      ? "Ready to explore"
+      : state === "FOCUS"
+        ? "Listening closely"
+        : state === "CHALLENGE"
+          ? "Believing in you"
+          : "Celebrating you";
+
   return (
-    <aside
-      className="hidden lg:flex h-screen w-72 shrink-0 flex-col px-8 py-8 gap-12 transition-colors duration-700 relative"
-      style={{
-        background: "var(--bg-night)",
-        borderRight: "1px solid var(--hairline)",
-      }}
-    >
-      {/* Brand */}
-      <div className="space-y-1.5">
-        <div
-          className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em]"
+    <aside className="nav-glass hidden lg:flex h-screen w-72 shrink-0 flex-col px-7 py-9 gap-10 relative">
+      <div className="space-y-2">
+        <div className="text-xs uppercase tracking-[0.2em]" style={{ color: "var(--ink-tertiary)" }}>
+          Lumira Academy
+        </div>
+        <h1
+          className="text-[2rem] font-semibold tracking-tight leading-none font-display"
+          style={{ color: "var(--ink-primary)" }}
+        >
+          Lumi<span style={{ color: "var(--realm-accent)" }}>ra</span>
+        </h1>
+        <p
+          className="font-display italic text-sm leading-relaxed pr-4"
           style={{ color: "var(--ink-tertiary)" }}
         >
-          <span>Lumira</span>
-          <span className="opacity-40">//</span>
-          <span>Ambient OS</span>
-        </div>
-        <h1 className="text-3xl font-light tracking-tight" style={{ color: "var(--ink-primary)" }}>
-          Lumi<span style={{ color: "var(--gold-soft)" }}>ra</span>
-        </h1>
-        <p className="text-xs italic leading-relaxed pr-6" style={{ color: "var(--ink-tertiary)" }}>
-          Learn beside someone who believes in you.
+          A universe where understanding is discovered.
         </p>
       </div>
 
-      {/* Catalog navigation — Explicitly defined to satisfy strict URL literal types */}
-      <nav className="flex-1 flex flex-col gap-1">
-        <Link to="/" className="block">
-          <NavItemContent label="Your Path" marker="01" active={pathname === "/"} />
-        </Link>
-
-        {/* The Dojo uses optional search parameters, safely omitting them uses the schema defaults */}
-        <Link to="/engine" className="block">
-          <NavItemContent label="The Dojo" marker="02" active={pathname === "/engine"} />
-        </Link>
-
-        <Link to="/skill-passport" className="block">
-          <NavItemContent label="Your Light" marker="03" active={pathname === "/skill-passport"} />
-        </Link>
-
-        <Link to="/lesson-builder" className="block">
-          <NavItemContent
-            label="Create Lesson"
-            marker="04"
-            active={pathname === "/lesson-builder"}
-          />
-        </Link>
-
-        <Link to="/architecture-log" className="block">
-          <NavItemContent
-            label="Journey Log"
-            marker="05"
-            active={pathname === "/architecture-log"}
-          />
-        </Link>
-
-        {/* Settings, set apart like a colophon entry */}
-        <Link to="/settings" className="block mt-5">
-          <NavItemContent label="Settings" marker="S" active={pathname === "/settings"} />
+      <nav className="flex-1 flex flex-col gap-0.5">
+        {NAV_ITEMS.map((item) => (
+          <Link key={item.to} to={item.to} className="block">
+            <NavItemContent
+              label={item.label}
+              icon={item.icon}
+              active={pathname === item.to || (item.to === "/engine" && pathname === "/engine")}
+            />
+          </Link>
+        ))}
+        <Link to="/settings" className="block mt-4">
+          <NavItemContent label="Settings" icon={Settings} active={pathname === "/settings"} />
         </Link>
       </nav>
 
-      {/* Mentor state card — catalog tag */}
-      <div
-        className="relative overflow-hidden rounded-2xl p-5"
-        style={{
-          background: "var(--grad-onyx)",
-          border: "1px solid var(--hairline)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-[0.06] mix-blend-overlay"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-            backgroundSize: "160px 160px",
-          }}
-        />
-        <div
-          className="font-mono text-[10px] uppercase tracking-[0.25em]"
-          style={{ color: "var(--ink-tertiary)" }}
-        >
-          Mentor state
+      <div className="glass-panel p-5 float-subtle">
+        <div className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+          Your mentor
         </div>
-        <div className="mt-2 flex items-center gap-2.5">
-          <span
-            className="h-2 w-2 rounded-full transition-colors duration-700 animate-pulse"
-            style={{ background: "var(--state-accent)", boxShadow: "0 0 10px var(--state-glow)" }}
-          />
-          <span
-            className="font-mono text-xs font-semibold tracking-[0.22em] uppercase"
-            style={{ color: "var(--ink-primary)" }}
-          >
-            {state}
+        <div className="mt-3 flex items-center gap-3">
+          <span className="relative flex h-2.5 w-2.5">
+            <span
+              className="absolute inset-0 rounded-full animate-ping opacity-40"
+              style={{ background: "var(--realm-accent)" }}
+            />
+            <span
+              className="relative h-2.5 w-2.5 rounded-full"
+              style={{
+                background: "var(--realm-accent)",
+                boxShadow: "0 0 14px var(--realm-glow)",
+              }}
+            />
+          </span>
+          <span className="text-xs font-medium" style={{ color: "var(--ink-primary)" }}>
+            {stateLabel}
           </span>
         </div>
       </div>

@@ -1,67 +1,153 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Star } from "lucide-react";
 
-export function CelebrationOverlay({ onClose }: { onClose: () => void }) {
+interface Props {
+  onClose: () => void;
+  discoveryTitle?: string;
+  insight?: string;
+}
+
+type Phase = "converge" | "celebrate" | "reveal" | "star" | "done";
+
+const PHASE_DURATION: Record<Phase, number> = {
+  converge: 1200,
+  celebrate: 2000,
+  reveal: 2500,
+  star: 3000,
+  done: 0,
+};
+
+export function CelebrationOverlay({
+  onClose,
+  discoveryTitle = "New Discoverer",
+  insight = "That understanding will stay with you now — you found it yourself.",
+}: Props) {
+  const [phase, setPhase] = useState<Phase>("converge");
+  const [canSkip, setCanSkip] = useState(false);
+
   useEffect(() => {
-    const t = setTimeout(onClose, 3500);
+    const skipTimer = setTimeout(() => setCanSkip(true), 4000);
+    return () => clearTimeout(skipTimer);
+  }, []);
+
+  useEffect(() => {
+    const phases: Phase[] = ["converge", "celebrate", "reveal", "star", "done"];
+    const idx = phases.indexOf(phase);
+    if (idx === -1 || phase === "done") {
+      onClose();
+      return;
+    }
+    const t = setTimeout(() => {
+      const next = phases[idx + 1];
+      if (next) setPhase(next);
+    }, PHASE_DURATION[phase]);
     return () => clearTimeout(t);
-  }, [onClose]);
+  }, [phase, onClose]);
+
+  const handleDismiss = () => {
+    if (canSkip || phase === "star" || phase === "done") onClose();
+  };
 
   return (
     <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md animate-in fade-in duration-700"
+      onClick={handleDismiss}
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md animate-in fade-in duration-700 cursor-pointer"
       style={{
-        background:
-          "radial-gradient(ellipse at center, rgba(201,162,75,0.18), rgba(7,7,12,0.85) 70%)",
+        background: `radial-gradient(ellipse at center, var(--realm-glow), rgba(7,7,12,0.88) 70%)`,
       }}
     >
-      {/* Soft glow pulse */}
+      {/* Particle burst */}
+      {phase !== "converge" &&
+        Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 rounded-full"
+            style={{
+              background: "var(--realm-accent)",
+              "--tx": `${Math.cos((i / 12) * Math.PI * 2) * 120}px`,
+              "--ty": `${Math.sin((i / 12) * Math.PI * 2) * 120}px`,
+              animation: "particle-pop 1.2s ease-out forwards",
+              animationDelay: `${i * 0.05}s`,
+            } as React.CSSProperties}
+          />
+        ))}
+
+      {/* Convergence glow */}
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-1000"
         style={{
-          background:
-            "radial-gradient(circle, rgba(201,162,75,0.65) 0%, var(--state-glow) 40%, transparent 70%)",
-          animation: "ripple 2.5s ease-out infinite",
+          width: phase === "converge" ? 120 : 300,
+          height: phase === "converge" ? 120 : 300,
+          background: `radial-gradient(circle, var(--realm-accent) 0%, var(--realm-glow) 40%, transparent 70%)`,
+          opacity: phase === "converge" ? 0.8 : 0.5,
+          animation: phase !== "converge" ? "ripple 2.5s ease-out infinite" : undefined,
         }}
       />
 
       <div
-        className="relative max-w-lg rounded-3xl p-10 text-center animate-in zoom-in-95 duration-700"
+        className="relative max-w-lg rounded-3xl p-10 text-center transition-all duration-700"
         style={{
           background: "linear-gradient(180deg, #1B1B28 0%, #0E0E18 100%)",
-          border: "1px solid rgba(201,162,75,0.45)",
-          boxShadow:
-            "0 0 80px var(--state-glow), 0 0 120px rgba(201,162,75,0.25), inset 0 1px 0 rgba(255,255,255,0.07)",
+          border: "1px solid var(--realm-accent)",
+          boxShadow: "0 0 80px var(--realm-glow), inset 0 1px 0 rgba(255,255,255,0.07)",
+          transform: phase === "converge" ? "scale(0.9)" : "scale(1)",
+          opacity: phase === "converge" ? 0 : 1,
         }}
       >
-        {/* Top gold hairline */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-8 right-8 top-0 h-px"
-          style={{ background: "var(--grad-hairline-gold)" }}
-        />
-        <div
-          className="font-mono text-[11px] uppercase tracking-[0.35em]"
-          style={{ color: "var(--gold-soft)" }}
-        >
-          Breakthrough
-        </div>
-        <h2
-          className="mt-4 text-2xl font-semibold tracking-tight leading-snug"
-          style={{ color: "var(--ink-primary)" }}
-        >
-          You discovered it yourself.
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--ink-secondary)" }}>
-          That understanding will stay with you now. An orbit is just a fall that keeps missing the
-          ground — every moon, planet, and satellite stays up the same way.
-        </p>
-        <div
-          className="mt-6 font-mono text-[10px] uppercase tracking-widest"
-          style={{ color: "var(--ink-tertiary)" }}
-        >
-          tap anywhere to continue
-        </div>
+        {phase === "celebrate" && (
+          <>
+            <div className="text-4xl mb-4" style={{ animation: "star-birth 0.8s ease-out" }}>
+              ✦
+            </div>
+            <h2 className="text-2xl font-display font-semibold" style={{ color: "var(--ink-primary)" }}>
+              You found it yourself.
+            </h2>
+            <p className="mt-3 text-sm" style={{ color: "var(--ink-secondary)" }}>
+              Your mentor is proud. Take a breath — this one is yours.
+            </p>
+          </>
+        )}
+
+        {phase === "reveal" && (
+          <>
+            <div
+              className="text-xs font-medium uppercase tracking-[0.25em] mb-3"
+              style={{ color: "var(--realm-accent)" }}
+            >
+              New Discovery
+            </div>
+            <h2
+              className="text-2xl font-display font-semibold"
+              style={{ color: "var(--ink-primary)", animation: "star-birth 0.6s ease-out" }}
+            >
+              {discoveryTitle}
+            </h2>
+            <p className="mt-4 text-sm italic leading-relaxed" style={{ color: "var(--ink-secondary)" }}>
+              &ldquo;{insight}&rdquo;
+            </p>
+          </>
+        )}
+
+        {(phase === "star" || phase === "done") && (
+          <>
+            <Star
+              className="mx-auto h-12 w-12 mb-4"
+              style={{
+                color: "var(--realm-accent)",
+                fill: "var(--realm-accent)",
+                filter: "drop-shadow(0 0 16px var(--realm-glow))",
+                animation: "star-fly 2s ease-in forwards",
+              }}
+            />
+            <h2 className="text-xl font-display" style={{ color: "var(--ink-primary)" }}>
+              A new star joins your constellation
+            </h2>
+            <p className="mt-2 text-sm" style={{ color: "var(--ink-tertiary)" }}>
+              {canSkip ? "Tap anywhere to continue" : "..."}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
