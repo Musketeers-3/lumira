@@ -546,26 +546,35 @@ export function MentorModel({
 
   // 3. Handle State Changes (Crossfading)
   useEffect(() => {
-    // GUARD CLAUSE: Only run if initialized
-    if (!mixer.current) return;
+    // GUARD CLAUSE: Only run if the mixer is alive and actions dictionary has tracks loaded
+    if (!mixer.current || Object.keys(actions.current).length === 0) return;
 
     const nextAction = actions.current[state];
+
+    // Set up the facial expression burst trigger for celebration state
     if (prevState.current !== state) {
       if (state === "CELEBRATE") celebrateBurst.current = 1.2;
       prevState.current = state;
     }
 
     if (nextAction) {
-      // Fade out others
+      // Loop safely through the dictionary entries
       Object.entries(actions.current).forEach(([key, action]) => {
-        if (key !== state && action) {
+        // Guard: make sure the track exists, and skip fading out the track we WANT to play
+        if (action && key !== state) {
           action.fadeOut(0.5);
         }
       });
-      // Fade in new
-      nextAction.reset().setEffectiveWeight(1).fadeIn(0.5).play();
+
+      // Force wake up the new state animation track at full weight
+      nextAction
+        .reset()
+        .setEffectiveWeight(1)
+        .setEffectiveTimeScale(reducedMotion ? 0.7 : 1) // Keeps accessibility context active
+        .fadeIn(0.5)
+        .play();
     }
-  }, [state]);
+  }, [state, reducedMotion]); // Add reducedMotion so it responds smoothly to settings changes
 
   // 4. Render Loop
   useFrame((_, dt) => {

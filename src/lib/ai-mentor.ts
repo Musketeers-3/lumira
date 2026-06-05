@@ -16,7 +16,7 @@ const ollama = createOpenAI({
 });
 
 // 2. Bind your local Qwen2 model
-const localModel = ollama("qwen2:latest");
+const localModel = ollama("qwen2:1.5b");
 
 export interface SocraticContext {
   lessonTopic: string;
@@ -56,10 +56,12 @@ export async function generateSocraticResponse(
 Student's current response: "${studentAnswer}"
 
 Generate a Socratic response that:
-1. Acknowledges what the student said with genuine appreciation
-2. Asks 1-2 powerful questions that deepen their thinking
-3. Never provides the answer directly
-4. Gently reveals logical implications of their thinking`;
+1. Keeps the response strictly under 50 words.
+2. Uses simple, clear, and encouraging language.
+3. Asks 1 concise, guiding question.
+4. Never provides the answer directly.
+5. Focuses only on the immediate logical next step.
+6. In addition to point 1 that is stated, the response length can be extended only if it isgenuinely required else it should remain below 50.`;
 
     const response = await generateObject({
       model: localModel, // Replaced OpenAI with local Qwen2

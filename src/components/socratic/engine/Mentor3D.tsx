@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment } from "@react-three/drei";
-import { PCFShadowMap } from "three";
+import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import type { LearningState } from "../types";
 import { MentorAvatar } from "./MentorAvatar";
 import { MentorRig } from "./mentor3d/MentorRig";
@@ -68,16 +68,22 @@ export function Mentor3D({ state, isSpeaking, isPausing = false }: Props) {
   return (
     <Canvas
       shadows={{ type: PCFShadowMap }}
-      dpr={[1, 1.5]}
+      // Clamp pixel ratio to 1.0 to save immense GPU cycles on 4K or Retina displays
+      dpr={1}
       camera={{ position: [0, 0.62, 2.15], fov: 36 }}
-      // ENABLING ALPHA TRANSPARENCY: The canvas is now glass.
-      gl={{ antialias: true, alpha: true }}
-      style={{ width: "100%", height: "100%", background: "transparent" }}
+      gl={{
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance", // Explicitly requests high-perf graphics cores
+        toneMapping: ACESFilmicToneMapping,
+      }}
     >
-      {/* Removed hardcoded <color> and <fog> layers. 
-        The 3D rig now floats natively inside the Ambient OS environment.
-      */}
-      <SceneContent state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
+      <MentorSceneLights state={state} />
+      <StudyScene state={state} />
+
+      <Suspense fallback={null}>
+        <MentorRig state={state} isSpeaking={isSpeaking} isPausing={isPausing} />
+      </Suspense>
     </Canvas>
   );
 }
