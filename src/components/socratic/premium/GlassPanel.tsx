@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type GlassPanelProps = {
@@ -7,6 +7,7 @@ type GlassPanelProps = {
   elevated?: boolean;
   glow?: boolean;
   float?: boolean;
+  style?: CSSProperties;
 };
 
 export function GlassPanel({
@@ -15,9 +16,11 @@ export function GlassPanel({
   elevated = false,
   glow = false,
   float = false,
+  style,
 }: GlassPanelProps) {
   return (
     <div
+      style={style}
       className={cn(
         elevated ? "glass-panel-elevated" : "glass-panel",
         glow && "glass-glow",
