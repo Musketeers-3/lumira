@@ -132,7 +132,7 @@ export function DiscoveryJournal({ highlightSkill }: Props) {
             </div>
 
             {weekEntries.map((entry) => (
-              <SceneCard key={entry.id} entry={entry} highlight={!!highlightSkill && entry.topic?.includes(highlightSkill)} />
+              <SceneCard key={entry.id} entry={entry} highlight={!!highlightSkill && !!entry.topic?.includes(highlightSkill)} />
             ))}
           </div>
         ))}
