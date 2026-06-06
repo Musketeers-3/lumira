@@ -6,6 +6,8 @@ import { GlassPanel } from "@/components/socratic/premium/GlassPanel";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { REALMS, realmFromDomain } from "@/lib/realms";
 import { useRealm } from "@/lib/realm-context";
+import { ArtifactScene } from "@/components/socratic/artifacts/ArtifactScene";
+import { signatureArtifactForRealm } from "@/lib/artifacts";
 
 export const Route = createFileRoute("/worlds")({
   head: () => ({
@@ -74,28 +76,15 @@ function WorldsPage() {
         </header>
       </Reveal>
 
-      {/* Atlas grid — hub-and-spoke layout */}
-      <div className="relative">
-        {/* Center hub indicator */}
-        <div
-          aria-hidden
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-32 rounded-full opacity-20 pointer-events-none hidden lg:block"
-          style={{
-            border: "1px solid var(--realm-accent)",
-            boxShadow: "0 0 60px var(--realm-glow)",
-          }}
-        />
-
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {REALMS.map((realm, idx) => {
-            const unlocked = isRealmUnlocked(realm.id);
-            return (
-              <Reveal key={realm.id} delay={idx * 100}>
-                <WorldCard realm={realm} unlocked={unlocked} onHover={() => setRealm(realm.id)} />
-              </Reveal>
-            );
-          })}
-        </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {REALMS.map((realm, idx) => {
+          const unlocked = isRealmUnlocked(realm.id);
+          return (
+            <Reveal key={realm.id} delay={idx * 100}>
+              <WorldCard realm={realm} unlocked={unlocked} onHover={() => setRealm(realm.id)} />
+            </Reveal>
+          );
+        })}
       </div>
 
       <Reveal delay={400}>
@@ -120,6 +109,7 @@ function WorldCard({
   unlocked: boolean;
   onHover: () => void;
 }) {
+  const artifact = signatureArtifactForRealm(realm.id);
   const engineLink = unlocked
     ? {
         to: "/engine" as const,
@@ -136,7 +126,7 @@ function WorldCard({
     <GlassPanel
       elevated={unlocked}
       glow={unlocked}
-      className={`realm-card relative overflow-hidden p-6 lg:p-8 h-full ${unlocked ? "" : "realm-card-locked"}`}
+      className={`realm-card group relative overflow-hidden p-0 h-full ${unlocked ? "" : "realm-card-locked"}`}
       style={
         unlocked
           ? {
@@ -146,7 +136,48 @@ function WorldCard({
           : undefined
       }
     >
-      {/* Realm ambient glow */}
+      {/* Diorama */}
+      <div
+        className="relative h-44 w-full overflow-hidden"
+        style={{
+          background: `radial-gradient(ellipse at 50% 60%, ${realm.glow}, transparent 65%), linear-gradient(180deg, rgba(8,9,14,0.4), rgba(6,7,10,0.9))`,
+          borderBottom: `1px solid ${realm.accent}22`,
+        }}
+      >
+        {artifact && unlocked && (
+          <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-110">
+            <ArtifactScene artifact={artifact} variant="hero" className="h-full w-full" />
+          </div>
+        )}
+        {!unlocked && artifact && (
+          <div className="absolute inset-0 opacity-25 grayscale">
+            <ArtifactScene artifact={artifact} variant="hero" className="h-full w-full" paused />
+          </div>
+        )}
+
+        {/* Mentor + student silhouettes (tiny SVG cameo) */}
+        {unlocked && (
+          <svg
+            className="pointer-events-none absolute bottom-2 left-3 opacity-60 transition-opacity group-hover:opacity-90"
+            width="50"
+            height="32"
+            viewBox="0 0 50 32"
+            aria-hidden
+          >
+            <g fill={realm.accent}>
+              {/* mentor */}
+              <circle cx="14" cy="10" r="3.5" />
+              <path d="M8 30 L8 18 Q8 14 14 14 Q20 14 20 18 L20 30 Z" />
+              {/* student (smaller) */}
+              <circle cx="30" cy="14" r="2.8" />
+              <path d="M25 30 L25 20 Q25 17 30 17 Q35 17 35 20 L35 30 Z" />
+              {/* pointing arm */}
+              <path d="M18 16 L26 12" stroke={realm.accent} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            </g>
+          </svg>
+        )}
+      </div>
+
       <div
         aria-hidden
         className="absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-30 pointer-events-none"
@@ -155,18 +186,16 @@ function WorldCard({
         }}
       />
 
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-4 p-6 lg:p-7">
         <div className="flex items-start justify-between">
-          <span className="text-3xl" role="img" aria-label={realm.shortName}>
+          <span className="text-2xl" role="img" aria-label={realm.shortName}>
             {realm.emoji}
           </span>
-          {!unlocked && (
-            <Lock className="h-4 w-4" style={{ color: "var(--ink-tertiary)" }} />
-          )}
+          {!unlocked && <Lock className="h-4 w-4" style={{ color: "var(--ink-tertiary)" }} />}
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold tracking-tight" style={{ color: "var(--ink-primary)" }}>
+          <h3 className="text-lg font-semibold tracking-tight font-display" style={{ color: "var(--ink-primary)" }}>
             {realm.name}
           </h3>
           <p className="mt-1 text-xs font-medium" style={{ color: realm.accent }}>
@@ -192,14 +221,14 @@ function WorldCard({
 
   if (!engineLink) {
     return (
-      <div onMouseEnter={onHover} className="cursor-not-allowed">
+      <div onMouseEnter={onHover} className="cursor-not-allowed h-full">
         {content}
       </div>
     );
   }
 
   return (
-    <Link to={engineLink.to} search={engineLink.search} onMouseEnter={onHover}>
+    <Link to={engineLink.to} search={engineLink.search} onMouseEnter={onHover} className="block h-full">
       {content}
     </Link>
   );
