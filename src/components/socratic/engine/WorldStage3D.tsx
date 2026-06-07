@@ -1,7 +1,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
-import { ACESFilmicToneMapping, PCFShadowMap } from "three";
+import { ACESFilmicToneMapping } from "three";
 import type { LearningState } from "../types";
 import type { RealmId } from "@/lib/realms";
 import type { Artifact } from "@/lib/artifacts";
@@ -29,8 +28,11 @@ function StageContent({
 
   return (
     <>
+      <color attach="background" args={["#050507"]} />
       <WorldStageCamera />
       <MentorSceneLights state={state} warmthBias={warmthBias} />
+      {/* Lightweight ambient lighting in place of HDR Environment to reduce GPU pressure */}
+      <hemisphereLight args={["#9ec5ff", "#1b1230", 0.45]} />
       <Suspense fallback={null}>
         <RealmEnvironmentScene
           realm={realm}
@@ -39,7 +41,6 @@ function StageContent({
           artifacts={artifacts}
         />
       </Suspense>
-      <Environment preset="night" />
     </>
   );
 }
@@ -75,14 +76,14 @@ export function WorldStage3D({
 
   return (
     <Canvas
-      shadows={{ type: PCFShadowMap }}
-      dpr={1}
+      dpr={[1, 1.25]}
       camera={{ position: WORLD_STAGE.cameraPosition, fov: WORLD_STAGE.fov }}
       gl={{
-        antialias: true,
-        alpha: true,
+        antialias: false,
+        alpha: false,
         powerPreference: "high-performance",
         toneMapping: ACESFilmicToneMapping,
+        preserveDrawingBuffer: false,
       }}
       style={{ touchAction: "none" }}
     >
