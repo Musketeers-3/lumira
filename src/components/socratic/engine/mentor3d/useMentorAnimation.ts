@@ -8,6 +8,10 @@ import { useMentorSettingsOptional } from "@/lib/mentor-settings-hooks";
 const CROSSFADE_SEC = 0.55;
 const CLAPPING_CROSSFADE_SEC = 0.35;
 
+// 🚨 GLOBAL CACHE: Persists across Vite Fast Refreshes and component remounts.
+// This prevents the CPU freeze that triggers the WebGL "Context Lost" timeout.
+const retargetCache = new Map<string, THREE.AnimationClip>();
+
 interface FbxSet {
   idle: THREE.Group;
   thinking: THREE.Group;
@@ -45,7 +49,18 @@ export function useMentorAnimation({ vrm, fbx, mentorState, onClappingFinished }
       const source = fbxGroup.animations[0];
       if (!source) return;
 
-      const clip = retargetFbxToVrm(source, vrm, fbxGroup, state);
+      // ⚡ CACHE CHECK: Did we already do the heavy math for this animation?
+      let clip = retargetCache.get(state);
+
+      if (!clip) {
+        // If not, calculate it and immediately save it to the global cache
+        const newClip = retargetFbxToVrm(source, vrm, fbxGroup, state);
+        if (newClip) {
+          retargetCache.set(state, newClip);
+          clip = newClip;
+        }
+      }
+
       if (!clip) return;
 
       const action = mixer.clipAction(clip);

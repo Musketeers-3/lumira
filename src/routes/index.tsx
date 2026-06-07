@@ -1,13 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Sparkles,
-  Compass,
-  Loader2,
-  Zap,
-  Map,
-  Star,
-} from "lucide-react";
+import { ArrowRight, Sparkles, Compass, Loader2, Zap, Map, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { Reveal } from "@/components/socratic/premium/Reveal";
@@ -94,8 +86,7 @@ function DiscoveryHub() {
   const starCount = discoveredSkills.length;
   const journeyCount = sessions.length;
 
-  const activeSession =
-    sessions.find((s) => !s.completed_at) ?? sessions[0] ?? null;
+  const activeSession = sessions.find((s) => !s.completed_at) ?? sessions[0] ?? null;
 
   const progress = activeSession ? computeProgress(activeSession) : 0;
   const isComplete = activeSession?.breakthrough || progress >= 100;
@@ -184,7 +175,12 @@ function DiscoveryHub() {
                 >
                   {activeSession && !isComplete ? "Continue Adventure" : "Begin Exploring"}
                 </PremiumButton>
-                <PremiumButton to="/worlds" variant="glass" size="lg" icon={<Map className="h-4 w-4" />}>
+                <PremiumButton
+                  to="/worlds"
+                  variant="glass"
+                  size="lg"
+                  icon={<Map className="h-4 w-4" />}
+                >
                   Explore Worlds
                 </PremiumButton>
               </div>
@@ -215,7 +211,10 @@ function DiscoveryHub() {
                 <Compass className="h-5 w-5" style={{ color: "var(--realm-accent)" }} />
               </div>
               <div>
-                <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                <span
+                  className="text-xs uppercase tracking-[0.15em]"
+                  style={{ color: "var(--ink-tertiary)" }}
+                >
                   Journeys taken
                 </span>
                 <p className="text-2xl font-semibold" style={{ color: "var(--ink-primary)" }}>
@@ -234,10 +233,17 @@ function DiscoveryHub() {
                   border: "1px solid var(--realm-accent)",
                 }}
               >
-                <Star className="h-5 w-5" style={{ color: "var(--realm-accent)" }} fill="currentColor" />
+                <Star
+                  className="h-5 w-5"
+                  style={{ color: "var(--realm-accent)" }}
+                  fill="currentColor"
+                />
               </div>
               <div>
-                <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                <span
+                  className="text-xs uppercase tracking-[0.15em]"
+                  style={{ color: "var(--ink-tertiary)" }}
+                >
                   Stars discovered
                 </span>
                 <p className="text-2xl font-semibold" style={{ color: "var(--ink-primary)" }}>
@@ -274,7 +280,10 @@ function DiscoveryHub() {
               </p>
 
               <div className="space-y-2 pt-2">
-                <div className="flex justify-between text-xs uppercase tracking-[0.12em]" style={{ color: "var(--ink-tertiary)" }}>
+                <div
+                  className="flex justify-between text-xs uppercase tracking-[0.12em]"
+                  style={{ color: "var(--ink-tertiary)" }}
+                >
                   <span>Progress</span>
                   <span style={{ color: "var(--realm-accent)" }}>
                     {isComplete ? "Complete" : "In Progress"}
@@ -316,7 +325,8 @@ function DiscoveryHub() {
                 className="inline-flex items-center gap-2 text-sm font-medium transition-all duration-300 hover:gap-3"
                 style={{ color: "var(--realm-accent)" }}
               >
-                {activeSession && !isComplete ? "Resume" : "Start"} <ArrowRight className="h-4 w-4" />
+                {activeSession && !isComplete ? "Resume" : "Start"}{" "}
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </GlassPanel>
@@ -329,13 +339,23 @@ function DiscoveryHub() {
             className="flex flex-col justify-between min-h-[340px] p-8 lg:p-10 h-full"
           >
             <div className="space-y-5">
-              <div className="flex items-center gap-2.5 text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
-                <Star className="h-3.5 w-3.5" style={{ color: "var(--realm-accent)" }} fill="currentColor" />
+              <div
+                className="flex items-center gap-2.5 text-xs uppercase tracking-[0.15em]"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
+                <Star
+                  className="h-3.5 w-3.5"
+                  style={{ color: "var(--realm-accent)" }}
+                  fill="currentColor"
+                />
                 Latest Discovery
               </div>
 
               {isLoading ? (
-                <div className="flex items-center gap-2 text-sm py-6" style={{ color: "var(--ink-tertiary)" }}>
+                <div
+                  className="flex items-center gap-2 text-sm py-6"
+                  style={{ color: "var(--ink-tertiary)" }}
+                >
                   <Loader2 className="h-4 w-4 animate-spin" /> Searching the stars...
                 </div>
               ) : latestDiscovery ? (
@@ -370,7 +390,10 @@ function DiscoveryHub() {
               className="mt-8 pt-6 flex items-center justify-between"
               style={{ borderTop: "1px solid var(--hairline)" }}
             >
-              <span className="text-xs uppercase tracking-[0.12em]" style={{ color: "var(--ink-tertiary)" }}>
+              <span
+                className="text-xs uppercase tracking-[0.12em]"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
                 {latestDiscovery?.unlocked_at
                   ? `Born ${new Date(latestDiscovery.unlocked_at).toLocaleDateString()}`
                   : "Uncharted"}
@@ -388,12 +411,12 @@ function DiscoveryHub() {
 
         {/* Next portal */}
         <Reveal className="lg:col-span-3" delay={300}>
-          <GlassPanel
-            elevated
-            className="flex flex-col justify-between min-h-[340px] p-8 h-full"
-          >
+          <GlassPanel elevated className="flex flex-col justify-between min-h-[340px] p-8 h-full">
             <div className="space-y-5">
-              <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+              <span
+                className="text-xs uppercase tracking-[0.15em]"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
                 Next Portal
               </span>
               <div className="text-4xl">🌌</div>

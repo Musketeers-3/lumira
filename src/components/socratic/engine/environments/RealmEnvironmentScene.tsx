@@ -8,6 +8,8 @@ import { PhysicsOrbitScene } from "./PhysicsOrbitScene";
 import { ChemistryLabScene } from "./ChemistryLabScene";
 import { EnvironmentArtifacts } from "./EnvironmentArtifacts";
 import { InteractiveOrb } from "./InteractiveOrb";
+import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
 
 interface Props {
   realm: RealmId;
@@ -18,6 +20,14 @@ interface Props {
 
 function BiologyGardenScene({ state, onObjectInteract, artifacts }: Omit<Props, "realm">) {
   const sporeRef = useRef<THREE.Group>(null!);
+  const { gl } = useThree();
+
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, force the renderer to dispose
+      gl.dispose();
+    };
+  }, [gl]);
 
   useFrame(({ clock }) => {
     if (sporeRef.current) {
@@ -31,7 +41,10 @@ function BiologyGardenScene({ state, onObjectInteract, artifacts }: Omit<Props, 
         {Array.from({ length: 8 }).map((_, i) => {
           const angle = (i / 8) * Math.PI * 2;
           return (
-            <mesh key={i} position={[Math.cos(angle) * 0.8, 0.3 + Math.sin(i) * 0.1, Math.sin(angle) * 0.5]}>
+            <mesh
+              key={i}
+              position={[Math.cos(angle) * 0.8, 0.3 + Math.sin(i) * 0.1, Math.sin(angle) * 0.5]}
+            >
               <sphereGeometry args={[0.05, 8, 8]} />
               <meshStandardMaterial
                 color="#4AE8C8"
@@ -57,7 +70,14 @@ function BiologyGardenScene({ state, onObjectInteract, artifacts }: Omit<Props, 
 
 function MathPatternScene({ onObjectInteract, artifacts }: Omit<Props, "realm" | "state">) {
   const gridRef = useRef<THREE.Group>(null!);
+  const { gl } = useThree();
 
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, force the renderer to dispose
+      gl.dispose();
+    };
+  }, [gl]);
   useFrame(({ clock }) => {
     if (gridRef.current) {
       gridRef.current.rotation.y = clock.elapsedTime * 0.1;
@@ -87,7 +107,18 @@ function MathPatternScene({ onObjectInteract, artifacts }: Omit<Props, "realm" |
   );
 }
 
-function HistoryArchiveScene({ onObjectInteract, artifacts }: Pick<Props, "onObjectInteract" | "artifacts">) {
+function HistoryArchiveScene({
+  onObjectInteract,
+  artifacts,
+}: Pick<Props, "onObjectInteract" | "artifacts">) {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, force the renderer to dispose
+      gl.dispose();
+    };
+  }, [gl]);
   return (
     <group position={[0, -0.2, -1]}>
       <mesh position={[0, 0.3, -0.3]}>
@@ -108,6 +139,14 @@ function HistoryArchiveScene({ onObjectInteract, artifacts }: Pick<Props, "onObj
 }
 
 function HubScene({ artifacts }: { artifacts: Artifact[] }) {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, force the renderer to dispose
+      gl.dispose();
+    };
+  }, [gl]);
   return (
     <group position={[0, 0, -1.5]}>
       {Array.from({ length: 20 }).map((_, i) => (
@@ -129,13 +168,39 @@ function HubScene({ artifacts }: { artifacts: Artifact[] }) {
 }
 
 export function RealmEnvironmentScene({ realm, state, onObjectInteract, artifacts }: Props) {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    return () => {
+      // When the component unmounts, force the renderer to dispose
+      gl.dispose();
+    };
+  }, [gl]);
   switch (realm) {
     case "physics":
-      return <PhysicsOrbitScene state={state} onObjectInteract={onObjectInteract} artifacts={artifacts} />;
+      return (
+        <PhysicsOrbitScene
+          state={state}
+          onObjectInteract={onObjectInteract}
+          artifacts={artifacts}
+        />
+      );
     case "chemistry":
-      return <ChemistryLabScene state={state} onObjectInteract={onObjectInteract} artifacts={artifacts} />;
+      return (
+        <ChemistryLabScene
+          state={state}
+          onObjectInteract={onObjectInteract}
+          artifacts={artifacts}
+        />
+      );
     case "biology":
-      return <BiologyGardenScene state={state} onObjectInteract={onObjectInteract} artifacts={artifacts} />;
+      return (
+        <BiologyGardenScene
+          state={state}
+          onObjectInteract={onObjectInteract}
+          artifacts={artifacts}
+        />
+      );
     case "math":
       return <MathPatternScene onObjectInteract={onObjectInteract} artifacts={artifacts} />;
     case "history":

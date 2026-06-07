@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from "react";
-import { useChat } from "@ai-sdk/react";
 import type { SocraticContext, SocraticResponse } from "@/lib/ai-mentor";
-import { generateSocraticResponse, evaluateUnderstanding } from "@/lib/ai-mentor";
+import { generateSocraticResponse } from "@/lib/ai-mentor";
+import { RealmId } from "@/lib/realms";
 
-interface MessageLog {
+export interface MessageLog {
   id: string;
   role: "user" | "mentor";
   content: string;
@@ -11,7 +11,8 @@ interface MessageLog {
   type?: "gentle_push" | "revealing_challenge" | "breakthrough_confirmation";
 }
 
-export function useSocraticDialogue(initialContext: SocraticContext) {
+export function useSocraticDialogue(initialContext: SocraticContext, realm: RealmId) {
+  // Accept active realm here
   const [messages, setMessages] = useState<MessageLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastMentorState, setLastMentorState] = useState<"FOCUS" | "CHALLENGE" | "CELEBRATE">(
@@ -25,7 +26,6 @@ export function useSocraticDialogue(initialContext: SocraticContext) {
 
       setIsLoading(true);
 
-      // Add student message
       const studentMsg: MessageLog = {
         id: `user-${Date.now()}`,
         role: "user",
@@ -35,42 +35,35 @@ export function useSocraticDialogue(initialContext: SocraticContext) {
       setMessages((prev) => [...prev, studentMsg]);
 
       try {
-        // Evaluate understanding
-        const evaluation = await evaluateUnderstanding(
-          studentAnswer,
-          contextRef.current.learningObjective,
-        );
+        // Pass the structural realm down into the generation engine room execution run
+        const response = await generateSocraticResponse(studentAnswer, contextRef.current, realm);
 
-        // Generate Socratic response
-        const socraticResponse = await generateSocraticResponse(studentAnswer, contextRef.current);
-
-        // Add mentor message
         const mentorMsg: MessageLog = {
           id: `mentor-${Date.now()}`,
           role: "mentor",
-          content: socraticResponse.mentor_response,
+          content: response.mentor_response,
           timestamp: Date.now(),
-          type: socraticResponse.question_type,
+          type: response.question_type,
         };
 
         setMessages((prev) => [...prev, mentorMsg]);
-        setLastMentorState(socraticResponse.estimated_state);
+        if (response.estimated_state) {
+          setLastMentorState(response.estimated_state);
+        }
 
-        // Update context with new answer
         contextRef.current.studentAnswers = [...contextRef.current.studentAnswers, studentAnswer];
 
         return {
-          evaluation,
-          response: socraticResponse,
+          response,
         };
       } catch (error) {
-        console.error("[Socratic Dialogue Error]", error);
+        console.error("[Socratic Dialogue Core Pipeline Exception]", error);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading],
+    [isLoading, realm], // Add realm token to the useCallback dependency map lock parameter
   );
 
   const reset = useCallback(() => {

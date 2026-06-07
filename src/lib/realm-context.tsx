@@ -48,9 +48,7 @@ export function RealmProvider({ children }: { children: React.ReactNode }) {
     setRealmState(next);
   }, []);
 
-  return (
-    <RealmContext.Provider value={{ realm, setRealm }}>{children}</RealmContext.Provider>
-  );
+  return <RealmContext.Provider value={{ realm, setRealm }}>{children}</RealmContext.Provider>;
 }
 
 export function useRealm() {

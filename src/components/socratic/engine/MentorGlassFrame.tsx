@@ -28,8 +28,7 @@ export function MentorGlassFrame({ children, isSpeaking, isPausing }: Props) {
         aria-hidden
         className="pointer-events-none absolute -inset-px rounded-[1.6rem] opacity-70"
         style={{
-          background:
-            "radial-gradient(120% 60% at 50% 0%, var(--state-glow), transparent 70%)",
+          background: "radial-gradient(120% 60% at 50% 0%, var(--state-glow), transparent 70%)",
           mixBlendMode: "screen",
           animation: "pulse-glow 5.5s ease-in-out infinite",
         }}
@@ -60,8 +59,7 @@ export function MentorGlassFrame({ children, isSpeaking, isPausing }: Props) {
       <div
         className="relative z-10 overflow-hidden rounded-[1.1rem]"
         style={{
-          boxShadow:
-            "inset 0 2px 14px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(245,241,230,0.06)",
+          boxShadow: "inset 0 2px 14px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(245,241,230,0.06)",
         }}
       >
         {children}
@@ -71,8 +69,7 @@ export function MentorGlassFrame({ children, isSpeaking, isPausing }: Props) {
 }
 
 function CornerBracket({ pos }: { pos: "tl" | "tr" | "bl" | "br" }) {
-  const base =
-    "pointer-events-none absolute z-30 h-4 w-4 border-[rgba(201,162,75,0.65)]";
+  const base = "pointer-events-none absolute z-30 h-4 w-4 border-[rgba(201,162,75,0.65)]";
   const map: Record<typeof pos, string> = {
     tl: "left-1 top-1 border-l border-t rounded-tl-[1.25rem]",
     tr: "right-1 top-1 border-r border-t rounded-tr-[1.25rem]",

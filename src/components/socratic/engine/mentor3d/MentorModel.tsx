@@ -1,4 +1,5 @@
-import { Suspense, useEffect, useMemo, useRef } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -8,6 +9,7 @@ import { useMentorAnimationState, type MentorAnimState } from "@/lib/mentor-anim
 import { useMentorAnimation } from "./useMentorAnimation";
 import { useMentorLife } from "./useMentorLife";
 import { MENTOR_FBX_URLS, MENTOR_STAGE, MENTOR_VRM_URL } from "./mentorLayout";
+import { useFBX, useGLTF } from "@react-three/drei";
 
 interface Props {
   isSpeaking?: boolean;
@@ -23,26 +25,38 @@ function MentorModelInner({
   vrmUrl = MENTOR_VRM_URL,
 }: Props) {
   const { mentorState, setMentorState } = useMentorAnimationState();
+  const [vrm, setVrm] = useState<VRM | null>(null);
 
-  const gltf = useLoader(GLTFLoader, vrmUrl, (loader) => {
-    loader.register((parser) => new VRMLoaderPlugin(parser));
+  const { scene, userData } = useGLTF(vrmUrl, false, false, (loader: any) => {
+    loader.register((parser: any) => new VRMLoaderPlugin(parser));
   });
 
-  const [idle, thinking, talking, clapping] = useLoader(FBXLoader, [
-    MENTOR_FBX_URLS.idle,
-    MENTOR_FBX_URLS.thinking,
-    MENTOR_FBX_URLS.talking,
-    MENTOR_FBX_URLS.clapping,
-  ]);
+  const idle = useFBX(MENTOR_FBX_URLS.idle);
+  const thinking = useFBX(MENTOR_FBX_URLS.thinking);
+  const talking = useFBX(MENTOR_FBX_URLS.talking);
+  const clapping = useFBX(MENTOR_FBX_URLS.clapping);
 
-  const vrm = useMemo(() => gltf.userData.vrm as VRM, [gltf]);
+  // Now, userData.vrm WILL exist!
+  useEffect(() => {
+    if (userData.vrm) {
+      setVrm(userData.vrm as VRM);
+    }
+  }, [userData]);
+
   const setupOnce = useRef(false);
 
   useEffect(() => {
     if (!vrm || setupOnce.current) return;
+
     vrm.scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) obj.frustumCulled = false;
+      if ((obj as THREE.Mesh).isMesh) {
+        obj.frustumCulled = false;
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
     });
+
+    vrm.scene.updateMatrixWorld(true);
     setupOnce.current = true;
   }, [vrm]);
 
@@ -70,18 +84,18 @@ function MentorModelInner({
       rotation={MENTOR_STAGE.rotation}
       scale={MENTOR_STAGE.scale}
     >
-      <primitive object={vrm.scene} />
+      <primitive object={vrm.scene} dispose={null} />
     </group>
   );
 }
 
-useLoader.preload(GLTFLoader, MENTOR_VRM_URL, (loader) => {
-  loader.register((parser) => new VRMLoaderPlugin(parser));
+useGLTF.preload(MENTOR_VRM_URL, false, false, (loader: any) => {
+  loader.register((parser: any) => new VRMLoaderPlugin(parser));
 });
-useLoader.preload(FBXLoader, MENTOR_FBX_URLS.idle);
-useLoader.preload(FBXLoader, MENTOR_FBX_URLS.thinking);
-useLoader.preload(FBXLoader, MENTOR_FBX_URLS.talking);
-useLoader.preload(FBXLoader, MENTOR_FBX_URLS.clapping);
+useFBX.preload(MENTOR_FBX_URLS.idle);
+useFBX.preload(MENTOR_FBX_URLS.thinking);
+useFBX.preload(MENTOR_FBX_URLS.talking);
+useFBX.preload(MENTOR_FBX_URLS.clapping);
 
 export function MentorModel(props: Props) {
   return (

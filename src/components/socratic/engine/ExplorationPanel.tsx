@@ -93,7 +93,10 @@ export function ExplorationPanel({
       {/* Quest arc + topic */}
       <div className="flex items-center justify-between gap-3 shrink-0">
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-[0.2em] font-medium" style={{ color: "var(--realm-accent)" }}>
+          <div
+            className="text-[10px] uppercase tracking-[0.2em] font-medium"
+            style={{ color: "var(--realm-accent)" }}
+          >
             {topic}
           </div>
           <div className="mt-1.5 flex items-center gap-1">
@@ -146,9 +149,15 @@ export function ExplorationPanel({
       )}
 
       {/* Dialogue */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-[80px] max-h-[140px] space-y-3 pr-1">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto min-h-[80px] max-h-[140px] space-y-3 pr-1"
+      >
         {messages.length === 0 ? (
-          <p className="text-sm font-display italic text-center py-4" style={{ color: "var(--ink-tertiary)" }}>
+          <p
+            className="text-sm font-display italic text-center py-4"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
             Tap objects in the world, or share your first thought below.
           </p>
         ) : (
@@ -182,7 +191,9 @@ export function ExplorationPanel({
       <div
         className="flex items-center gap-2 shrink-0 rounded-xl p-2 transition-all"
         style={{
-          border: inputActive ? "1px solid var(--realm-accent)" : "1px solid rgba(255,255,255,0.08)",
+          border: inputActive
+            ? "1px solid var(--realm-accent)"
+            : "1px solid rgba(255,255,255,0.08)",
           background: "rgba(0,0,0,0.3)",
           boxShadow: inputActive ? "0 0 20px var(--realm-glow)" : "none",
         }}
@@ -197,7 +208,9 @@ export function ExplorationPanel({
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
+          onKeyDown={(e) =>
+            e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())
+          }
           onFocus={() => setInputActive(true)}
           onBlur={() => setInputActive(false)}
           placeholder="Share your thinking..."

@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Star } from "lucide-react";
 import { discoveryTitle } from "@/lib/realms";
+import type { StarRarity } from "@/lib/constellations";
 
 interface StarNode {
   id: string;
   name: string;
   unlocked: boolean;
+  rarity?: StarRarity; // Added support for rarity
 }
 
 interface Props {
@@ -13,6 +15,7 @@ interface Props {
   isLoading?: boolean;
 }
 
+// Fixed positions for a generic "Hub" shape preview
 const POSITIONS = [
   { top: "12%", left: "18%", size: 14 },
   { top: "28%", left: "62%", size: 18 },
@@ -31,8 +34,7 @@ export function ConstellationPreview({ stars, isLoading }: Props) {
     <div
       className="relative overflow-hidden rounded-2xl p-6 lg:p-8"
       style={{
-        background:
-          "radial-gradient(ellipse at 30% 20%, rgba(59,158,255,0.08), transparent 55%), radial-gradient(ellipse at 70% 80%, rgba(184,140,255,0.06), transparent 50%), linear-gradient(180deg, rgba(11,11,24,0.9), rgba(7,7,14,0.95))",
+        background: "linear-gradient(180deg, rgba(11,11,24,0.9), rgba(7,7,14,0.95))",
         border: "1px solid rgba(255,255,255,0.06)",
         minHeight: 220,
       }}
@@ -40,10 +42,9 @@ export function ConstellationPreview({ stars, isLoading }: Props) {
       {/* Nebula backdrop */}
       <div
         aria-hidden
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0 opacity-40 transition-opacity duration-1000"
         style={{
-          background:
-            "radial-gradient(circle at 50% 50%, var(--realm-glow), transparent 65%)",
+          background: "radial-gradient(circle at 50% 50%, var(--realm-glow), transparent 65%)",
         }}
       />
 
@@ -77,22 +78,22 @@ export function ConstellationPreview({ stars, isLoading }: Props) {
         <div className="relative flex-1 min-h-[120px]">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
-              <div
-                className="h-8 w-8 rounded-full animate-pulse"
-                style={{ background: "rgba(255,255,255,0.06)" }}
-              />
+              <div className="h-8 w-8 rounded-full animate-pulse bg-white/10" />
             </div>
           ) : (
             <>
-              {/* Connection lines between unlocked stars */}
-              <svg
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                aria-hidden
-              >
-                {displayStars.slice(0, -1).map((_, i) => {
+              {/* Connection lines */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden>
+                {displayStars.slice(0, -1).map((star, i) => {
                   const a = POSITIONS[i % POSITIONS.length];
                   const b = POSITIONS[(i + 1) % POSITIONS.length];
-                  if (!displayStars[i]?.unlocked || !displayStars[i + 1]?.unlocked) return null;
+                  const nextStar = displayStars[i + 1];
+
+                  if (!star.unlocked || !nextStar?.unlocked) return null;
+
+                  const isLegendaryLine =
+                    star.rarity === "legendary" || nextStar.rarity === "legendary";
+
                   return (
                     <line
                       key={i}
@@ -101,16 +102,28 @@ export function ConstellationPreview({ stars, isLoading }: Props) {
                       x2={`${parseFloat(b.left)}%`}
                       y2={`${b.top}`}
                       stroke="var(--realm-accent)"
-                      strokeOpacity={0.2}
-                      strokeWidth={1}
+                      strokeOpacity={isLegendaryLine ? 0.6 : 0.2}
+                      strokeWidth={isLegendaryLine ? 2 : 1}
+                      style={{
+                        filter: isLegendaryLine
+                          ? "drop-shadow(0 0 4px var(--realm-accent))"
+                          : "none",
+                      }}
                     />
                   );
                 })}
               </svg>
 
+              {/* Stars */}
               {displayStars.map((star, i) => {
                 const pos = POSITIONS[i % POSITIONS.length];
                 const lit = star.unlocked;
+                const isLegendary = star.rarity === "legendary";
+                const isRare = star.rarity === "rare";
+
+                // Override generic size if legendary
+                const size = isLegendary ? 20 : isRare ? 16 : pos.size;
+
                 return (
                   <div
                     key={star.id}
@@ -123,25 +136,38 @@ export function ConstellationPreview({ stars, isLoading }: Props) {
                     }}
                     title={discoveryTitle(star.name)}
                   >
+                    {/* Bloom for Premium Stars */}
+                    {lit && (isRare || isLegendary) && (
+                      <div
+                        className="absolute inset-0 rounded-full animate-pulse"
+                        style={{
+                          background: "var(--realm-accent)",
+                          filter: `blur(${isLegendary ? 10 : 5}px)`,
+                          transform: "scale(2)",
+                          opacity: isLegendary ? 0.4 : 0.2,
+                          zIndex: -1,
+                        }}
+                      />
+                    )}
+
                     <Star
-                      className="transition-all duration-500"
+                      className="transition-all duration-500 relative z-10"
                       style={{
-                        width: pos.size,
-                        height: pos.size,
-                        color: lit ? "var(--realm-accent)" : "var(--ink-tertiary)",
-                        fill: lit ? "var(--realm-accent)" : "transparent",
+                        width: size,
+                        height: size,
+                        color: lit
+                          ? isLegendary
+                            ? "#FFE25E"
+                            : "var(--realm-accent)"
+                          : "var(--ink-tertiary)",
+                        fill: lit
+                          ? isLegendary
+                            ? "#FFE25E"
+                            : "var(--realm-accent)"
+                          : "transparent",
                         filter: lit ? "drop-shadow(0 0 8px var(--realm-glow))" : "none",
-                        animation: lit ? "pulse-glow 3s ease-in-out infinite" : undefined,
                       }}
                     />
-                    {lit && i < 3 && (
-                      <span
-                        className="text-[9px] font-medium whitespace-nowrap max-w-[80px] truncate"
-                        style={{ color: "var(--ink-tertiary)" }}
-                      >
-                        {discoveryTitle(star.name)}
-                      </span>
-                    )}
                   </div>
                 );
               })}

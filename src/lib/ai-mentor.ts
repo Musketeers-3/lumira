@@ -1,21 +1,22 @@
-"use sign"; // Ensure this matches your original file's directive
+// Path: src/lib/ai-mentor.ts
 
 import { generateText, generateObject } from "ai";
 import { z } from "zod";
 import { createOpenAI } from "@ai-sdk/openai";
 import {
-  buildMentorSystemPrompt,
   BREAKTHROUGH_PROMPT,
+  buildMentorSystemPrompt,
   MENTOR_PERSONALITY_CORE,
 } from "@/lib/mentor-personality";
+import { getSkillTracking } from "@/lib/learning-persistence"; // IMPORT your existing Supabase utility
+import { compileMentorMemory, type DBReviewRecord } from "./mentor-memory"; // IMPORT the new compiler
+import type { RealmId } from "@/lib/realms";
 
-// 1. Initialize the official OpenAI provider, but hijack the URL to point to local Ollama
 const ollama = createOpenAI({
   baseURL: "http://localhost:11434/v1",
-  apiKey: "ollama", // The SDK requires a string here, but Ollama safely ignores it
+  apiKey: "ollama",
 });
 
-// 2. Bind your local Qwen2 model
 const localModel = ollama("qwen2:1.5b");
 
 export interface SocraticContext {
@@ -34,16 +35,22 @@ export interface SocraticResponse {
 }
 
 /**
- * Generate a Socratic response using Local AI
- * This intelligently responds to student answers with guiding questions
- * that encourage discovery rather than direct instruction.
+ * Generate an historically aware Socratic response using Local AI & Supabase contexts
  */
 export async function generateSocraticResponse(
   studentAnswer: string,
   context: SocraticContext,
+  realm: RealmId, // Pass down the active realm ID for localized tracking filter checks
 ): Promise<SocraticResponse> {
   try {
-    const systemPrompt = buildMentorSystemPrompt(
+    // 1. Fetch the user's raw skill history records directly from Supabase
+    const rawSkillsData = await getSkillTracking();
+    const skillsList = (rawSkillsData || []) as DBReviewRecord[];
+
+    // 2. Synthesize history profile records into prompt tokens
+    const mentorMemoryPrompt = compileMentorMemory(skillsList, realm);
+
+    const baseSystemPrompt = buildMentorSystemPrompt(
       context.lessonTopic,
       context.learningObjective,
       context.currentStep,
@@ -51,21 +58,25 @@ export async function generateSocraticResponse(
       "FOCUS",
     );
 
-    const userPrompt = `Student's previous answers: ${context.studentAnswers.map((a, i) => `(Step ${i + 1}): "${a}"`).join(" ")}
+    // 3. Assemble the historically aware system prompt block
+    const fullSystemPrompt = `
+${baseSystemPrompt}
 
-Student's current response: "${studentAnswer}"
+${mentorMemoryPrompt}
+`;
 
-Generate a Socratic response that:
-1. Keeps the response strictly under 50 words.
-2. Uses simple, clear, and encouraging language.
-3. Asks 1 concise, guiding question.
-4. Never provides the answer directly.
-5. Focuses only on the immediate logical next step.
-6. In addition to point 1 that is stated, the response length can be extended only if it isgenuinely required else it should remain below 50.`;
+    const chatHistory = context.studentAnswers.map((a, i) => `(Step ${i + 1}): "${a}"`).join("\n");
+
+    const userPrompt = `Student's previous answers in this active session:
+${chatHistory}
+
+Student's current fresh response: "${studentAnswer}"
+
+Generate a structured Socratic response object following your strict guidelines (under 50 words, exactly 1 targeted question, never provide answers directly). Use clear, wise and simple language.`;
 
     const response = await generateObject({
-      model: localModel, // Replaced OpenAI with local Qwen2
-      system: systemPrompt,
+      model: localModel,
+      system: fullSystemPrompt, // Connected directly to the new historic profile matrix
       prompt: userPrompt,
       schema: z.object({
         mentor_response: z.string().describe("The mentor response with Socratic questions"),
@@ -75,7 +86,7 @@ Generate a Socratic response that:
         estimated_state: z
           .enum(["FOCUS", "CHALLENGE", "CELEBRATE"])
           .describe(
-            "FOCUS: patient listening. CHALLENGE: direct scale/assumption questions, believing tone. CELEBRATE: quiet pride after breakthrough only.",
+            "FOCUS: listening. CHALLENGE: assumption matching. CELEBRATE: breakthrough insight achieved only.",
           ),
         next_learning_prompt: z
           .string()
@@ -86,11 +97,10 @@ Generate a Socratic response that:
 
     return response.object as SocraticResponse;
   } catch (error) {
-    console.error("[Local AI Mentor Error]", error);
-    // Fallback to a basic Socratic response if the local model fails to parse JSON
+    console.error("[Local AI Mentor Context Integration Error]", error);
     return {
       mentor_response:
-        "That's interesting. Let me ask you this: what assumption are you making in your approach?",
+        "That is an exceptional line of thought. Let's look at the parameters we have right before us. What changes if we review our assumptions?",
       question_type: "gentle_push",
       estimated_state: "FOCUS",
     };

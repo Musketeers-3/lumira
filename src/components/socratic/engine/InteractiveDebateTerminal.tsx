@@ -150,7 +150,11 @@ export function InteractiveDebateTerminal({
                             ? "var(--realm-accent)"
                             : "var(--gold-soft)"
                           : "rgba(255,255,255,0.08)",
-                        boxShadow: active ? "0 0 14px var(--realm-glow)" : reached ? "0 0 8px var(--realm-glow)" : "none",
+                        boxShadow: active
+                          ? "0 0 14px var(--realm-glow)"
+                          : reached
+                            ? "0 0 8px var(--realm-glow)"
+                            : "none",
                         transform: active ? "scale(1.3)" : "scale(1)",
                       }}
                     />
@@ -193,9 +197,7 @@ export function InteractiveDebateTerminal({
         }}
       >
         {messages.length === 0 ? (
-          <div
-            className="flex h-full flex-col items-center justify-center gap-3 text-center px-6"
-          >
+          <div className="flex h-full flex-col items-center justify-center gap-3 text-center px-6">
             <div
               className="text-3xl animate-pulse"
               style={{ animation: "discovery-pulse 2s ease-in-out infinite" }}
@@ -238,9 +240,7 @@ export function InteractiveDebateTerminal({
                   border: active
                     ? "1px solid var(--realm-accent)"
                     : "1px solid rgba(255,255,255,0.1)",
-                  background: active
-                    ? "var(--realm-glow)"
-                    : "rgba(255,255,255,0.03)",
+                  background: active ? "var(--realm-glow)" : "rgba(255,255,255,0.03)",
                   color: active ? "var(--realm-accent)" : "var(--ink-secondary)",
                   boxShadow: active ? "0 0 18px var(--realm-glow)" : "none",
                 }}
@@ -257,7 +257,9 @@ export function InteractiveDebateTerminal({
         className="flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl transition-all duration-500"
         style={{
           background: "linear-gradient(180deg, #1B1B28 0%, #13131C 100%)",
-          border: inputActive ? "1px solid var(--realm-accent)" : "1px solid rgba(255,255,255,0.08)",
+          border: inputActive
+            ? "1px solid var(--realm-accent)"
+            : "1px solid rgba(255,255,255,0.08)",
           boxShadow: inputActive
             ? "0 0 28px var(--realm-glow), inset 0 1px 0 rgba(255,255,255,0.05)"
             : "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.4)",

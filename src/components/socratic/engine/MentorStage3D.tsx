@@ -1,12 +1,9 @@
-import { Suspense, useEffect, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { ACESFilmicToneMapping } from "three";
+import { Suspense } from "react";
 import type { LearningState } from "../types";
 import { MentorRig } from "./mentor3d/MentorRig";
 import { MentorStageCamera } from "./mentor3d/MentorStageCamera";
 import { MentorAnimationBridgeWithPause } from "./mentor3d/MentorAnimationBridge";
 import { MentorSceneLights } from "./mentor3d/MentorSceneLights";
-import { MENTOR_STAGE } from "./mentor3d/mentorLayout";
 import { useMentorSettingsOptional } from "@/lib/mentor-settings-hooks";
 
 interface Props {
@@ -14,6 +11,15 @@ interface Props {
   isSpeaking: boolean;
   isPausing?: boolean;
   lookTarget?: [number, number, number] | null;
+}
+
+function LoadingBox() {
+  return (
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshBasicMaterial color="red" wireframe />
+    </mesh>
+  );
 }
 
 function StageContent({ state, isSpeaking, isPausing, lookTarget }: Required<Props>) {
@@ -24,42 +30,31 @@ function StageContent({ state, isSpeaking, isPausing, lookTarget }: Required<Pro
     <>
       <color attach="background" args={["#050507"]} />
       <MentorStageCamera />
-      <MentorAnimationBridgeWithPause isPausing={isPausing} />
+
+      {/* 🟢 PROOF OF LIFE SPHERE - OUTSIDE SUSPENSE */}
+      <mesh position={[0, 1, 0]} scale={5}>
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshBasicMaterial color="lime" wireframe />
+      </mesh>
+
       <MentorSceneLights state={state} warmthBias={warmthBias} />
+
       <Suspense fallback={null}>
+        <MentorAnimationBridgeWithPause isPausing={isPausing} />
         <MentorRig isSpeaking={isSpeaking} isPausing={isPausing} lookTarget={lookTarget} />
       </Suspense>
     </>
   );
 }
 
-export function MentorStage3D({ state, isSpeaking, isPausing = false, lookTarget = null }: Props) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return <div className="h-full w-full" aria-hidden />;
-
+// ⚡ EXPORTED SCENE: Stripped of <Canvas> to play nice with the ViewPort tracker
+export function MentorScene({ state, isSpeaking, isPausing = false, lookTarget = null }: Props) {
   return (
-    <Canvas
-      dpr={1}
-      camera={{ position: MENTOR_STAGE.cameraPosition, fov: MENTOR_STAGE.fov }}
-      gl={{
-        antialias: true,
-        alpha: false,
-        powerPreference: "high-performance",
-        toneMapping: ACESFilmicToneMapping,
-      }}
-      style={{ touchAction: "none" }}
-    >
-      <StageContent
-        state={state}
-        isSpeaking={isSpeaking}
-        isPausing={isPausing}
-        lookTarget={lookTarget}
-      />
-    </Canvas>
+    <StageContent
+      state={state}
+      isSpeaking={isSpeaking}
+      isPausing={isPausing}
+      lookTarget={lookTarget}
+    />
   );
 }

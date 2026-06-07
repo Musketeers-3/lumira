@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLearningState } from "@/lib/learning-state-context";
 import { useMentorAnimationState } from "@/lib/mentor-animation-context";
@@ -10,8 +10,9 @@ import type { LearningState, Message } from "../types";
 import { ExplorationEnvironment } from "./ExplorationEnvironment";
 import { CelebrationOverlay } from "./CelebrationOverlay";
 import { discoveryTitle, type RealmId } from "@/lib/realms";
-import { getUnlockedArtifacts, persistArtifact } from "@/lib/artifacts";
+import { artifactForSkillName, getUnlockedArtifacts, persistArtifact } from "@/lib/artifacts";
 import { useRealmAudio } from "@/lib/useRealmAudio";
+import { DiscoveryPayload } from "@/lib/constellations";
 interface SocraticEngineProps {
   enableAI?: boolean;
   enablePersistence?: boolean;
@@ -45,13 +46,16 @@ export function SocraticEngine({
   const { sessionId, startSession, updateSession, markBreakthrough, logMessage, fetchSkills } =
     useSessionPersistence();
 
-  const AI_CONTEXT: SocraticContext = {
-    lessonTopic: topic,
-    learningObjective: learningObjective,
-    studentAnswers: [],
-    currentStep: 0,
-    totalSteps: 5,
-  };
+  const AI_CONTEXT = useMemo<SocraticContext>(
+    () => ({
+      lessonTopic: topic,
+      learningObjective: learningObjective,
+      studentAnswers: [],
+      currentStep: 0,
+      totalSteps: 5,
+    }),
+    [topic, learningObjective],
+  );
 
   const {
     messages: aiMessages,
@@ -127,24 +131,39 @@ export function SocraticEngine({
     [setState, setIsSpeaking],
   );
 
+  // 1. Upgrade celebrate state to hold the payload instead of a boolean
+  const [celebratePayload, setCelebratePayload] = useState<DiscoveryPayload | null>(null);
+
   const intentFromAi = (type?: string): Message["intent"] => {
     if (type === "revealing_challenge" || type === "challenge") return "Believing Challenge";
     if (type === "breakthrough_confirmation" || type === "breakthrough") return "Light Found";
     return "Gentle Push";
   };
 
-  const handleObjectInteract = useCallback((label: string, hint: string) => {
-    setExplorationHint(hint);
-    setLookTarget(LOOK_TARGETS[label] ?? null);
-    setState("FOCUS");
-    setMentorState("thinking");
-    setTimeout(() => {
-      setState("IDLE");
-      setMentorState("idle");
-    }, 2000);
-  }, [setState, setMentorState]);
+  const handleObjectInteract = useCallback(
+    (label: string, hint: string) => {
+      setExplorationHint(hint);
+      setLookTarget(LOOK_TARGETS[label] ?? null);
+      setState("FOCUS");
+      setMentorState("thinking");
+      setTimeout(() => {
+        setState("IDLE");
+        setMentorState("idle");
+      }, 2000);
+    },
+    [setState, setMentorState],
+  );
 
-  const handleAiAnswer = async (answer: string) => {
+  // 2. MOVE terminalMessages ABOVE handleAiAnswer so it can be accessed
+  const terminalMessages: Message[] = aiMessages.map((m) => ({
+    id: m.id,
+    speaker: m.role === "user" ? "student" : "mentor",
+    intent: m.role === "user" ? "You" : intentFromAi(m.type),
+    text: m.content,
+  }));
+
+  // 3. EXPLICITLY TYPE the function signature to fix the JSX.Element Promise mismatch
+  const handleAiAnswer = async (answer: string, intent?: string): Promise<void> => {
     try {
       if (enablePersistence && sessionId) {
         await logMessage(sessionId, state, {
@@ -178,27 +197,35 @@ export function SocraticEngine({
 
       if (response.question_type === "breakthrough_confirmation") {
         setMentorState("clapping");
+
+        // Resolve the actual artifact and insight
+        const artifact = artifactForSkillName(topic);
+        const childInsight =
+          terminalMessages.filter((m) => m.speaker === "student").at(-1)?.text ??
+          "A truth discovered.";
+
+        // Formulate the Discovery Payload
+        const discoveryPayload: DiscoveryPayload = {
+          realm: realm,
+          artifact: artifact?.id ?? "orbit-ring",
+          topic: topic,
+          insight: childInsight,
+          rarity: "legendary", // Dynamic rarity logic goes here in the future
+          constellationWeight: 1,
+        };
+
         if (enablePersistence && sessionId) {
           await markBreakthrough(sessionId);
         }
-        persistArtifact("orbit-ring");
-        setTimeout(() => setCelebrate(true), 900);
+        if (artifact) persistArtifact(artifact.id);
+
+        // Trigger the cinematic payload
+        setTimeout(() => setCelebratePayload(discoveryPayload), 900);
       }
     } catch (error) {
       console.error("[AI Mentor Core Execution Failure]", error);
     }
   };
-
-  const terminalMessages: Message[] = aiMessages.map((m) => ({
-    id: m.id,
-    speaker: m.role === "user" ? "student" : "mentor",
-    intent: m.role === "user" ? "You" : intentFromAi(m.type),
-    text: m.content,
-  }));
-
-  const breakthroughInsight =
-    terminalMessages.filter((m) => m.speaker === "student").at(-1)?.text ??
-    "That understanding will stay with you now — you found it yourself.";
 
   return (
     <div className="flex flex-col gap-5 pt-4 pb-12">
@@ -218,12 +245,10 @@ export function SocraticEngine({
         onObjectInteract={handleObjectInteract}
         onSubmitAnswer={handleAiAnswer}
       />
-      {celebrate && (
-        <CelebrationOverlay
-          onClose={() => setCelebrate(false)}
-          discoveryTitle={discoveryTitle(topic)}
-          insight={breakthroughInsight}
-        />
+
+      {/* 4. Pass the precise payload to the Celebration Overlay */}
+      {celebratePayload && (
+        <CelebrationOverlay payload={celebratePayload} onClose={() => setCelebratePayload(null)} />
       )}
     </div>
   );

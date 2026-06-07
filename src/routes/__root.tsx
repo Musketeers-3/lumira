@@ -170,21 +170,21 @@ function RootComponent() {
           <RealmAudioProvider>
             <LearningStateProvider>
               <MentorAnimationProvider>
-              <DocumentRealmSync />
-              <DocumentStateSync />
-              <MentorSettingsProvider>
-                <AssetPreloader />
-                <AmbientBackground />
-                <div className="relative flex min-h-screen w-full">
-                  <Sidebar />
-                  <div className="flex min-h-screen flex-1 flex-col">
-                    <TopBar />
-                    <main className="flex-1 p-5 lg:p-10 xl:p-12">
-                      <Outlet />
-                    </main>
+                <DocumentRealmSync />
+                <DocumentStateSync />
+                <MentorSettingsProvider>
+                  <AssetPreloader />
+                  <AmbientBackground />
+                  <div className="relative flex min-h-screen w-full">
+                    <Sidebar />
+                    <div className="flex min-h-screen flex-1 flex-col">
+                      <TopBar />
+                      <main className="flex-1 p-5 lg:p-10 xl:p-12">
+                        <Outlet />
+                      </main>
+                    </div>
                   </div>
-                </div>
-              </MentorSettingsProvider>
+                </MentorSettingsProvider>
               </MentorAnimationProvider>
             </LearningStateProvider>
           </RealmAudioProvider>

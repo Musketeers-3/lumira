@@ -8,12 +8,7 @@ type RevealProps = {
   direction?: "up" | "down" | "left" | "right" | "none";
 };
 
-export function Reveal({
-  children,
-  className,
-  delay = 0,
-  direction = "up",
-}: RevealProps) {
+export function Reveal({ children, className, delay = 0, direction = "up" }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 

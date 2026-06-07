@@ -30,8 +30,7 @@ export const REALMS: Realm[] = [
     unlocked: true,
     defaultLessonId: "moon-orbit-demo",
     defaultTopic: "Newtonian Gravity & Orbits",
-    defaultObjective:
-      "Discover that an orbit is continuous falling combined with sideways motion.",
+    defaultObjective: "Discover that an orbit is continuous falling combined with sideways motion.",
   },
   {
     id: "chemistry",
@@ -80,8 +79,7 @@ export const REALMS: Realm[] = [
     shortName: "Archive",
     emoji: "📜",
     tagline: "Civilizations, change, and the passage of time",
-    description:
-      "Turn the pages of time itself and witness how human curiosity shaped the world.",
+    description: "Turn the pages of time itself and witness how human curiosity shaped the world.",
     accent: "#D4A054",
     glow: "rgba(212, 160, 84, 0.4)",
     unlocked: false,

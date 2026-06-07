@@ -92,15 +92,12 @@ export function DiscoveryJournal({ highlightSkill }: Props) {
           >
             Book of Discoveries
           </div>
-          <h3
-            className="mt-2 text-2xl font-display"
-            style={{ color: "var(--ink-primary)" }}
-          >
+          <h3 className="mt-2 text-2xl font-display" style={{ color: "var(--ink-primary)" }}>
             Your Scrapbook
           </h3>
           <p className="mt-2 text-sm max-w-md" style={{ color: "var(--ink-secondary)" }}>
-            {entries.length} {entries.length === 1 ? "adventure" : "adventures"} ·{" "}
-            {totalWorlds} {totalWorlds === 1 ? "world" : "worlds"} visited
+            {entries.length} {entries.length === 1 ? "adventure" : "adventures"} · {totalWorlds}{" "}
+            {totalWorlds === 1 ? "world" : "worlds"} visited
           </p>
         </div>
       </div>
@@ -108,13 +105,20 @@ export function DiscoveryJournal({ highlightSkill }: Props) {
       {isLoading && (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-40 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+            <div
+              key={i}
+              className="h-40 rounded-2xl animate-pulse"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            />
           ))}
         </div>
       )}
 
       {!isLoading && entries.length === 0 && (
-        <p className="text-sm font-display italic py-6 text-center" style={{ color: "var(--ink-tertiary)" }}>
+        <p
+          className="text-sm font-display italic py-6 text-center"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
           No memories yet — complete an adventure to seal your first one.
         </p>
       )}
@@ -124,7 +128,10 @@ export function DiscoveryJournal({ highlightSkill }: Props) {
           <div key={week} className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.08)" }} />
-              <span className="text-[10px] font-medium uppercase tracking-[0.2em]" style={{ color: "var(--ink-tertiary)" }}>
+              <span
+                className="text-[10px] font-medium uppercase tracking-[0.2em]"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
                 Week of {week} · {weekEntries.length}{" "}
                 {weekEntries.length === 1 ? "discovery" : "discoveries"}
               </span>
@@ -132,7 +139,11 @@ export function DiscoveryJournal({ highlightSkill }: Props) {
             </div>
 
             {weekEntries.map((entry) => (
-              <SceneCard key={entry.id} entry={entry} highlight={!!highlightSkill && !!entry.topic?.includes(highlightSkill)} />
+              <SceneCard
+                key={entry.id}
+                entry={entry}
+                highlight={!!highlightSkill && !!entry.topic?.includes(highlightSkill)}
+              />
             ))}
           </div>
         ))}
@@ -183,7 +194,11 @@ function SceneCard({ entry, highlight }: { entry: SessionRecord; highlight: bool
               {entry.breakthrough && (
                 <span
                   className="text-[9px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
-                  style={{ background: `${accent}22`, color: accent, border: `1px solid ${accent}55` }}
+                  style={{
+                    background: `${accent}22`,
+                    color: accent,
+                    border: `1px solid ${accent}55`,
+                  }}
                 >
                   ⭐ Star born
                 </span>
@@ -197,7 +212,10 @@ function SceneCard({ entry, highlight }: { entry: SessionRecord; highlight: bool
             </p>
           </div>
 
-          <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+          <div
+            className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.15em]"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
             <span style={{ color: accent }}>{realm?.shortName}</span>
             <span>·</span>
             <span>{dayName}'s adventure</span>

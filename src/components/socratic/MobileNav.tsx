@@ -1,7 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X, Compass, Map, Star, BookOpen, PenLine, Settings } from "lucide-react";
 import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { useLearningState } from "@/lib/learning-state-context";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -35,7 +42,6 @@ export function MobileNav() {
       <SheetTrigger asChild>
         <button
           type="button"
-          aria-label="Open navigation"
           className="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 hover:-translate-y-px glass-panel"
           style={{ borderRadius: "0.875rem" }}
         >
@@ -47,10 +53,21 @@ export function MobileNav() {
         className="w-[85vw] max-w-sm border-0 p-0 nav-glass"
         style={{ background: "var(--bg-night)" }}
       >
+        {/* FIX: Accessibility context block hidden from display view but active for screen readers */}
+        <SheetHeader className="sr-only">
+          <SheetTitle>Navigation Menu</SheetTitle>
+          <SheetDescription>
+            Navigate across the core spaces, worlds, and settings of Lumira OS.
+          </SheetDescription>
+        </SheetHeader>
+
         <div className="flex h-full flex-col px-6 py-8">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <div className="text-xs uppercase tracking-[0.2em]" style={{ color: "var(--ink-tertiary)" }}>
+              <div
+                className="text-xs uppercase tracking-[0.2em]"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
                 Lumira Academy
               </div>
               <h2
@@ -103,7 +120,10 @@ export function MobileNav() {
           </nav>
 
           <div className="glass-panel mt-6 p-5">
-            <div className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+            <div
+              className="text-xs uppercase tracking-[0.15em]"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
               Your mentor
             </div>
             <div className="mt-2 flex items-center gap-2.5">

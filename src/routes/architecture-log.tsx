@@ -126,7 +126,10 @@ function ArchitectureLog() {
 
           {/* Empty State */}
           {!isLoading && sessions.length === 0 && !isError && (
-            <div className="relative p-6 text-sm italic font-display" style={{ color: "var(--ink-tertiary)" }}>
+            <div
+              className="relative p-6 text-sm italic font-display"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
               Your journal is blank. Step into a world to begin your first adventure.
             </div>
           )}
@@ -177,7 +180,10 @@ function ArchitectureLog() {
                         {formattedDate} · {formattedTime}
                       </div>
                     </div>
-                    <p className="mt-2 text-sm italic font-display" style={{ color: "var(--ink-secondary)" }}>
+                    <p
+                      className="mt-2 text-sm italic font-display"
+                      style={{ color: "var(--ink-secondary)" }}
+                    >
                       {s.breakthrough
                         ? '"A new star joined your constellation during this adventure."'
                         : '"Explored mysteries through guided discovery and reasoning."'}

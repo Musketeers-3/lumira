@@ -328,7 +328,11 @@ export function artifactForSkillName(skillName?: string): Artifact | undefined {
   return (
     ARTIFACTS.find((a) => a.skillName.toLowerCase() === s) ??
     ARTIFACTS.find((a) => s.includes(a.skillName.toLowerCase().split(" ")[0])) ??
-    ARTIFACTS.find((a) => a.skillName.toLowerCase().split(" ")[0] && s.includes(a.skillName.toLowerCase().split(" ")[0]))
+    ARTIFACTS.find(
+      (a) =>
+        a.skillName.toLowerCase().split(" ")[0] &&
+        s.includes(a.skillName.toLowerCase().split(" ")[0]),
+    )
   );
 }
 

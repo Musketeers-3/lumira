@@ -12,7 +12,15 @@ interface Props {
   artifacts: Artifact[];
 }
 
-function Molecule({ position, color, speed = 1 }: { position: [number, number, number]; color: string; speed?: number }) {
+function Molecule({
+  position,
+  color,
+  speed = 1,
+}: {
+  position: [number, number, number];
+  color: string;
+  speed?: number;
+}) {
   const ref = useRef<THREE.Group>(null!);
 
   useFrame(({ clock }) => {
@@ -45,7 +53,8 @@ export function ChemistryLabScene({ state, onObjectInteract, artifacts }: Props)
 
   useFrame(({ clock }) => {
     if (!glowRef.current) return;
-    glowRef.current.intensity = 0.6 + Math.sin(clock.elapsedTime * 2) * 0.15 + (state === "CELEBRATE" ? 0.3 : 0);
+    glowRef.current.intensity =
+      0.6 + Math.sin(clock.elapsedTime * 2) * 0.15 + (state === "CELEBRATE" ? 0.3 : 0);
   });
 
   return (
