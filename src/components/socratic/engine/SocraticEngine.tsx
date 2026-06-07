@@ -61,7 +61,7 @@ export function SocraticEngine({
     messages: aiMessages,
     submitAnswer,
     isLoading: aiLoading,
-  } = useSocraticDialogue(AI_CONTEXT);
+  } = useSocraticDialogue(AI_CONTEXT, realm);
 
   const [stepIndex, setStepIndex] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
