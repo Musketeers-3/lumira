@@ -1,7 +1,9 @@
 import { useRouterState } from "@tanstack/react-router";
-import { Moon, Sun } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Moon, Sun, LogOut, User } from "lucide-react";
 import { useLearningState } from "@/lib/learning-state-context";
 import { useTheme } from "@/lib/theme-context";
+import { useAuth } from "@/lib/auth-context";
 import { MobileNav } from "@/components/socratic/MobileNav";
 
 const baseTitles: Record<string, string> = {
@@ -30,13 +32,20 @@ export function TopBar() {
     }),
   });
 
+  const navigate = useNavigate();
   const { state } = useLearningState();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
 
   let title = baseTitles[pathname] ?? "Lumira";
   if (pathname === "/engine" && search?.topic) {
     title = search.topic as string;
   }
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/" });
+  };
 
   return (
     <header
@@ -95,6 +104,47 @@ export function TopBar() {
             <Moon className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-12" style={{ color: "var(--ink-secondary)" }} />
           )}
         </button>
+
+        {isAuthenticated ? (
+          <div className="flex items-center gap-2">
+            <div
+              className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full text-xs"
+              style={{ borderRadius: "9999px", background: "rgba(255,255,255,0.05)" }}
+            >
+              <User className="h-3 w-3" style={{ color: "var(--realm-accent)" }} />
+              <span style={{ color: "var(--ink-secondary)" }}>{user?.name || user?.email}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label="Sign out"
+              title="Sign out"
+              className="group inline-flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-400 hover:-translate-y-0.5 glass-panel"
+              style={{ borderRadius: "0.875rem" }}
+            >
+              <LogOut className="h-4 w-4" style={{ color: "var(--ink-secondary)" }} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/login" })}
+              className="px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+              style={{ color: "var(--ink-secondary)" }}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/register" })}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+              style={{ background: "var(--realm-accent)", color: "#fff" }}
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
 import { Route as SkillPassportRouteImport } from './routes/skill-passport'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LessonBuilderRouteImport } from './routes/lesson-builder'
 import { Route as GatewaysRouteImport } from './routes/gateways'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -32,6 +34,16 @@ const SkillPassportRoute = SkillPassportRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LessonBuilderRoute = LessonBuilderRouteImport.update({
@@ -72,6 +84,8 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
   '/lesson-builder': typeof LessonBuilderRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
   '/worlds': typeof WorldsRoute
@@ -83,6 +97,8 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
   '/lesson-builder': typeof LessonBuilderRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
   '/worlds': typeof WorldsRoute
@@ -95,6 +111,8 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
   '/lesson-builder': typeof LessonBuilderRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
   '/worlds': typeof WorldsRoute
@@ -108,6 +126,8 @@ export interface FileRouteTypes {
     | '/explore'
     | '/gateways'
     | '/lesson-builder'
+    | '/login'
+    | '/register'
     | '/settings'
     | '/skill-passport'
     | '/worlds'
@@ -119,6 +139,8 @@ export interface FileRouteTypes {
     | '/explore'
     | '/gateways'
     | '/lesson-builder'
+    | '/login'
+    | '/register'
     | '/settings'
     | '/skill-passport'
     | '/worlds'
@@ -130,6 +152,8 @@ export interface FileRouteTypes {
     | '/explore'
     | '/gateways'
     | '/lesson-builder'
+    | '/login'
+    | '/register'
     | '/settings'
     | '/skill-passport'
     | '/worlds'
@@ -142,6 +166,8 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   GatewaysRoute: typeof GatewaysRoute
   LessonBuilderRoute: typeof LessonBuilderRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
   SettingsRoute: typeof SettingsRoute
   SkillPassportRoute: typeof SkillPassportRoute
   WorldsRoute: typeof WorldsRoute
@@ -168,6 +194,20 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lesson-builder': {
@@ -222,6 +262,8 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   GatewaysRoute: GatewaysRoute,
   LessonBuilderRoute: LessonBuilderRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
   SettingsRoute: SettingsRoute,
   SkillPassportRoute: SkillPassportRoute,
   WorldsRoute: WorldsRoute,
@@ -229,3 +271,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

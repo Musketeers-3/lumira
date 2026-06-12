@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { LessonBuilder } from "@/components/lesson-builder/LessonBuilder";
 import { LessonsList } from "@/components/lesson-builder/LessonsList";
+import * as lessonApi from '@/services/api/lessonApi';
 import type { LessonDraft } from "@/types/lesson";
 
 export const Route = createFileRoute("/lesson-builder")({
@@ -16,56 +17,8 @@ export const Route = createFileRoute("/lesson-builder")({
   component: LessonBuilderPage,
 });
 
-// --- 1. Async Data Simulator (Frontend-First Persistence) ---
-// This mocks network latency to ensure our loading states and mutation architectures
-// are production-ready for the eventual Supabase swap.
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const STORAGE_KEY = "lumira_drafts";
-
-const lessonDb = {
-  async fetchAll(): Promise<LessonDraft[]> {
-    await delay(600); // Simulate network latency
-    if (typeof window === "undefined") return [];
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  },
-
-  async save(lesson: LessonDraft): Promise<void> {
-    await delay(400);
-    const stored = localStorage.getItem(STORAGE_KEY);
-    let lessons: LessonDraft[] = stored ? JSON.parse(stored) : [];
-
-    const exists = lessons.some((l) => l.id === lesson.id);
-    if (exists) {
-      lessons = lessons.map((l) => (l.id === lesson.id ? lesson : l));
-    } else {
-      lessons.push(lesson);
-    }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons));
-  },
-
-  async delete(id: string): Promise<void> {
-    await delay(400);
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-
-    const lessons: LessonDraft[] = JSON.parse(stored);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons.filter((l) => l.id !== id)));
-  },
-
-  async publish(id: string): Promise<void> {
-    await delay(400);
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-
-    const lessons: LessonDraft[] = JSON.parse(stored);
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(lessons.map((l) => (l.id === id ? { ...l, isPublished: true } : l))),
-    );
-  },
-};
+// --- API-based Lesson Persistence ---
+// All lesson operations now go through REST API
 
 function createNewLessonDraft(): LessonDraft {
   const now = new Date().toISOString();
@@ -85,21 +38,61 @@ function createNewLessonDraft(): LessonDraft {
   };
 }
 
-// --- 2. The Main Route Component ---
+// --- The Main Route Component ---
 function LessonBuilderPage() {
   const queryClient = useQueryClient();
   const [editingLesson, setEditingLesson] = useState<LessonDraft | null>(null);
 
-  // TanStack Query: Hydrate list automatically and cache
+  // TanStack Query: Fetch lessons from API
   const { data: lessons = [], isLoading } = useQuery<LessonDraft[]>({
     queryKey: ["lessons"],
-    queryFn: lessonDb.fetchAll,
+    queryFn: async () => {
+      try {
+        const apiLessons = await lessonApi.getLessons();
+        // Map API response to local LessonDraft format
+        return apiLessons.map(l => ({
+          id: l._id,
+          title: l.title,
+          description: l.description,
+          topic: l.topic,
+          targetSkills: l.targetSkills || [],
+          difficulty: l.difficulty,
+          steps: l.steps || [],
+          estimatedDuration: l.estimatedDuration || 15,
+          createdBy: 'teacher',
+          createdAt: l.createdAt,
+          updatedAt: l.updatedAt,
+          isPublished: l.isPublished
+        }));
+      } catch (error) {
+        console.error('[Lesson Builder] Error fetching lessons:', error);
+        return [];
+      }
+    },
     staleTime: 1000 * 60 * 5,
   });
 
-  // TanStack Mutations: Handle async writes and auto-invalidate cache
+  // TanStack Mutations: Handle API writes and auto-invalidate cache
   const saveMutation = useMutation({
-    mutationFn: lessonDb.save,
+    mutationFn: async (lesson: LessonDraft) => {
+      const data = {
+        title: lesson.title,
+        description: lesson.description,
+        topic: lesson.topic,
+        targetSkills: lesson.targetSkills,
+        difficulty: lesson.difficulty as 'beginner' | 'intermediate' | 'advanced',
+        steps: lesson.steps,
+        estimatedDuration: lesson.estimatedDuration
+      };
+
+      if (lesson.id && lesson.id.length > 11) {
+        // Existing lesson - update
+        return lessonApi.updateLesson(lesson.id, data);
+      } else {
+        // New lesson - create
+        return lessonApi.createLesson(data);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lessons"] });
       setEditingLesson(null);
@@ -107,14 +100,26 @@ function LessonBuilderPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: lessonDb.delete,
+    mutationFn: (id: string) => {
+      // Only delete if it's a real MongoDB ID (longer than local IDs)
+      if (id.length > 11) {
+        return lessonApi.deleteLesson(id);
+      }
+      return Promise.resolve();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lessons"] });
     },
   });
 
   const publishMutation = useMutation({
-    mutationFn: lessonDb.publish,
+    mutationFn: (id: string) => {
+      // Only publish if it's a real MongoDB ID
+      if (id.length > 11) {
+        return lessonApi.publishLesson(id);
+      }
+      return Promise.resolve();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lessons"] });
     },

@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { LearningStateProvider, useLearningState } from "@/lib/learning-state-context";
 import { MentorAnimationProvider } from "@/lib/mentor-animation-context";
 import { MentorSettingsProvider } from "@/lib/mentor-settings-context";
@@ -165,31 +166,33 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <RealmProvider>
-          <RealmAudioProvider>
-            <LearningStateProvider>
-              <MentorAnimationProvider>
-                <DocumentRealmSync />
-                <DocumentStateSync />
-                <MentorSettingsProvider>
-                  <AssetPreloader />
-                  <AmbientBackground />
-                  <div className="relative flex min-h-screen w-full">
-                    <Sidebar />
-                    <div className="flex min-h-screen flex-1 flex-col">
-                      <TopBar />
-                      <main className="flex-1 p-5 lg:p-10 xl:p-12">
-                        <Outlet />
-                      </main>
+      <AuthProvider>
+        <ThemeProvider>
+          <RealmProvider>
+            <RealmAudioProvider>
+              <LearningStateProvider>
+                <MentorAnimationProvider>
+                  <DocumentRealmSync />
+                  <DocumentStateSync />
+                  <MentorSettingsProvider>
+                    <AssetPreloader />
+                    <AmbientBackground />
+                    <div className="relative flex min-h-screen w-full">
+                      <Sidebar />
+                      <div className="flex min-h-screen flex-1 flex-col">
+                        <TopBar />
+                        <main className="flex-1 p-5 lg:p-10 xl:p-12">
+                          <Outlet />
+                        </main>
+                      </div>
                     </div>
-                  </div>
-                </MentorSettingsProvider>
-              </MentorAnimationProvider>
-            </LearningStateProvider>
-          </RealmAudioProvider>
-        </RealmProvider>
-      </ThemeProvider>
+                  </MentorSettingsProvider>
+                </MentorAnimationProvider>
+              </LearningStateProvider>
+            </RealmAudioProvider>
+          </RealmProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
