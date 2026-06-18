@@ -220,6 +220,37 @@ export const getMessages = async (req, res, next) => {
   }
 };
 
+/**
+ * @route DELETE /api/sessions/:id
+ * @desc Delete a learning session
+ * @access Private
+ */
+export const deleteSession = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Verify session belongs to user and delete
+    const session = await LearningSession.findOneAndDelete({ _id: id, userId: req.user._id });
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: 'Session not found'
+      });
+    }
+
+    // Also delete all messages for this session
+    await SessionMessage.deleteMany({ sessionId: id });
+
+    res.json({
+      success: true,
+      message: 'Session deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createSession,
   updateSession,
@@ -227,5 +258,6 @@ export default {
   getSessions,
   getRecentSessions,
   saveMessage,
-  getMessages
+  getMessages,
+  deleteSession
 };

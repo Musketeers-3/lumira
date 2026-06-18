@@ -22,9 +22,9 @@ const app = express();
  * Middleware
  */
 
-// CORS - allow frontend
+// CORS - allow frontend (use array for multiple origins or allow all in dev)
 app.use(cors({
-  origin: config.frontendUrl,
+  origin: config.isDevelopment ? ['http://localhost:5173', 'http://localhost:8081', 'http://localhost:8080'] : config.frontendUrl,
   credentials: true
 }));
 

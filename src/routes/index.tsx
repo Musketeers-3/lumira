@@ -6,6 +6,7 @@ import { Reveal } from "@/components/socratic/premium/Reveal";
 import { GlassPanel } from "@/components/socratic/premium/GlassPanel";
 import { PremiumButton } from "@/components/socratic/premium/PremiumButton";
 import { ConstellationPreview } from "@/components/socratic/ConstellationPreview";
+import { DiscoveryCards } from "@/components/socratic/discovery";
 import { discoveryTitle, realmFromDomain } from "@/lib/realms";
 
 export const Route = createFileRoute("/")({
@@ -438,6 +439,9 @@ function DiscoveryHub() {
           </GlassPanel>
         </Reveal>
       </div>
+
+      {/* Discovery Cards Section */}
+      <DiscoveryCards className="mt-16" />
     </div>
   );
 }

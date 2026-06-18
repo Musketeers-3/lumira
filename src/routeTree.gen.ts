@@ -15,6 +15,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LessonBuilderRouteImport } from './routes/lesson-builder'
+import { Route as JournalRouteImport } from './routes/journal'
 import { Route as GatewaysRouteImport } from './routes/gateways'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as EngineRouteImport } from './routes/engine'
@@ -51,6 +52,11 @@ const LessonBuilderRoute = LessonBuilderRouteImport.update({
   path: '/lesson-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GatewaysRoute = GatewaysRouteImport.update({
   id: '/gateways',
   path: '/gateways',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/engine': typeof EngineRoute
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
+  '/journal': typeof JournalRoute
   '/lesson-builder': typeof LessonBuilderRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/engine': typeof EngineRoute
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
+  '/journal': typeof JournalRoute
   '/lesson-builder': typeof LessonBuilderRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/engine': typeof EngineRoute
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
+  '/journal': typeof JournalRoute
   '/lesson-builder': typeof LessonBuilderRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/engine'
     | '/explore'
     | '/gateways'
+    | '/journal'
     | '/lesson-builder'
     | '/login'
     | '/register'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/engine'
     | '/explore'
     | '/gateways'
+    | '/journal'
     | '/lesson-builder'
     | '/login'
     | '/register'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/engine'
     | '/explore'
     | '/gateways'
+    | '/journal'
     | '/lesson-builder'
     | '/login'
     | '/register'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   EngineRoute: typeof EngineRoute
   ExploreRoute: typeof ExploreRoute
   GatewaysRoute: typeof GatewaysRoute
+  JournalRoute: typeof JournalRoute
   LessonBuilderRoute: typeof LessonBuilderRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LessonBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gateways': {
       id: '/gateways'
       path: '/gateways'
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   EngineRoute: EngineRoute,
   ExploreRoute: ExploreRoute,
   GatewaysRoute: GatewaysRoute,
+  JournalRoute: JournalRoute,
   LessonBuilderRoute: LessonBuilderRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,

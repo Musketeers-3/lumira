@@ -107,7 +107,7 @@ export async function saveSessionMessage(
     const messageData = {
       mentorState: state,
       messageText: message.text,
-      sender: message.sender
+      sender: message.speaker // Use 'speaker' from Message type
     };
     await sessionApi.saveMessage(sessionId, messageData);
     return true;
@@ -165,6 +165,18 @@ export async function getRecentSessions(limit: number = 10) {
     return await sessionApi.getRecentSessions(limit);
   } catch (error) {
     console.error('[Learning Persistence] Error fetching sessions:', error);
+    return null;
+  }
+}
+
+/**
+ * Get all user sessions
+ */
+export async function getAllSessions() {
+  try {
+    return await sessionApi.getSessions();
+  } catch (error) {
+    console.error('[Learning Persistence] Error fetching all sessions:', error);
     return null;
   }
 }

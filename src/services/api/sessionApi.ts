@@ -136,6 +136,15 @@ export const getMessages = async (sessionId: string): Promise<SessionMessage[]> 
   return response.data.data;
 };
 
+/**
+ * Delete a session
+ */
+export const deleteSession = async (sessionId: string): Promise<void> => {
+  await apiClient.delete<{ success: boolean; message: string }>(
+    `/sessions/${sessionId}`
+  );
+};
+
 export default {
   createSession,
   updateSession,
@@ -143,5 +152,6 @@ export default {
   getSessions,
   getRecentSessions,
   saveMessage,
-  getMessages
+  getMessages,
+  deleteSession
 };

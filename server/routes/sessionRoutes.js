@@ -6,7 +6,8 @@ import {
   getSessions,
   getRecentSessions,
   saveMessage,
-  getMessages
+  getMessages,
+  deleteSession
 } from '../controllers/sessionController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
@@ -37,6 +38,13 @@ router.put('/:id', protect, updateSession);
  * @access Private
  */
 router.put('/:id/complete', protect, completeSession);
+
+/**
+ * @route DELETE /api/sessions/:id
+ * @desc Delete a learning session
+ * @access Private
+ */
+router.delete('/:id', protect, deleteSession);
 
 /**
  * @route GET /api/sessions

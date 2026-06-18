@@ -9,7 +9,7 @@ const NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/worlds", label: "Worlds", icon: Map },
   { to: "/engine", label: "Explore", icon: Compass },
   { to: "/skill-passport", label: "Constellation", icon: Star },
-  { to: "/architecture-log", label: "Journal", icon: BookOpen },
+  { to: "/journal", label: "Journal", icon: BookOpen },
   { to: "/lesson-builder", label: "Create Lesson", icon: PenLine },
 ];
 
@@ -68,7 +68,10 @@ export function Sidebar() {
   return (
     <aside className="nav-glass hidden lg:flex h-screen w-72 shrink-0 flex-col px-7 py-9 gap-10 relative">
       <div className="space-y-2">
-        <div className="text-xs uppercase tracking-[0.2em]" style={{ color: "var(--ink-tertiary)" }}>
+        <div
+          className="text-xs uppercase tracking-[0.2em]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
           Lumira Academy
         </div>
         <h1
@@ -101,7 +104,10 @@ export function Sidebar() {
       </nav>
 
       <div className="glass-panel p-5 float-subtle">
-        <div className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+        <div
+          className="text-xs uppercase tracking-[0.15em]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
           Your mentor
         </div>
         <div className="mt-3 flex items-center gap-3">

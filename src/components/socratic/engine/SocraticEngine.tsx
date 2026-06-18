@@ -43,8 +43,16 @@ export function SocraticEngine({
   const { state, setState, isSpeaking, setIsSpeaking } = useLearningState();
   const { setMentorState } = useMentorAnimationState();
   const { setRealm: setAudioRealm } = useRealmAudio();
-  const { sessionId, startSession, updateSession, markBreakthrough, logMessage, fetchSkills } =
-    useSessionPersistence();
+  const {
+    sessionId,
+    initSession,
+    ensureSession,
+    updateSession,
+    markBreakthrough,
+    logMessage,
+    fetchSkills,
+    clearSession,
+  } = useSessionPersistence();
 
   const AI_CONTEXT = useMemo<SocraticContext>(
     () => ({
@@ -92,10 +100,17 @@ export function SocraticEngine({
 
   useEffect(() => {
     if (enablePersistence) {
-      startSession(lessonId, topic);
+      // Only initialize - don't create session yet
+      // Session will be created lazily when first message is sent
+      initSession(lessonId, topic);
     }
-    return () => clearTimers();
-  }, [enablePersistence, lessonId, topic, startSession]);
+    return () => {
+      clearTimers();
+      if (enablePersistence) {
+        clearSession();
+      }
+    };
+  }, [enablePersistence, lessonId, topic, initSession, clearSession]);
 
   const clearTimers = () => {
     if (speakTimer.current) clearTimeout(speakTimer.current);
@@ -165,8 +180,11 @@ export function SocraticEngine({
   // 3. EXPLICITLY TYPE the function signature to fix the JSX.Element Promise mismatch
   const handleAiAnswer = async (answer: string, intent?: string): Promise<void> => {
     try {
-      if (enablePersistence && sessionId) {
-        await logMessage(sessionId, state, {
+      // Ensure session exists before logging (creates lazily if needed)
+      const currentSessionId = enablePersistence ? await ensureSession(lessonId, topic) : null;
+
+      if (enablePersistence && currentSessionId) {
+        await logMessage(currentSessionId, state, {
           id: `stud-${Date.now()}`,
           speaker: "student",
           intent: "You",
@@ -181,15 +199,15 @@ export function SocraticEngine({
       setStepIndex((prev) => Math.min(prev + 1, AI_CONTEXT.totalSteps - 1));
       playMentorPresence(response.estimated_state, response.mentor_response.length);
 
-      if (enablePersistence && sessionId) {
-        await logMessage(sessionId, response.estimated_state, {
+      if (enablePersistence && currentSessionId) {
+        await logMessage(currentSessionId, response.estimated_state, {
           id: `ment-${Date.now()}`,
           speaker: "mentor",
           intent: intentFromAi(response.question_type),
           text: response.mentor_response,
         });
         await updateSession(
-          sessionId,
+          currentSessionId,
           [...stateProgressionRef.current, response.estimated_state],
           aiMessages.length + 2,
         );

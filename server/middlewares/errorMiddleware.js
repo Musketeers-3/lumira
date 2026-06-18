@@ -2,6 +2,7 @@
  * Error Middleware
  * Centralized error handling for the API
  */
+import config from '../config/env.js';
 
 /**
  * Custom error class with status code

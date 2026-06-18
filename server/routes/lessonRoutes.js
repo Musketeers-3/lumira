@@ -1,12 +1,13 @@
-import express from 'express';
+import express from "express";
 import {
   getLessons,
+  getDiscoverLessons,
   createLesson,
   updateLesson,
   deleteLesson,
-  publishLesson
-} from '../controllers/lessonController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+  publishLesson,
+} from "../controllers/lessonController.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -20,34 +21,41 @@ const router = express.Router();
  * @desc Get all user lesson drafts
  * @access Private
  */
-router.get('/', protect, getLessons);
+router.get("/", protect, getLessons);
+
+/**
+ * @route GET /api/lessons/discover
+ * @desc Get published lessons for discovery with user progress
+ * @access Private
+ */
+router.get("/discover", protect, getDiscoverLessons);
 
 /**
  * @route POST /api/lessons
  * @desc Create a new lesson draft
  * @access Private
  */
-router.post('/', protect, createLesson);
+router.post("/", protect, createLesson);
 
 /**
  * @route PUT /api/lessons/:id
  * @desc Update a lesson draft
  * @access Private
  */
-router.put('/:id', protect, updateLesson);
+router.put("/:id", protect, updateLesson);
 
 /**
  * @route DELETE /api/lessons/:id
  * @desc Delete a lesson draft
  * @access Private
  */
-router.delete('/:id', protect, deleteLesson);
+router.delete("/:id", protect, deleteLesson);
 
 /**
  * @route PUT /api/lessons/:id/publish
  * @desc Publish a lesson draft
  * @access Private
  */
-router.put('/:id/publish', protect, publishLesson);
+router.put("/:id/publish", protect, publishLesson);
 
 export default router;

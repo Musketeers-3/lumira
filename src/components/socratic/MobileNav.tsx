@@ -18,7 +18,7 @@ const NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/worlds", label: "Worlds", icon: Map },
   { to: "/engine", label: "Explore", icon: Compass },
   { to: "/skill-passport", label: "Constellation", icon: Star },
-  { to: "/architecture-log", label: "Journal", icon: BookOpen },
+  { to: "/journal", label: "Journal", icon: BookOpen },
   { to: "/lesson-builder", label: "Create Lesson", icon: PenLine },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
