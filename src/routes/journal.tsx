@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { Loader2, BookOpen, Clock, Star, Sparkles, Calendar, ChevronRight, Bug, X } from "lucide-react";
+import {
+  Loader2,
+  BookOpen,
+  Clock,
+  Star,
+  Sparkles,
+  Calendar,
+  ChevronRight,
+  Bug,
+  X,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { REALMS, type RealmId } from "@/lib/realms";
@@ -15,6 +25,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import * as sessionApi from "@/services/api/sessionApi";
+import { evaluateAchievements } from "@/achievements";
+import { SessionAchievementBadge } from "@/components/achievements";
+import type { BadgeMetadata } from "@/achievements/types";
 import {
   useWeekGrouping,
   formatWeekRange,
@@ -131,13 +144,7 @@ function WeekHeader({ group }: { group: WeekGroup }) {
  * Session Card Component
  * Individual session entry in the journal
  */
-function SessionCard({
-  session,
-  onClick,
-}: {
-  session: SessionEntry;
-  onClick: () => void;
-}) {
+function SessionCard({ session, onClick }: { session: SessionEntry; onClick: () => void }) {
   const { date, time } = formatDateTime(session.startedAt);
   const realm = REALMS.find((r) => r.id === session.realm);
 
@@ -162,17 +169,11 @@ function SessionCard({
 
             {/* Date, Time, and Realm */}
             <div className="flex items-center gap-4 flex-wrap">
-              <div
-                className="flex items-center gap-1.5"
-                style={{ color: "var(--ink-tertiary)" }}
-              >
+              <div className="flex items-center gap-1.5" style={{ color: "var(--ink-tertiary)" }}>
                 <Calendar className="h-3.5 w-3.5" />
                 <span className="text-sm">{date}</span>
               </div>
-              <div
-                className="flex items-center gap-1.5"
-                style={{ color: "var(--ink-tertiary)" }}
-              >
+              <div className="flex items-center gap-1.5" style={{ color: "var(--ink-tertiary)" }}>
                 <Clock className="h-3.5 w-3.5" />
                 <span className="text-sm">{time}</span>
               </div>
@@ -216,9 +217,7 @@ function SessionCard({
                   className="mt-1 font-medium flex items-center gap-1"
                   style={{
                     color:
-                      session.performanceScore >= 70
-                        ? "var(--gold-soft)"
-                        : "var(--ink-secondary)",
+                      session.performanceScore >= 70 ? "var(--gold-soft)" : "var(--ink-secondary)",
                   }}
                 >
                   <Star className="h-3.5 w-3.5" fill="currentColor" />
@@ -227,19 +226,8 @@ function SessionCard({
               </div>
             )}
 
-            {/* Breakthrough Badge */}
-            {session.breakthrough && (
-              <Badge
-                className="ml-2"
-                style={{
-                  background: "var(--gold-deep)",
-                  color: "var(--ink-primary)",
-                }}
-              >
-                <Sparkles className="h-3 w-3 mr-1" />
-                Discovery
-              </Badge>
-            )}
+            {/* Achievement Badges */}
+            <SessionAchievementBadge badges={session.badges || []} />
 
             <ChevronRight
               className="h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -270,14 +258,32 @@ function JournalPage() {
         return [];
       }
 
-      // Map lessonId to realm info and sort by date (newest first)
+      // Map lessonId to realm info and evaluate achievements, then sort by date (newest first)
       return data
         .map((session) => {
           const realmInfo = getRealmFromLessonId(session.lessonId);
+
+          // Evaluate achievements for this session
+          const badges = evaluateAchievements({
+            session: {
+              _id: session._id,
+              lessonId: session.lessonId,
+              topic: session.topic,
+              startedAt: session.startedAt,
+              completedAt: session.completedAt,
+              durationSeconds: session.durationSeconds,
+              performanceScore: session.performanceScore,
+              stateProgression: session.stateProgression || [],
+              messagesCount: session.messagesCount,
+              breakthrough: session.breakthrough,
+            },
+          }).map((result) => result.badge);
+
           return {
             ...session,
             realm: realmInfo?.realm,
             realmName: realmInfo?.name,
+            badges: badges as BadgeMetadata[],
           };
         })
         .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
@@ -356,37 +362,51 @@ function JournalPage() {
           <div className="space-y-4">
             {/* Raw Sessions Data */}
             <div>
-              <h4 className="text-xs uppercase tracking-wider mb-2" style={{ color: "var(--ink-tertiary)" }}>
+              <h4
+                className="text-xs uppercase tracking-wider mb-2"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
                 Raw Sessions ({sessions.length})
               </h4>
               <pre
                 className="p-3 rounded-lg text-xs overflow-x-auto"
                 style={{ background: "var(--bg-onyx)", color: "var(--ink-secondary)" }}
               >
-                {JSON.stringify(sessions.map(s => ({
-                  _id: s._id,
-                  topic: s.topic,
-                  startedAt: s.startedAt,
-                  realmName: s.realmName
-                })), null, 2)}
+                {JSON.stringify(
+                  sessions.map((s) => ({
+                    _id: s._id,
+                    topic: s.topic,
+                    startedAt: s.startedAt,
+                    realmName: s.realmName,
+                  })),
+                  null,
+                  2,
+                )}
               </pre>
             </div>
 
             {/* Week Groups */}
             <div>
-              <h4 className="text-xs uppercase tracking-wider mb-2" style={{ color: "var(--ink-tertiary)" }}>
+              <h4
+                className="text-xs uppercase tracking-wider mb-2"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
                 Week Groups ({weekGroups.length})
               </h4>
               <pre
                 className="p-3 rounded-lg text-xs overflow-x-auto"
                 style={{ background: "var(--bg-onyx)", color: "var(--ink-secondary)" }}
               >
-                {JSON.stringify(weekGroups.map(g => ({
-                  label: g.label,
-                  startDate: g.startDate.toISOString(),
-                  endDate: g.endDate.toISOString(),
-                  sessions: g.sessions.map(s => s.topic)
-                })), null, 2)}
+                {JSON.stringify(
+                  weekGroups.map((g) => ({
+                    label: g.label,
+                    startDate: g.startDate.toISOString(),
+                    endDate: g.endDate.toISOString(),
+                    sessions: g.sessions.map((s) => s.topic),
+                  })),
+                  null,
+                  2,
+                )}
               </pre>
             </div>
           </div>
@@ -443,7 +463,10 @@ function JournalPage() {
               <WeekHeader group={group} />
 
               {/* Sessions in this week */}
-              <div className="space-y-3 ml-4 border-l-2 pl-6" style={{ borderColor: "var(--hairline)" }}>
+              <div
+                className="space-y-3 ml-4 border-l-2 pl-6"
+                style={{ borderColor: "var(--hairline)" }}
+              >
                 {group.sessions.map((session) => (
                   <SessionCard
                     key={session._id}

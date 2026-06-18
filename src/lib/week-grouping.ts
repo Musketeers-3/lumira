@@ -1,4 +1,5 @@
-import { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from "react";
+import type { BadgeMetadata } from "@/achievements/types";
 
 /**
  * Week Grouping Utilities for Learning Journal
@@ -20,6 +21,7 @@ export interface SessionEntry {
   breakthrough: boolean;
   realm?: string;
   realmName?: string;
+  badges?: BadgeMetadata[];
 }
 
 export interface WeekGroup {
@@ -65,34 +67,34 @@ export function getWeekLabel(weekStart: Date, weekEnd: Date, now: Date = new Dat
 
   // This Week
   if (weekStart.getTime() === currentWeekStart.getTime()) {
-    return 'This Week';
+    return "This Week";
   }
 
   // Last Week (previous week)
   const lastWeekStart = new Date(currentWeekStart);
   lastWeekStart.setDate(lastWeekStart.getDate() - 7);
   if (weekStart.getTime() === lastWeekStart.getTime()) {
-    return 'Last Week';
+    return "Last Week";
   }
 
   // Two Weeks Ago
   const twoWeeksAgoStart = new Date(currentWeekStart);
   twoWeeksAgoStart.setDate(twoWeeksAgoStart.getDate() - 14);
   if (weekStart.getTime() === twoWeeksAgoStart.getTime()) {
-    return 'Two Weeks Ago';
+    return "Two Weeks Ago";
   }
 
   // Three Weeks Ago
   const threeWeeksAgoStart = new Date(currentWeekStart);
   threeWeeksAgoStart.setDate(threeWeeksAgoStart.getDate() - 21);
   if (weekStart.getTime() === threeWeeksAgoStart.getTime()) {
-    return 'Three Weeks Ago';
+    return "Three Weeks Ago";
   }
 
   // For older weeks, display date range
-  const startMonth = weekStart.toLocaleDateString('en-US', { month: 'short' });
+  const startMonth = weekStart.toLocaleDateString("en-US", { month: "short" });
   const startDay = weekStart.getDate();
-  const endMonth = weekEnd.toLocaleDateString('en-US', { month: 'short' });
+  const endMonth = weekEnd.toLocaleDateString("en-US", { month: "short" });
   const endDay = weekEnd.getDate();
   const year = weekStart.getFullYear();
 
@@ -141,7 +143,7 @@ export function groupSessionsByWeek(sessions: SessionEntry[]): WeekGroup[] {
 
     // Sort sessions within the group (newest first)
     const sortedSessions = [...weekSessions].sort(
-      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+      (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
     );
 
     groups.push({
@@ -189,8 +191,8 @@ export function useStableWeekLabel() {
  * Used for accessibility or alternative UI displays
  */
 export function formatWeekRange(startDate: Date, endDate: Date): string {
-  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
-  return `${startDate.toLocaleDateString('en-US', options)} – ${endDate.toLocaleDateString('en-US', options)}`;
+  const options: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
+  return `${startDate.toLocaleDateString("en-US", options)} – ${endDate.toLocaleDateString("en-US", options)}`;
 }
 
 /**
