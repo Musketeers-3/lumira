@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
+import { Route as TeacherDashboardRouteImport } from './routes/teacher-dashboard'
 import { Route as SkillPassportRouteImport } from './routes/skill-passport'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -25,6 +26,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WorldsRoute = WorldsRouteImport.update({
   id: '/worlds',
   path: '/worlds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherDashboardRoute = TeacherDashboardRouteImport.update({
+  id: '/teacher-dashboard',
+  path: '/teacher-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SkillPassportRoute = SkillPassportRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/teacher-dashboard': typeof TeacherDashboardRoute
   '/worlds': typeof WorldsRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/teacher-dashboard': typeof TeacherDashboardRoute
   '/worlds': typeof WorldsRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/teacher-dashboard': typeof TeacherDashboardRoute
   '/worlds': typeof WorldsRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/skill-passport'
+    | '/teacher-dashboard'
     | '/worlds'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/skill-passport'
+    | '/teacher-dashboard'
     | '/worlds'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/skill-passport'
+    | '/teacher-dashboard'
     | '/worlds'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SettingsRoute: typeof SettingsRoute
   SkillPassportRoute: typeof SkillPassportRoute
+  TeacherDashboardRoute: typeof TeacherDashboardRoute
   WorldsRoute: typeof WorldsRoute
 }
 
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/worlds'
       fullPath: '/worlds'
       preLoaderRoute: typeof WorldsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher-dashboard': {
+      id: '/teacher-dashboard'
+      path: '/teacher-dashboard'
+      fullPath: '/teacher-dashboard'
+      preLoaderRoute: typeof TeacherDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/skill-passport': {
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SettingsRoute: SettingsRoute,
   SkillPassportRoute: SkillPassportRoute,
+  TeacherDashboardRoute: TeacherDashboardRoute,
   WorldsRoute: WorldsRoute,
 }
 export const routeTree = rootRouteImport

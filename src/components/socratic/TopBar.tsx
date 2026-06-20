@@ -1,6 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
-import { Moon, Sun, LogOut, User } from "lucide-react";
+import { Moon, Sun, LogOut, User, Telescope } from "lucide-react";
 import { useLearningState } from "@/lib/learning-state-context";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
@@ -16,11 +16,27 @@ const baseTitles: Record<string, string> = {
   "/lesson-builder": "Lesson Builder",
 };
 
+// Teacher-specific page titles
+const teacherTitles: Record<string, string> = {
+  "/teacher-dashboard": "Classroom Observatory",
+  "/teacher-classes": "Your Classes",
+  "/teacher-students": "Student Roster",
+  "/teacher-insights": "Learning Insights",
+  "/teacher-reports": "Analytics Reports",
+};
+
 const subtitleFor = (state: string) => {
   if (state === "IDLE") return "ready to explore";
   if (state === "FOCUS") return "listening kindly";
   if (state === "CHALLENGE") return "believing in you";
   return "proud of you";
+};
+
+const teacherSubtitleFor = (state: string) => {
+  if (state === "IDLE") return "monitoring discoveries";
+  if (state === "FOCUS") return "observing progress";
+  if (state === "CHALLENGE") return "guiding growth";
+  return "celebrating breakthroughs";
 };
 
 export function TopBar() {
@@ -35,9 +51,13 @@ export function TopBar() {
   const navigate = useNavigate();
   const { state } = useLearningState();
   const { theme, toggleTheme } = useTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isTeacher, logout } = useAuth();
 
+  // Determine title based on role and pathname
   let title = baseTitles[pathname] ?? "Lumira";
+  if (isTeacher && teacherTitles[pathname]) {
+    title = teacherTitles[pathname];
+  }
   if (pathname === "/engine" && search?.topic) {
     title = search.topic as string;
   }
@@ -57,8 +77,8 @@ export function TopBar() {
       <div className="flex items-center gap-4">
         <MobileNav />
         <div className="space-y-0.5">
-          <div className="text-xs uppercase tracking-[0.2em] hidden sm:block" style={{ color: "var(--realm-accent)" }}>
-            lumira academy
+          <div className="text-xs uppercase tracking-[0.2em] hidden sm:block" style={{ color: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}>
+            {isTeacher ? "classroom observatory" : "lumira academy"}
           </div>
           <h1
             className="text-base lg:text-lg font-semibold tracking-tight transition-all duration-500 font-display"
@@ -77,16 +97,16 @@ export function TopBar() {
           <span className="relative flex h-2 w-2">
             <span
               className="absolute inset-0 rounded-full animate-ping opacity-30"
-              style={{ background: "var(--realm-accent)" }}
+              style={{ background: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}
             />
             <span
               className="relative h-2 w-2 rounded-full"
-              style={{ background: "var(--realm-accent)", boxShadow: "0 0 10px var(--realm-glow)" }}
+              style={{ background: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)", boxShadow: `0 0 10px ${isTeacher ? "var(--gold)" : "var(--realm-glow)"}` }}
             />
           </span>
-          <span style={{ color: "var(--ink-tertiary)" }}>mentor</span>
-          <span className="transition-colors duration-700" style={{ color: "var(--realm-accent)" }}>
-            {subtitleFor(state)}
+          <span style={{ color: "var(--ink-tertiary)" }}>{isTeacher ? "observer" : "mentor"}</span>
+          <span className="transition-colors duration-700" style={{ color: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}>
+            {isTeacher ? teacherSubtitleFor(state) : subtitleFor(state)}
           </span>
         </div>
 

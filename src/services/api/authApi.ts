@@ -9,6 +9,7 @@ export interface RegisterData {
   email: string;
   password: string;
   name?: string;
+  role?: 'student' | 'teacher';
 }
 
 export interface LoginData {
@@ -21,6 +22,7 @@ export interface AuthUser {
   email: string;
   name: string;
   avatar?: string;
+  role: 'student' | 'teacher';
   createdAt: string;
   updatedAt: string;
 }

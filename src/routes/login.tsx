@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/login")({
@@ -14,17 +14,25 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate({ to: "/" });
+  // Redirect if already authenticated based on role
+  if (isAuthenticated && user) {
+    const destination = user.role === "teacher" ? "/teacher-dashboard" : "/";
+    navigate({ to: destination });
     return null;
   }
+
+  // Watch for user role changes and redirect accordingly
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "teacher") {
+      navigate({ to: "/teacher-dashboard" });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +41,7 @@ function LoginPage() {
 
     try {
       await login(email, password);
-      navigate({ to: "/" });
+      // Redirect will happen via useEffect when user state updates
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

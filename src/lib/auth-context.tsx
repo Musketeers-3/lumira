@@ -6,8 +6,10 @@ interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isTeacher: boolean;
+  isStudent: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name?: string) => Promise<void>;
+  register: (email: string, password: string, name?: string, role?: 'student' | 'teacher') => Promise<void>;
   logout: () => void;
 }
 
@@ -43,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, name?: string) => {
-    const response = await authApi.register({ email, password, name });
+  const register = async (email: string, password: string, name?: string, role?: 'student' | 'teacher') => {
+    const response = await authApi.register({ email, password, name, role });
     if (response.success) {
       setUser(response.data.user);
     } else {
@@ -63,6 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        isTeacher: user?.role === 'teacher',
+        isStudent: user?.role === 'student',
         login,
         register,
         logout

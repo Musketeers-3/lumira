@@ -1,16 +1,42 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useLearningState } from "@/lib/learning-state-context";
+import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
-import { Compass, Map, Star, BookOpen, PenLine, Settings } from "lucide-react";
+import {
+  Compass,
+  Map,
+  Star,
+  BookOpen,
+  PenLine,
+  Settings,
+  GraduationCap,
+  Users,
+  BarChart3,
+  Lightbulb,
+  FileText,
+  Telescope,
+  Eye,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-const NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
+// Student navigation items
+const STUDENT_NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/", label: "Discovery Hub", icon: Compass },
   { to: "/worlds", label: "Worlds", icon: Map },
   { to: "/engine", label: "Explore", icon: Compass },
   { to: "/skill-passport", label: "Constellation", icon: Star },
   { to: "/journal", label: "Journal", icon: BookOpen },
   { to: "/lesson-builder", label: "Create Lesson", icon: PenLine },
+];
+
+// Teacher navigation items - Observatory-themed
+const TEACHER_NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: "/teacher-dashboard", label: "Dashboard", icon: Telescope },
+  { to: "/teacher-classes", label: "Classes", icon: GraduationCap },
+  { to: "/teacher-students", label: "Students", icon: Users },
+  { to: "/teacher-insights", label: "Insights", icon: Lightbulb },
+  { to: "/teacher-reports", label: "Reports", icon: BarChart3 },
+  { to: "/lesson-builder", label: "Create Class", icon: PenLine },
 ];
 
 function NavItemContent({
@@ -55,6 +81,7 @@ function NavItemContent({
 export function Sidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const { state } = useLearningState();
+  const { isTeacher } = useAuth();
 
   const stateLabel =
     state === "IDLE"
@@ -89,15 +116,48 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 flex flex-col gap-0.5">
-        {NAV_ITEMS.map((item) => (
-          <Link key={item.to} to={item.to} className="block">
-            <NavItemContent
-              label={item.label}
-              icon={item.icon}
-              active={pathname === item.to || (item.to === "/engine" && pathname === "/engine")}
-            />
-          </Link>
-        ))}
+        {/* Role-based navigation */}
+        {isTeacher ? (
+          <>
+            {/* Teacher navigation - Observatory theme */}
+            <div
+              className="px-4 py-2 text-xs uppercase tracking-[0.15em]"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
+              Observatory
+            </div>
+            {TEACHER_NAV_ITEMS.map((item) => (
+              <Link key={item.to} to={item.to} className="block">
+                <NavItemContent
+                  label={item.label}
+                  icon={item.icon}
+                  active={pathname === item.to}
+                />
+              </Link>
+            ))}
+            {/* Student experience link for teachers */}
+            <div className="my-2 h-px" style={{ background: "var(--hairline)" }} />
+            <Link to="/" className="block">
+              <NavItemContent
+                label="View Student Experience"
+                icon={Eye}
+                active={false}
+              />
+            </Link>
+          </>
+        ) : (
+          /* Student navigation */
+          STUDENT_NAV_ITEMS.map((item) => (
+            <Link key={item.to} to={item.to} className="block">
+              <NavItemContent
+                label={item.label}
+                icon={item.icon}
+                active={pathname === item.to || (item.to === "/engine" && pathname === "/engine")}
+              />
+            </Link>
+          ))
+        )}
+
         <Link to="/settings" className="block mt-4">
           <NavItemContent label="Settings" icon={Settings} active={pathname === "/settings"} />
         </Link>

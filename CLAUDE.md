@@ -27,7 +27,7 @@ bun run generate:mentor # Generate placeholder 3D mentor GLB
 ```bash
 cd server
 npm run dev          # Start with nodemon (auto-reload) on port 5001
-npm start            # Start production server
+npm start            # Start production server (must run from server directory)
 ```
 
 ### Running Both
@@ -51,17 +51,20 @@ bun run dev
   - `mentor-*.ts` - 3D mentor personality and animation contexts
   - `realms.ts`, `realm-context.tsx` - Learning world/realm management
   - `useRealmAudio.tsx` - Audio management
+  - `week-grouping.ts` - Session grouping by week for journal views
 - `components/ui/` - Radix UI + shadcn/ui components
 - `components/socratic/` - Socratic dialogue UI
 - `components/lesson-builder/` - Lesson creation UI
+- `components/achievements/` - Achievement badges and unlock modals
+- `artifacts/` - Artifact definitions, types, and evaluator for gamification system
 - `services/api/` - API client layer with JWT interceptors
 
 ### Backend Structure (`/server`)
 - `server.js` - Express app entry point
 - `config/` - Database and environment configuration
 - `models/` - Mongoose schemas (User, LearningSession, SessionMessage, SkillTracking, LessonDraft)
-- `controllers/` - Request handlers for each domain
-- `routes/` - Express routers with auth middleware
+- `controllers/` - Request handlers: auth, session, skill, lesson, ai
+- `routes/` - Express routers: auth, session, skill, lesson, ai (all require auth middleware except auth routes)
 - `middlewares/` - JWT auth and error handling
 - `services/` - AI service (Ollama integration), auth service
 
@@ -71,10 +74,14 @@ bun run dev
 - `GET /api/auth/me` - Get current user
 - `POST /api/sessions` - Create learning session
 - `GET /api/sessions` - Get user's sessions
+- `GET /api/sessions/recent` - Get recent sessions
+- `PUT /api/sessions/:id/complete` - Complete a session
 - `POST /api/sessions/:id/messages` - Save message
+- `GET /api/sessions/:id/messages` - Get session messages
 - `GET /api/skills` - Get user skills
 - `POST /api/ai/socratic` - Generate Socratic response
 - `GET/POST/PUT/DELETE /api/lessons` - Lesson drafts CRUD
+- `GET /api/lessons/discover` - Get published lessons for discovery
 
 ## Key Technical Details
 
@@ -103,6 +110,11 @@ Use `bun run generate:mentor` to create a placeholder GLB; replace with a Blende
 3. `apiClient.ts` attaches token to Authorization header
 4. Protected routes require valid JWT via `authMiddleware`
 
+### Gamification System
+The achievement system uses client-side evaluation:
+- `src/artifacts/` - Defines artifact types, unlock conditions, and the evaluator
+- `src/achievements/` - UI components for badges and unlock modals
+
 ## Important Notes
 
 - The vite config uses `@lovable.dev/vite-tanstack-config` - do not manually add plugins that are already included
@@ -110,3 +122,5 @@ Use `bun run generate:mentor` to create a placeholder GLB; replace with a Blende
 - AI features require a running Ollama instance (default: localhost:11434)
 - MongoDB must be running for backend to function
 - Frontend runs on port 5173 (Vite default), backend on port 5001
+- TanStack Router uses file-based routing: `src/routes/*.tsx` maps to `/` routes, `src/routes/subdir/*.tsx` maps to `/subdir/`
+- MIGRATION-PLAN.md contains detailed migration history and architecture decisions

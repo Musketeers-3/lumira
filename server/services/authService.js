@@ -23,18 +23,23 @@ export const generateToken = (userId) => {
  * @param {object} userData - User registration data
  * @returns {object} User and token
  */
-export const register = async ({ email, password, name }) => {
+export const register = async ({ email, password, name, role }) => {
   // Check if user already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
     throw new Error('User already exists with this email');
   }
 
+  // Validate role if provided
+  const validRoles = ['student', 'teacher'];
+  const userRole = role && validRoles.includes(role) ? role : 'student';
+
   // Create new user
   const user = await User.create({
     email: email.toLowerCase(),
     password,
-    name: name || 'Explorer'
+    name: name || 'Explorer',
+    role: userRole
   });
 
   // Generate token

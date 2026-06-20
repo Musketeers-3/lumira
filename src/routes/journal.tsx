@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import {
   Loader2,
   BookOpen,
@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Bug,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
@@ -24,10 +25,15 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import * as sessionApi from "@/services/api/sessionApi";
 import { evaluateAchievements } from "@/achievements";
-import { SessionAchievementBadge } from "@/components/achievements";
+import { evaluateArtifacts, getPersistedArtifactIds, getEarnedArtifacts } from "@/artifacts";
+import {
+  ArtifactUnlockModal,
+} from "@/components/achievements";
+import { EmptyJournalState } from "@/components/journal";
 import type { BadgeMetadata } from "@/achievements/types";
+import type { ArtifactMetadata } from "@/artifacts/types";
+import * as sessionApi from "@/services/api/sessionApi";
 import {
   useWeekGrouping,
   formatWeekRange,
@@ -35,6 +41,10 @@ import {
   type SessionEntry,
   type WeekGroup,
 } from "@/lib/week-grouping";
+
+// DEBUG: Force empty state for visual testing
+// Set to false to disable and show real data
+const FORCE_EMPTY_STATE = false;
 
 export const Route = createFileRoute("/journal")({
   head: () => ({
@@ -141,6 +151,252 @@ function WeekHeader({ group }: { group: WeekGroup }) {
 }
 
 /**
+ * Collectible Item - Individual achievement or artifact for display
+ */
+interface CollectibleItemProps {
+  icon: string;
+  title: string;
+  description: string;
+  rarity: string;
+  isAchievement?: boolean;
+}
+
+const CollectibleItem = memo(function CollectibleItem({
+  icon,
+  title,
+  description,
+  rarity,
+  isAchievement = false,
+}: CollectibleItemProps) {
+  const rarityColors: Record<string, { bg: string; border: string; text: string }> = {
+    common: { bg: "rgba(255,255,255,0.05)", border: "var(--hairline)", text: "var(--ink-tertiary)" },
+    rare: { bg: "rgba(59, 158, 255, 0.15)", border: "#3B9EFF40", text: "#3B9EFF" },
+    legendary: { bg: "rgba(201, 162, 75, 0.2)", border: "var(--gold-deep)", text: "var(--gold-soft)" },
+    mastery: { bg: "rgba(184, 140, 255, 0.15)", border: "#B88CFF40", text: "#B88CFF" },
+  };
+
+  const colors = rarityColors[rarity] || rarityColors.common;
+
+  return (
+    <div
+      className="flex items-start gap-3 p-3 rounded-lg transition-colors"
+      style={{ background: colors.bg }}
+    >
+      <span className="text-xl">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm" style={{ color: "var(--ink-primary)" }}>
+            {title}
+          </span>
+          <span
+            className="text-xs px-1.5 py-0.5 rounded-full uppercase tracking-wider"
+            style={{
+              background: colors.bg,
+              color: colors.text,
+              border: `1px solid ${colors.border}`,
+            }}
+          >
+            {rarity}
+          </span>
+        </div>
+        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--ink-secondary)" }}>
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+});
+
+/**
+ * CollectiblesDisplay - Expandable collectibles section for session cards
+ * Shows: 1 achievement + 2 artifacts (collapsed), all collectibles (expanded)
+ */
+interface CollectiblesDisplayProps {
+  badges: BadgeMetadata[];
+  artifacts: ArtifactMetadata[];
+}
+
+const CollectiblesDisplay = memo(function CollectiblesDisplay({
+  badges,
+  artifacts,
+}: CollectiblesDisplayProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const totalCollectibles = badges.length + artifacts.length;
+
+  // No collectibles to show
+  if (totalCollectibles === 0) {
+    return null;
+  }
+
+  // Determine what to show in collapsed state
+  const visibleAchievements = badges.slice(0, 1);
+  const visibleArtifacts = artifacts.slice(0, 2);
+  const hiddenCount = totalCollectibles - visibleAchievements.length - visibleArtifacts.length;
+
+  return (
+    <div className="space-y-2">
+      {/* Collapsed view - inline collectibles */}
+      {!isExpanded && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Achievement badges */}
+          {visibleAchievements.map((badge) => (
+            <span
+              key={badge.id}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+              style={{
+                background:
+                  badge.rarity === "legendary"
+                    ? "rgba(201, 162, 75, 0.2)"
+                    : badge.rarity === "rare"
+                      ? "rgba(59, 158, 255, 0.15)"
+                      : "rgba(255,255,255,0.05)",
+                color:
+                  badge.rarity === "legendary"
+                    ? "var(--gold-soft)"
+                    : badge.rarity === "rare"
+                      ? "#3B9EFF"
+                      : "var(--ink-tertiary)",
+                border: `1px solid ${
+                  badge.rarity === "legendary"
+                    ? "var(--gold-deep)"
+                    : badge.rarity === "rare"
+                      ? "#3B9EFF40"
+                      : "var(--hairline)"
+                }`,
+              }}
+              title={badge.title}
+            >
+              <span>{badge.icon}</span>
+            </span>
+          ))}
+
+          {/* Artifact badges */}
+          {visibleArtifacts.map((artifact) => (
+            <span
+              key={artifact.id}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+              style={{
+                background:
+                  artifact.rarity === "legendary"
+                    ? "rgba(201, 162, 75, 0.2)"
+                    : artifact.rarity === "rare"
+                      ? "rgba(59, 158, 255, 0.15)"
+                      : "rgba(255,255,255,0.05)",
+                color:
+                  artifact.rarity === "legendary"
+                    ? "var(--gold-soft)"
+                    : artifact.rarity === "rare"
+                      ? "#3B9EFF"
+                      : "var(--ink-tertiary)",
+                border: `1px solid ${
+                  artifact.rarity === "legendary"
+                    ? "var(--gold-deep)"
+                    : artifact.rarity === "rare"
+                      ? "#3B9EFF40"
+                      : "var(--hairline)"
+                }`,
+              }}
+              title={artifact.name}
+            >
+              <span>{artifact.icon}</span>
+            </span>
+          ))}
+
+          {/* Expand button */}
+          {hiddenCount > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(true);
+              }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all hover:scale-105"
+              style={{
+                background: "var(--gold-deep)",
+                color: "var(--ink-primary)",
+              }}
+            >
+              +{hiddenCount}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Expanded view - detailed panel */}
+      {isExpanded && (
+        <div
+          className="rounded-xl p-4 space-y-3 animate-in slide-in-from-top-2 duration-200"
+          style={{
+            background: "var(--bg-night)",
+            border: "1px solid var(--hairline)",
+          }}
+        >
+          {/* Achievements section */}
+          {badges.length > 0 && (
+            <div>
+              <div
+                className="text-xs font-medium uppercase tracking-wider mb-2"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
+                Achievements
+              </div>
+              <div className="space-y-2">
+                {badges.map((badge) => (
+                  <CollectibleItem
+                    key={badge.id}
+                    icon={badge.icon}
+                    title={badge.title}
+                    description={badge.description}
+                    rarity={badge.rarity}
+                    isAchievement={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Artifacts section */}
+          {artifacts.length > 0 && (
+            <div>
+              <div
+                className="text-xs font-medium uppercase tracking-wider mb-2"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
+                Artifacts
+              </div>
+              <div className="space-y-2">
+                {artifacts.map((artifact) => (
+                  <CollectibleItem
+                    key={artifact.id}
+                    icon={artifact.icon}
+                    title={artifact.name}
+                    description={artifact.description}
+                    rarity={artifact.rarity}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Collapse button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(false);
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
+            <ChevronDown className="h-4 w-4" />
+            Collapse
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
+
+/**
  * Session Card Component
  * Individual session entry in the journal
  */
@@ -226,8 +482,11 @@ function SessionCard({ session, onClick }: { session: SessionEntry; onClick: () 
               </div>
             )}
 
-            {/* Achievement Badges */}
-            <SessionAchievementBadge badges={session.badges || []} />
+            {/* Collectibles - expandable badges and artifacts */}
+            <CollectiblesDisplay
+              badges={session.badges || []}
+              artifacts={session.artifacts || []}
+            />
 
             <ChevronRight
               className="h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -244,6 +503,8 @@ function JournalPage() {
   const [selectedSession, setSelectedSession] = useState<SessionEntry | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
+  const [newlyUnlockedArtifact, setNewlyUnlockedArtifact] = useState<ArtifactMetadata | null>(null);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const { fetchAllSessions } = useSessionPersistence();
 
   // Fetch all sessions using the persistence layer with graceful error handling
@@ -258,13 +519,32 @@ function JournalPage() {
         return [];
       }
 
-      // Map lessonId to realm info and evaluate achievements, then sort by date (newest first)
+      // Map lessonId to realm info and evaluate achievements & artifacts, then sort by date (newest first)
       return data
-        .map((session) => {
+        .map((session, index, array) => {
           const realmInfo = getRealmFromLessonId(session.lessonId);
 
+          // Get historical sessions (all sessions completed before this one)
+          const historicalSessions = array
+            .slice(index + 1)
+            .filter((s) => s.completedAt)
+            .map((s) => {
+              const histRealm = getRealmFromLessonId(s.lessonId);
+              return {
+                _id: s._id,
+                lessonId: s.lessonId,
+                topic: s.topic,
+                startedAt: s.startedAt,
+                completedAt: s.completedAt,
+                durationSeconds: s.durationSeconds,
+                performanceScore: s.performanceScore,
+                breakthrough: s.breakthrough,
+                realm: histRealm?.realm,
+              };
+            });
+
           // Evaluate achievements for this session
-          const badges = evaluateAchievements({
+          const badgeResults = evaluateAchievements({
             session: {
               _id: session._id,
               lessonId: session.lessonId,
@@ -277,13 +557,63 @@ function JournalPage() {
               messagesCount: session.messagesCount,
               breakthrough: session.breakthrough,
             },
-          }).map((result) => result.badge);
+          });
+          const badges = badgeResults.map((result) => result.badge);
+          const earnedBadgeIds = badges.map((b) => b.id);
+
+          // Get persisted artifact IDs
+          const persistedArtifactIds = getPersistedArtifactIds();
+
+          // Evaluate new artifact unlocks (for modal) - pass historical for counting
+          const artifactResults = evaluateArtifacts({
+            session: {
+              _id: session._id,
+              lessonId: session.lessonId,
+              topic: session.topic,
+              startedAt: session.startedAt,
+              completedAt: session.completedAt,
+              durationSeconds: session.durationSeconds,
+              performanceScore: session.performanceScore,
+              breakthrough: session.breakthrough,
+              realm: realmInfo?.realm,
+            },
+            earnedBadges: earnedBadgeIds,
+            unlockedArtifacts: persistedArtifactIds,
+            historicalSessions,
+          });
+
+          // Get all earned artifacts for display on this session card
+          const displayArtifacts = getEarnedArtifacts(
+            {
+              _id: session._id,
+              lessonId: session.lessonId,
+              topic: session.topic,
+              startedAt: session.startedAt,
+              completedAt: session.completedAt,
+              durationSeconds: session.durationSeconds,
+              performanceScore: session.performanceScore,
+              breakthrough: session.breakthrough,
+              realm: realmInfo?.realm,
+            },
+            earnedBadgeIds,
+            historicalSessions,
+          );
+
+          // Check for new unlocks and show modal (only for the most recent session)
+          if (index === 0 && artifactResults.some((r) => r.isNewUnlock)) {
+            const newUnlock = artifactResults.find((r) => r.isNewUnlock);
+            if (newUnlock) {
+              setNewlyUnlockedArtifact(newUnlock.artifact);
+              setIsUnlockModalOpen(true);
+            }
+          }
 
           return {
             ...session,
             realm: realmInfo?.realm,
             realmName: realmInfo?.name,
             badges: badges as BadgeMetadata[],
+            artifacts: displayArtifacts as ArtifactMetadata[],
           };
         })
         .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
@@ -435,27 +765,11 @@ function JournalPage() {
       )}
 
       {/* Empty State */}
-      {!isLoading && sessions.length === 0 && (
-        <div
-          className="rounded-2xl p-12 text-center"
-          style={{ background: "var(--bg-onyx)", border: "1px solid var(--hairline)" }}
-        >
-          <BookOpen className="mx-auto h-12 w-12 mb-4" style={{ color: "var(--ink-tertiary)" }} />
-          <h3
-            className="text-lg font-semibold font-display"
-            style={{ color: "var(--ink-primary)" }}
-          >
-            No sessions yet
-          </h3>
-          <p className="mt-2 max-w-sm mx-auto" style={{ color: "var(--ink-secondary)" }}>
-            Your learning journey begins with your first session. Visit a world to start
-            discovering.
-          </p>
-        </div>
-      )}
+      {FORCE_EMPTY_STATE && !isLoading && <EmptyJournalState />}
+      {!FORCE_EMPTY_STATE && !isLoading && sessions.length === 0 && <EmptyJournalState />}
 
       {/* Grouped Session List */}
-      {!isLoading && sessions.length > 0 && (
+      {!FORCE_EMPTY_STATE && !isLoading && sessions.length > 0 && (
         <div className="space-y-2">
           {weekGroups.map((group) => (
             <div key={group.label + group.startDate.getTime()}>
@@ -633,6 +947,13 @@ function JournalPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Artifact Unlock Modal */}
+      <ArtifactUnlockModal
+        isOpen={isUnlockModalOpen}
+        artifact={newlyUnlockedArtifact}
+        onClose={() => setIsUnlockModalOpen(false)}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useMemo, useCallback, useRef, useEffect } from "react";
 import type { BadgeMetadata } from "@/achievements/types";
+import type { ArtifactMetadata } from "@/artifacts/types";
 
 /**
  * Week Grouping Utilities for Learning Journal
@@ -14,7 +15,7 @@ export interface SessionEntry {
   topic: string;
   startedAt: string;
   completedAt?: string;
-  durationSeconds?: number;
+  durationCount?: number;
   performanceScore?: number;
   stateProgression: string[];
   messagesCount: number;
@@ -22,6 +23,7 @@ export interface SessionEntry {
   realm?: string;
   realmName?: string;
   badges?: BadgeMetadata[];
+  artifacts?: ArtifactMetadata[];
 }
 
 export interface WeekGroup {

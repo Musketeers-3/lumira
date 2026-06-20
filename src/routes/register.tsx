@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/register")({
@@ -14,18 +14,21 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const { register, isAuthenticated } = useAuth();
+  const { register, user, isAuthenticated } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"student" | "teacher">("student");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate({ to: "/" });
-    return null;
-  }
+  // Redirect if already authenticated based on role - use useEffect to avoid rules-of-hooks violation
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const destination = user.role === "teacher" ? "/teacher-dashboard" : "/";
+      navigate({ to: destination });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +36,8 @@ function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await register(email, password, name);
-      navigate({ to: "/" });
+      await register(email, password, name, role);
+      // Redirect will happen via useEffect when user state updates
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -56,13 +59,15 @@ function RegisterPage() {
             className="text-3xl font-display"
             style={{ color: "var(--ink-primary)" }}
           >
-            Join Lumira
+            {role === "teacher" ? "Join as Instructor" : "Join Lumira"}
           </h1>
           <p
             className="mt-2 text-sm"
             style={{ color: "var(--ink-secondary)" }}
           >
-            Begin your learning adventure
+            {role === "teacher"
+              ? "Set up your classroom observatory"
+              : "Begin your learning adventure"}
           </p>
         </div>
 
@@ -144,6 +149,53 @@ function RegisterPage() {
               }}
               placeholder="••••••••"
             />
+          </div>
+
+          {/* Role Selection */}
+          <div>
+            <label
+              className="block text-xs uppercase tracking-wider mb-2"
+              style={{ color: "var(--ink-secondary)" }}
+            >
+              I am a...
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole("student")}
+                className={`p-4 rounded-lg text-sm font-medium transition-all ${
+                  role === "student" ? "ring-2 ring-offset-2 ring-offset-[var(--bg-onyx)]" : ""
+                }`}
+                style={{
+                  background: role === "student" ? "var(--realm-accent)" : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${role === "student" ? "var(--realm-accent)" : "rgba(255,255,255,0.1)"}`,
+                  color: role === "student" ? "#fff" : "var(--ink-secondary)",
+                  "--tw-ring-color": "var(--realm-accent)",
+                } as React.CSSProperties}
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("teacher")}
+                className={`p-4 rounded-lg text-sm font-medium transition-all ${
+                  role === "teacher" ? "ring-2 ring-offset-2 ring-offset-[var(--bg-onyx)]" : ""
+                }`}
+                style={{
+                  background: role === "teacher" ? "var(--gold)" : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${role === "teacher" ? "var(--gold)" : "rgba(255,255,255,0.1)"}`,
+                  color: role === "teacher" ? "var(--bg-primary)" : "var(--ink-secondary)",
+                  "--tw-ring-color": "var(--gold)",
+                } as React.CSSProperties}
+              >
+                Teacher
+              </button>
+            </div>
+            <p className="mt-2 text-xs" style={{ color: "var(--ink-tertiary)" }}>
+              {role === "teacher"
+                ? "Create classes and monitor student progress"
+                : "Explore worlds and learn with your mentor"}
+            </p>
           </div>
 
           <button
