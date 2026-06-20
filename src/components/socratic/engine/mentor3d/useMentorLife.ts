@@ -68,7 +68,9 @@ export function useMentorLife({
     let tSurprised = 0;
     let tSad = 0;
 
-    const breathPulse = !reducedMotion ? Math.sin(t * 1.1) * (mentorState === "idle" ? 0.04 : 0.02) : 0;
+    const breathPulse = !reducedMotion
+      ? Math.sin(t * 1.1) * (mentorState === "idle" ? 0.04 : 0.02)
+      : 0;
 
     if (mentorState === "idle") {
       tRelaxed = 0.25 + warmthBias * 0.15 + breathPulse;

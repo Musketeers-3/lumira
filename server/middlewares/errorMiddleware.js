@@ -2,7 +2,7 @@
  * Error Middleware
  * Centralized error handling for the API
  */
-import config from '../config/env.js';
+import config from "../config/env.js";
 
 /**
  * Custom error class with status code
@@ -11,7 +11,7 @@ export class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.status = `${statusCode}`.startsWith("4") ? "fail" : "error";
     this.isOperational = true;
 
     Error.captureStackTrace(this, this.constructor);
@@ -35,12 +35,12 @@ export const errorHandler = (err, req, res, next) => {
 
   // Log error for development
   if (config.isDevelopment) {
-    console.error('Error:', err);
+    console.error("Error:", err);
   }
 
   // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
+  if (err.name === "CastError") {
+    const message = "Resource not found";
     error = new AppError(message, 404);
   }
 
@@ -52,27 +52,27 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map(val => val.message);
-    const message = messages.join(', ');
+  if (err.name === "ValidationError") {
+    const messages = Object.values(err.errors).map((val) => val.message);
+    const message = messages.join(", ");
     error = new AppError(message, 400);
   }
 
   // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    const message = 'Invalid token. Please log in again.';
+  if (err.name === "JsonWebTokenError") {
+    const message = "Invalid token. Please log in again.";
     error = new AppError(message, 401);
   }
 
-  if (err.name === 'TokenExpiredError') {
-    const message = 'Your token has expired. Please log in again.';
+  if (err.name === "TokenExpiredError") {
+    const message = "Your token has expired. Please log in again.";
     error = new AppError(message, 401);
   }
 
   res.status(error.statusCode || 500).json({
     success: false,
-    message: error.message || 'Server Error',
-    ...(config.isDevelopment && { stack: err.stack })
+    message: error.message || "Server Error",
+    ...(config.isDevelopment && { stack: err.stack }),
   });
 };
 

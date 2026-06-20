@@ -1,5 +1,5 @@
-import LearningSession from '../models/LearningSession.js';
-import SessionMessage from '../models/SessionMessage.js';
+import LearningSession from "../models/LearningSession.js";
+import SessionMessage from "../models/SessionMessage.js";
 
 /**
  * Session Controller
@@ -18,7 +18,7 @@ export const createSession = async (req, res, next) => {
     if (!lessonId || !topic) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide lessonId and topic'
+        message: "Please provide lessonId and topic",
       });
     }
 
@@ -26,12 +26,12 @@ export const createSession = async (req, res, next) => {
       userId: req.user._id,
       lessonId,
       topic,
-      startedAt: new Date()
+      startedAt: new Date(),
     });
 
     res.status(201).json({
       success: true,
-      data: session
+      data: session,
     });
   } catch (error) {
     next(error);
@@ -53,7 +53,7 @@ export const updateSession = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
@@ -67,7 +67,7 @@ export const updateSession = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: session
+      data: session,
     });
   } catch (error) {
     next(error);
@@ -89,7 +89,7 @@ export const completeSession = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
@@ -101,7 +101,7 @@ export const completeSession = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: session
+      data: session,
     });
   } catch (error) {
     next(error);
@@ -115,12 +115,11 @@ export const completeSession = async (req, res, next) => {
  */
 export const getSessions = async (req, res, next) => {
   try {
-    const sessions = await LearningSession.find({ userId: req.user._id })
-      .sort({ createdAt: -1 });
+    const sessions = await LearningSession.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      data: sessions
+      data: sessions,
     });
   } catch (error) {
     next(error);
@@ -142,7 +141,7 @@ export const getRecentSessions = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: sessions
+      data: sessions,
     });
   } catch (error) {
     next(error);
@@ -164,17 +163,17 @@ export const saveMessage = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
     const message = await SessionMessage.create({
       sessionId: id,
       userId: req.user._id,
-      mentorState: mentorState || 'IDLE',
+      mentorState: mentorState || "IDLE",
       messageText,
       sender,
-      messageType: messageType || 'text'
+      messageType: messageType || "text",
     });
 
     // Update session message count
@@ -183,7 +182,7 @@ export const saveMessage = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      data: message
+      data: message,
     });
   } catch (error) {
     next(error);
@@ -204,16 +203,15 @@ export const getMessages = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
-    const messages = await SessionMessage.find({ sessionId: id })
-      .sort({ createdAt: 1 });
+    const messages = await SessionMessage.find({ sessionId: id }).sort({ createdAt: 1 });
 
     res.json({
       success: true,
-      data: messages
+      data: messages,
     });
   } catch (error) {
     next(error);
@@ -235,7 +233,7 @@ export const deleteSession = async (req, res, next) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
@@ -244,7 +242,7 @@ export const deleteSession = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Session deleted successfully'
+      message: "Session deleted successfully",
     });
   } catch (error) {
     next(error);
@@ -259,5 +257,5 @@ export default {
   getRecentSessions,
   saveMessage,
   getMessages,
-  deleteSession
+  deleteSession,
 };

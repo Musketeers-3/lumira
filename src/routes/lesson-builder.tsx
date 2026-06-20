@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { LessonBuilder } from "@/components/lesson-builder/LessonBuilder";
 import { LessonsList } from "@/components/lesson-builder/LessonsList";
-import * as lessonApi from '@/services/api/lessonApi';
+import * as lessonApi from "@/services/api/lessonApi";
 import type { LessonDraft } from "@/types/lesson";
 
 export const Route = createFileRoute("/lesson-builder")({
@@ -50,7 +50,7 @@ function LessonBuilderPage() {
       try {
         const apiLessons = await lessonApi.getLessons();
         // Map API response to local LessonDraft format
-        return apiLessons.map(l => ({
+        return apiLessons.map((l) => ({
           id: l._id,
           title: l.title,
           description: l.description,
@@ -59,13 +59,13 @@ function LessonBuilderPage() {
           difficulty: l.difficulty,
           steps: l.steps || [],
           estimatedDuration: l.estimatedDuration || 15,
-          createdBy: 'teacher',
+          createdBy: "teacher",
           createdAt: l.createdAt,
           updatedAt: l.updatedAt,
-          isPublished: l.isPublished
+          isPublished: l.isPublished,
         }));
       } catch (error) {
-        console.error('[Lesson Builder] Error fetching lessons:', error);
+        console.error("[Lesson Builder] Error fetching lessons:", error);
         return [];
       }
     },
@@ -80,9 +80,9 @@ function LessonBuilderPage() {
         description: lesson.description,
         topic: lesson.topic,
         targetSkills: lesson.targetSkills,
-        difficulty: lesson.difficulty as 'beginner' | 'intermediate' | 'advanced',
+        difficulty: lesson.difficulty as "beginner" | "intermediate" | "advanced",
         steps: lesson.steps,
-        estimatedDuration: lesson.estimatedDuration
+        estimatedDuration: lesson.estimatedDuration,
       };
 
       if (lesson.id && lesson.id.length > 11) {

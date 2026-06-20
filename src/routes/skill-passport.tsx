@@ -5,6 +5,7 @@ import { discoveryTitle } from "@/lib/realms";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useQuery } from "@tanstack/react-query";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
+import { useStudentRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 import {
   ConstellationGraph,
   type ConstellationStar,
@@ -40,6 +41,12 @@ export interface Skill {
 }
 
 function SkillPassport() {
+  const { isLoading: authLoading } = useStudentRouteGuard();
+
+  if (authLoading) {
+    return <RouteGuardLoading />;
+  }
+
   const { fetchSkills } = useSessionPersistence();
   const [selectedStar, setSelectedStar] = useState<ConstellationStar | null>(null);
 

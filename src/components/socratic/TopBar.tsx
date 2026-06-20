@@ -77,7 +77,10 @@ export function TopBar() {
       <div className="flex items-center gap-4">
         <MobileNav />
         <div className="space-y-0.5">
-          <div className="text-xs uppercase tracking-[0.2em] hidden sm:block" style={{ color: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}>
+          <div
+            className="text-xs uppercase tracking-[0.2em] hidden sm:block"
+            style={{ color: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}
+          >
             {isTeacher ? "classroom observatory" : "lumira academy"}
           </div>
           <h1
@@ -101,11 +104,17 @@ export function TopBar() {
             />
             <span
               className="relative h-2 w-2 rounded-full"
-              style={{ background: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)", boxShadow: `0 0 10px ${isTeacher ? "var(--gold)" : "var(--realm-glow)"}` }}
+              style={{
+                background: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)",
+                boxShadow: `0 0 10px ${isTeacher ? "var(--gold)" : "var(--realm-glow)"}`,
+              }}
             />
           </span>
           <span style={{ color: "var(--ink-tertiary)" }}>{isTeacher ? "observer" : "mentor"}</span>
-          <span className="transition-colors duration-700" style={{ color: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}>
+          <span
+            className="transition-colors duration-700"
+            style={{ color: isTeacher ? "var(--gold-soft)" : "var(--realm-accent)" }}
+          >
             {isTeacher ? teacherSubtitleFor(state) : subtitleFor(state)}
           </span>
         </div>
@@ -119,9 +128,15 @@ export function TopBar() {
           style={{ borderRadius: "0.875rem" }}
         >
           {theme === "dark" ? (
-            <Sun className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" style={{ color: "var(--ink-secondary)" }} />
+            <Sun
+              className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45"
+              style={{ color: "var(--ink-secondary)" }}
+            />
           ) : (
-            <Moon className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-12" style={{ color: "var(--ink-secondary)" }} />
+            <Moon
+              className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-12"
+              style={{ color: "var(--ink-secondary)" }}
+            />
           )}
         </button>
 

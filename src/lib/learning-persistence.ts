@@ -3,9 +3,9 @@
  * Handles session, skill, and message persistence via REST API
  */
 
-import * as sessionApi from '@/services/api/sessionApi';
-import * as skillApi from '@/services/api/skillApi';
-import type { Message } from '@/components/socratic/types';
+import * as sessionApi from "@/services/api/sessionApi";
+import * as skillApi from "@/services/api/skillApi";
+import type { Message } from "@/components/socratic/types";
 
 export interface LearningSession {
   id: string;
@@ -25,7 +25,7 @@ export interface LearningSession {
  */
 export async function createLearningSession(
   lessonId: string,
-  topic: string
+  topic: string,
 ): Promise<LearningSession | null> {
   try {
     const data = { lessonId, topic };
@@ -40,10 +40,10 @@ export async function createLearningSession(
       performanceScore: session.performanceScore,
       stateProgression: session.stateProgression,
       messagesCount: session.messagesCount,
-      breakthrough: session.breakthrough
+      breakthrough: session.breakthrough,
     };
   } catch (error) {
-    console.error('[Learning Persistence] Error creating session:', error);
+    console.error("[Learning Persistence] Error creating session:", error);
     return null;
   }
 }
@@ -58,19 +58,19 @@ export async function updateLearningSession(
     messagesCount?: number;
     performanceScore?: number;
     breakthrough?: boolean;
-  }
+  },
 ): Promise<boolean> {
   try {
     const updateData = {
       stateProgression: updates.stateProgression,
       messagesCount: updates.messagesCount,
       performanceScore: updates.performanceScore,
-      breakthrough: updates.breakthrough
+      breakthrough: updates.breakthrough,
     };
     await sessionApi.updateSession(sessionId, updateData);
     return true;
   } catch (error) {
-    console.error('[Learning Persistence] Error updating session:', error);
+    console.error("[Learning Persistence] Error updating session:", error);
     return false;
   }
 }
@@ -81,16 +81,16 @@ export async function updateLearningSession(
 export async function completeLearningSession(
   sessionId: string,
   durationSeconds: number,
-  performanceScore: number
+  performanceScore: number,
 ): Promise<boolean> {
   try {
     await sessionApi.completeSession(sessionId, {
       durationSeconds,
-      performanceScore
+      performanceScore,
     });
     return true;
   } catch (error) {
-    console.error('[Learning Persistence] Error completing session:', error);
+    console.error("[Learning Persistence] Error completing session:", error);
     return false;
   }
 }
@@ -101,18 +101,18 @@ export async function completeLearningSession(
 export async function saveSessionMessage(
   sessionId: string,
   state: string,
-  message: Message
+  message: Message,
 ): Promise<boolean> {
   try {
     const messageData = {
       mentorState: state,
       messageText: message.text,
-      sender: message.speaker // Use 'speaker' from Message type
+      sender: message.speaker, // Use 'speaker' from Message type
     };
     await sessionApi.saveMessage(sessionId, messageData);
     return true;
   } catch (error) {
-    console.error('[Learning Persistence] Error saving message:', error);
+    console.error("[Learning Persistence] Error saving message:", error);
     return false;
   }
 }
@@ -124,11 +124,11 @@ export async function getSkillTracking(skillName?: string) {
   try {
     const skills = await skillApi.getSkills();
     if (skillName) {
-      return skills.filter(s => s.skillName === skillName);
+      return skills.filter((s) => s.skillName === skillName);
     }
     return skills;
   } catch (error) {
-    console.error('[Learning Persistence] Error fetching skills:', error);
+    console.error("[Learning Persistence] Error fetching skills:", error);
     return null;
   }
 }
@@ -140,19 +140,19 @@ export async function updateSkillMastery(
   skillName: string,
   skillCategory: string,
   proficiencyLevel: number,
-  masteryScore: number
+  masteryScore: number,
 ): Promise<boolean> {
   try {
     const data = {
       skillName: skillName,
       skillCategory: skillCategory,
       proficiencyLevel: proficiencyLevel,
-      masteryScore: masteryScore
+      masteryScore: masteryScore,
     };
     await skillApi.upsertSkill(data);
     return true;
   } catch (error) {
-    console.error('[Learning Persistence] Error updating skill:', error);
+    console.error("[Learning Persistence] Error updating skill:", error);
     return false;
   }
 }
@@ -164,7 +164,7 @@ export async function getRecentSessions(limit: number = 10) {
   try {
     return await sessionApi.getRecentSessions(limit);
   } catch (error) {
-    console.error('[Learning Persistence] Error fetching sessions:', error);
+    console.error("[Learning Persistence] Error fetching sessions:", error);
     return null;
   }
 }
@@ -176,7 +176,7 @@ export async function getAllSessions() {
   try {
     return await sessionApi.getSessions();
   } catch (error) {
-    console.error('[Learning Persistence] Error fetching all sessions:', error);
+    console.error("[Learning Persistence] Error fetching all sessions:", error);
     return null;
   }
 }

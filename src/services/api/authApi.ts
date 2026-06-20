@@ -1,4 +1,4 @@
-import apiClient, { setToken, removeToken, getToken } from './apiClient';
+import apiClient, { setToken, removeToken, getToken } from "./apiClient";
 
 /**
  * Auth API
@@ -9,7 +9,7 @@ export interface RegisterData {
   email: string;
   password: string;
   name?: string;
-  role?: 'student' | 'teacher';
+  role?: "student" | "teacher";
 }
 
 export interface LoginData {
@@ -22,7 +22,7 @@ export interface AuthUser {
   email: string;
   name: string;
   avatar?: string;
-  role: 'student' | 'teacher';
+  role: "student" | "teacher";
   createdAt: string;
   updatedAt: string;
 }
@@ -39,7 +39,7 @@ export interface AuthResponse {
  * Register a new user
  */
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>('/auth/register', data);
+  const response = await apiClient.post<AuthResponse>("/auth/register", data);
   if (response.data.success) {
     setToken(response.data.data.token);
   }
@@ -50,7 +50,7 @@ export const register = async (data: RegisterData): Promise<AuthResponse> => {
  * Login user
  */
 export const login = async (data: LoginData): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>('/auth/login', data);
+  const response = await apiClient.post<AuthResponse>("/auth/login", data);
   if (response.data.success) {
     setToken(response.data.data.token);
   }
@@ -72,7 +72,7 @@ export const getMe = async (): Promise<AuthUser | null> => {
     const token = getToken();
     if (!token) return null;
 
-    const response = await apiClient.get<{ success: boolean; data: AuthUser }>('/auth/me');
+    const response = await apiClient.get<{ success: boolean; data: AuthUser }>("/auth/me");
     return response.data.success ? response.data.data : null;
   } catch {
     removeToken();
@@ -92,5 +92,5 @@ export default {
   login,
   logout,
   getMe,
-  isAuthenticated
+  isAuthenticated,
 };

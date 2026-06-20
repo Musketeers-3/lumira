@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import config from '../config/env.js';
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import config from "../config/env.js";
 
 /**
  * Auth Service
@@ -14,7 +14,7 @@ import config from '../config/env.js';
  */
 export const generateToken = (userId) => {
   return jwt.sign({ id: userId }, config.jwtSecret, {
-    expiresIn: '30d' // Token valid for 30 days
+    expiresIn: "30d", // Token valid for 30 days
   });
 };
 
@@ -27,19 +27,19 @@ export const register = async ({ email, password, name, role }) => {
   // Check if user already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
-    throw new Error('User already exists with this email');
+    throw new Error("User already exists with this email");
   }
 
   // Validate role if provided
-  const validRoles = ['student', 'teacher'];
-  const userRole = role && validRoles.includes(role) ? role : 'student';
+  const validRoles = ["student", "teacher"];
+  const userRole = role && validRoles.includes(role) ? role : "student";
 
   // Create new user
   const user = await User.create({
     email: email.toLowerCase(),
     password,
-    name: name || 'Explorer',
-    role: userRole
+    name: name || "Explorer",
+    role: userRole,
   });
 
   // Generate token
@@ -47,7 +47,7 @@ export const register = async ({ email, password, name, role }) => {
 
   return {
     user: user.toJSON(),
-    token
+    token,
   };
 };
 
@@ -59,16 +59,16 @@ export const register = async ({ email, password, name, role }) => {
  */
 export const login = async (email, password) => {
   // Find user by email (include password for comparison)
-  const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
 
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw new Error("Invalid email or password");
   }
 
   // Check password
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    throw new Error('Invalid email or password');
+    throw new Error("Invalid email or password");
   }
 
   // Generate token
@@ -76,7 +76,7 @@ export const login = async (email, password) => {
 
   return {
     user: user.toJSON(),
-    token
+    token,
   };
 };
 
@@ -89,7 +89,7 @@ export const getUserById = async (userId) => {
   const user = await User.findById(userId);
 
   if (!user) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   return user.toJSON();
@@ -99,5 +99,5 @@ export default {
   generateToken,
   register,
   login,
-  getUserById
+  getUserById,
 };

@@ -1,5 +1,5 @@
-import axios from 'axios';
-import config from '../config/env.js';
+import axios from "axios";
+import config from "../config/env.js";
 
 /**
  * AI Service
@@ -12,8 +12,8 @@ const ollamaClient = axios.create({
   baseURL: config.ollamaBaseUrl,
   timeout: 60000, // 60 second timeout
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 /**
@@ -22,21 +22,21 @@ const ollamaClient = axios.create({
  * @param {string} system - System prompt
  * @returns {Promise<string>} Generated text
  */
-export const generateText = async (prompt, system = '') => {
+export const generateText = async (prompt, system = "") => {
   try {
-    const response = await ollamaClient.post('/chat/completions', {
+    const response = await ollamaClient.post("/chat/completions", {
       model: config.ollamaModel,
       messages: [
-        ...(system ? [{ role: 'system', content: system }] : []),
-        { role: 'user', content: prompt }
+        ...(system ? [{ role: "system", content: system }] : []),
+        { role: "user", content: prompt },
       ],
-      stream: false
+      stream: false,
     });
 
     return response.data.choices[0].message.content;
   } catch (error) {
-    console.error('[AI Service] generateText error:', error.message);
-    throw new Error('Failed to generate text from AI');
+    console.error("[AI Service] generateText error:", error.message);
+    throw new Error("Failed to generate text from AI");
   }
 };
 
@@ -47,7 +47,7 @@ export const generateText = async (prompt, system = '') => {
  * @param {object} schema - Zod schema for structured output
  * @returns {Promise<object>} Parsed object
  */
-export const generateObject = async (prompt, system = '', schema) => {
+export const generateObject = async (prompt, system = "", schema) => {
   // For now, we use generateText and parse the response
   // In production, you might want to use a library that supports structured output
   try {
@@ -63,8 +63,8 @@ export const generateObject = async (prompt, system = '', schema) => {
 
     return { text };
   } catch (error) {
-    console.error('[AI Service] generateObject error:', error.message);
-    throw new Error('Failed to generate structured output from AI');
+    console.error("[AI Service] generateObject error:", error.message);
+    throw new Error("Failed to generate structured output from AI");
   }
 };
 
@@ -79,7 +79,7 @@ export const generateObject = async (prompt, system = '', schema) => {
 export const generateSocraticResponse = async (studentAnswer, context, realm, skillsList) => {
   const systemPrompt = buildSocraticSystemPrompt(context, skillsList, realm);
 
-  const chatHistory = context.studentAnswers.map((a, i) => `(Step ${i + 1}): "${a}"`).join('\n');
+  const chatHistory = context.studentAnswers.map((a, i) => `(Step ${i + 1}): "${a}"`).join("\n");
 
   const userPrompt = `Student's previous answers in this active session:
 ${chatHistory}
@@ -91,9 +91,12 @@ Generate a structured Socratic response (under 50 words, exactly 1 targeted ques
   const result = await generateObject(userPrompt, systemPrompt, true);
 
   return {
-    mentor_response: result.mentor_response || result.text || "That's an interesting perspective. What would happen if we looked at it from a different angle?",
-    question_type: result.question_type || 'gentle_push',
-    estimated_state: result.estimated_state || 'FOCUS'
+    mentor_response:
+      result.mentor_response ||
+      result.text ||
+      "That's an interesting perspective. What would happen if we looked at it from a different angle?",
+    question_type: result.question_type || "gentle_push",
+    estimated_state: result.estimated_state || "FOCUS",
   };
 };
 
@@ -110,13 +113,13 @@ Student answer: "${studentAnswer}"
 Evaluate if this response demonstrates understanding.
 Return JSON with: demonstrates_understanding (boolean), confidence (0.0-1.0), gaps (array of strings), strengths (array of strings).`;
 
-  const result = await generateObject(prompt, '', true);
+  const result = await generateObject(prompt, "", true);
 
   return {
     demonstrates_understanding: result.demonstrates_understanding || false,
     confidence: Math.min(Math.max(result.confidence || 0.5, 0), 1),
     gaps: result.gaps || [],
-    strengths: result.strengths || []
+    strengths: result.strengths || [],
   };
 };
 
@@ -137,7 +140,10 @@ Generate a brief celebration message (under 30 words) that acknowledges their br
 
   const result = await generateText(prompt, systemPrompt);
 
-  return result || `You just discovered something profound: ${insight}. This insight changes how you see the problem.`;
+  return (
+    result ||
+    `You just discovered something profound: ${insight}. This insight changes how you see the problem.`
+  );
 };
 
 /**
@@ -157,10 +163,10 @@ Current step: ${context.currentStep} of ${context.totalSteps}`;
   // Add user skill history if available
   if (skillsList && skillsList.length > 0) {
     const recentSkills = skillsList
-      .filter(s => s.status === 'unlocked')
+      .filter((s) => s.status === "unlocked")
       .slice(0, 5)
-      .map(s => `- ${s.skillName}: ${s.insight || 'discovered'}`)
-      .join('\n');
+      .map((s) => `- ${s.skillName}: ${s.insight || "discovered"}`)
+      .join("\n");
 
     if (recentSkills) {
       return `${basePrompt}
@@ -178,5 +184,5 @@ export default {
   generateObject,
   generateSocraticResponse,
   evaluateUnderstanding,
-  generateBreakthroughMessage
+  generateBreakthroughMessage,
 };

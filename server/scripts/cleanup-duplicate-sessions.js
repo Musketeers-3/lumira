@@ -12,7 +12,7 @@
  */
 
 // Run the cleanup
-db = db.getSiblingDB('lumira');
+db = db.getSiblingDB("lumira");
 
 const TARGET_USER_ID = ObjectId("6a31731785dca4a5539f65bc"); // test@test.com
 // Or process all users: null
@@ -34,18 +34,22 @@ print(`\n📊 Total sessions BEFORE cleanup: ${totalBefore}`);
 // ============================================================
 const duplicates = db.learningSessions.aggregate([
   { $match: userFilter },
-  { $group: {
-    _id: { topic: "$topic", lessonId: "$lessonId", userId: "$userId" },
-    count: { $sum: 1 },
-    sessions: { $push: {
-      _id: "$_id",
-      performanceScore: "$performanceScore",
-      messagesCount: "$messagesCount",
-      createdAt: "$createdAt",
-      startedAt: "$startedAt"
-    }}
-  }},
-  { $match: { count: { $gt: 1 } } }
+  {
+    $group: {
+      _id: { topic: "$topic", lessonId: "$lessonId", userId: "$userId" },
+      count: { $sum: 1 },
+      sessions: {
+        $push: {
+          _id: "$_id",
+          performanceScore: "$performanceScore",
+          messagesCount: "$messagesCount",
+          createdAt: "$createdAt",
+          startedAt: "$startedAt",
+        },
+      },
+    },
+  },
+  { $match: { count: { $gt: 1 } } },
 ]);
 
 const duplicateGroups = duplicates.toArray();
@@ -65,14 +69,15 @@ for (const group of duplicateGroups) {
   // 2. Among valid ones, keep oldest
   // 3. Others = mark for deletion
 
-  const validSessions = sessions.filter(s =>
-    (s.performanceScore && s.performanceScore > 0) ||
-    (s.messagesCount && s.messagesCount > 0)
+  const validSessions = sessions.filter(
+    (s) =>
+      (s.performanceScore && s.performanceScore > 0) || (s.messagesCount && s.messagesCount > 0),
   );
 
-  const invalidSessions = sessions.filter(s =>
-    (!s.performanceScore || s.performanceScore === 0) &&
-    (!s.messagesCount || s.messagesCount === 0)
+  const invalidSessions = sessions.filter(
+    (s) =>
+      (!s.performanceScore || s.performanceScore === 0) &&
+      (!s.messagesCount || s.messagesCount === 0),
   );
 
   if (validSessions.length > 0) {
@@ -87,34 +92,37 @@ for (const group of duplicateGroups) {
   }
 
   // Add all invalid sessions to delete
-  toDelete.push(...invalidSessions.map(s => s._id));
+  toDelete.push(...invalidSessions.map((s) => s._id));
 
   print(`\n  Topic: ${group._id.topic}`);
   print(`    Valid: ${validSessions.length}, Invalid: ${invalidSessions.length}`);
   print(`    Keeping: ${kept[kept.length - 1]}`);
   if (invalidSessions.length > 0) {
-    print(`    Will delete: ${invalidSessions.map(s => s._id).join(', ')}`);
+    print(`    Will delete: ${invalidSessions.map((s) => s._id).join(", ")}`);
   }
 }
 
 // ============================================================
 // STEP 4: Also find sessions with NO score and NO messages (regardless of duplicates)
 // ============================================================
-const emptySessions = db.learningSessions.find({
-  ...userFilter,
-  $or: [
-    { performanceScore: { $in: [null, 0] } },
-    { messagesCount: { $in: [null, 0] } }
-  ]
-}).toArray();
+const emptySessions = db.learningSessions
+  .find({
+    ...userFilter,
+    $or: [{ performanceScore: { $in: [null, 0] } }, { messagesCount: { $in: [null, 0] } }],
+  })
+  .toArray();
 
 print(`\n📋 Found ${emptySessions.length} sessions with no score or messages`);
 
 for (const session of emptySessions) {
-  print(`  - ${session.topic}: score=${session.performanceScore}, messages=${session.messagesCount}`);
+  print(
+    `  - ${session.topic}: score=${session.performanceScore}, messages=${session.messagesCount}`,
+  );
   // Only delete if there's no data at all (truly empty)
-  if ((!session.performanceScore || session.performanceScore === 0) &&
-      (!session.messagesCount || session.messagesCount === 0)) {
+  if (
+    (!session.performanceScore || session.performanceScore === 0) &&
+    (!session.messagesCount || session.messagesCount === 0)
+  ) {
     toDelete.push(session._id);
   }
 }
@@ -122,10 +130,10 @@ for (const session of emptySessions) {
 // ============================================================
 // STEP 5: Remove duplicates from delete list (keep unique)
 // ============================================================
-toDelete = [...new Set(toDelete.map(id => id.toString()))].map(id => ObjectId(id));
+toDelete = [...new Set(toDelete.map((id) => id.toString()))].map((id) => ObjectId(id));
 
 print(`\n🗑️  Sessions to DELETE: ${toDelete.length}`);
-toDelete.forEach(id => print(`  - ${id}`));
+toDelete.forEach((id) => print(`  - ${id}`));
 
 // ============================================================
 // STEP 6: Execute deletion (DRY RUN - just show what would happen)
@@ -153,6 +161,16 @@ print("=".repeat(60));
 // Return data for verification
 print("\n📋 Return Data:");
 print("  totalBefore: " + totalBefore);
-print("  toDelete: " + toDelete.map(function(id) { return id.toString(); }));
-print("  kept: " + kept.map(function(id) { return id.toString(); }));
+print(
+  "  toDelete: " +
+    toDelete.map(function (id) {
+      return id.toString();
+    }),
+);
+print(
+  "  kept: " +
+    kept.map(function (id) {
+      return id.toString();
+    }),
+);
 print("  totalAfter: " + totalAfter);

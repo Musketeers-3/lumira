@@ -1,9 +1,9 @@
-import SkillTracking from '../models/SkillTracking.js';
+import SkillTracking from "../models/SkillTracking.js";
 import {
   generateSocraticResponse,
   evaluateUnderstanding,
-  generateBreakthroughMessage
-} from '../services/aiService.js';
+  generateBreakthroughMessage,
+} from "../services/aiService.js";
 
 /**
  * AI Controller
@@ -23,37 +23,38 @@ export const socraticResponse = async (req, res, next) => {
     if (!studentAnswer || !context) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide studentAnswer and context'
+        message: "Please provide studentAnswer and context",
       });
     }
 
     // Fetch user's skill history for context
     const skillsList = await SkillTracking.find({
       userId: req.user._id,
-      status: 'unlocked'
+      status: "unlocked",
     }).limit(10);
 
     const result = await generateSocraticResponse(
       studentAnswer,
       context,
-      realm || 'hub',
-      skillsList
+      realm || "hub",
+      skillsList,
     );
 
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     // Return fallback response on AI error
-    console.error('[AI Controller] Socratic response error:', error.message);
+    console.error("[AI Controller] Socratic response error:", error.message);
     res.json({
       success: true,
       data: {
-        mentor_response: "That's an exceptional line of thought. Let's look at the parameters we have right before us. What changes if we review our assumptions?",
-        question_type: 'gentle_push',
-        estimated_state: 'FOCUS'
-      }
+        mentor_response:
+          "That's an exceptional line of thought. Let's look at the parameters we have right before us. What changes if we review our assumptions?",
+        question_type: "gentle_push",
+        estimated_state: "FOCUS",
+      },
     });
   }
 };
@@ -70,7 +71,7 @@ export const evaluateStudent = async (req, res, next) => {
     if (!studentAnswer || !learningObjective) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide studentAnswer and learningObjective'
+        message: "Please provide studentAnswer and learningObjective",
       });
     }
 
@@ -78,19 +79,19 @@ export const evaluateStudent = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     // Return fallback on AI error
-    console.error('[AI Controller] Evaluate error:', error.message);
+    console.error("[AI Controller] Evaluate error:", error.message);
     res.json({
       success: true,
       data: {
         demonstrates_understanding: false,
         confidence: 0.5,
-        gaps: ['Evaluation system error'],
-        strengths: []
-      }
+        gaps: ["Evaluation system error"],
+        strengths: [],
+      },
     });
   }
 };
@@ -107,7 +108,7 @@ export const breakthroughCelebration = async (req, res, next) => {
     if (!insight || !context) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide insight and context'
+        message: "Please provide insight and context",
       });
     }
 
@@ -115,16 +116,16 @@ export const breakthroughCelebration = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: { message }
+      data: { message },
     });
   } catch (error) {
     // Return fallback on AI error
-    console.error('[AI Controller] Breakthrough error:', error.message);
+    console.error("[AI Controller] Breakthrough error:", error.message);
     res.json({
       success: true,
       data: {
-        message: `You just independently discovered something profound: ${req.body.insight}. This insight changes how you see the problem.`
-      }
+        message: `You just independently discovered something profound: ${req.body.insight}. This insight changes how you see the problem.`,
+      },
     });
   }
 };
@@ -132,5 +133,5 @@ export const breakthroughCelebration = async (req, res, next) => {
 export default {
   socraticResponse,
   evaluateStudent,
-  breakthroughCelebration
+  breakthroughCelebration,
 };

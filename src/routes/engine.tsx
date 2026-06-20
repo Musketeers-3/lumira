@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { SocraticEngine } from "@/components/socratic/engine/SocraticEngine";
+import { useStudentRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 
 // 1. Define a strict search parameter schema to dynamically load any lesson
 const engineSearchSchema = z.object({
@@ -32,6 +33,12 @@ export const Route = createFileRoute("/engine")({
 });
 
 function EnginePage() {
+  const { isLoading } = useStudentRouteGuard();
+
+  if (isLoading) {
+    return <RouteGuardLoading />;
+  }
+
   // 2. Extract the dynamic parameters from the URL
   const search = Route.useSearch();
 

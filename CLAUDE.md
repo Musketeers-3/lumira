@@ -12,7 +12,7 @@ Lumira is an AI-powered learning platform with a 3D mentor character. It uses a 
 
 ## Commands
 
-### Frontend Development
+### Frontend Development (uses bun)
 ```bash
 bun run dev              # Start development server
 bun run build            # Build for production (Cloudflare Pages)
@@ -23,17 +23,17 @@ bun run format           # Format with Prettier
 bun run generate:mentor # Generate placeholder 3D mentor GLB
 ```
 
-### Backend Development
+### Backend Development (uses npm)
 ```bash
 cd server
-npm run dev          # Start with nodemon (auto-reload) on port 5001
+npm run dev          # Start with nodemon (auto-reload) on port 5002 (configurable via .env)
 npm start            # Start production server (must run from server directory)
 ```
 
 ### Running Both
 Requires two terminals:
 ```bash
-# Terminal 1 - Backend
+# Terminal 1 - Backend (port 5002 by default, configurable via server/.env)
 cd server && npm run dev
 
 # Terminal 2 - Frontend
@@ -86,11 +86,11 @@ bun run dev
 ## Key Technical Details
 
 ### Environment Variables
-- Frontend: `.env` with `VITE_API_URL` (defaults to `http://localhost:5001/api`)
-- Backend: `server/.env` with `PORT`, `MONGODB_URI`, `JWT_SECRET`, `OLLAMA_BASE_URL`
+- Frontend: `.env` with `VITE_API_URL` (defaults to `http://localhost:5002/api`)
+- Backend: `server/.env` with `PORT`, `MONGODB_URI`, `JWT_SECRET`, `OLLAMA_BASE_URL` (default: 5002)
 
 ### 3D Mentor
-The mentor is a VRM model rendered with React Three Fiber + @pixiv/three-vrm. Key files:
+The mentor is a GLB model rendered with React Three Fiber. Key files:
 - `src/lib/mentor-animation-context.tsx` - Animation state
 - `src/lib/mentor-personality.ts` - Personality traits and response patterns
 - `src/lib/mentor-memory.ts` - Conversation history
@@ -102,7 +102,7 @@ The mentor asset (`public/models/mentor/lumira.glb`) uses animation clips mapped
 - `celebrate_quiet` → CELEBRATE state
 - `speak_add` → additive layer when `isSpeaking`
 
-Use `bun run generate:mentor` to create a placeholder GLB; replace with a Blender-authored asset following the spec in `docs/mentor-asset-spec.md`.
+Use `bun run generate:mentor` to create a placeholder GLB; replace with a Blender-authored asset following the spec in `docs/mentor-asset-spec.md`. Full animation clip and morph target specifications are documented there.
 
 ### Authentication Flow
 1. User registers/logs in → receives JWT token
@@ -115,12 +115,19 @@ The achievement system uses client-side evaluation:
 - `src/artifacts/` - Defines artifact types, unlock conditions, and the evaluator
 - `src/achievements/` - UI components for badges and unlock modals
 
+### Role-Based Access Control
+The app supports two user roles: `student` (default) and `teacher`. Role is set during registration and determines route access:
+- `src/lib/route-guards.tsx` - Provides route guards: `useTeacherRouteGuard()`, `useStudentRouteGuard()`, `useGuestRouteGuard()`
+- Teacher routes: `/teacher-dashboard`, `/teacher-classes`, `/teacher-students`, `/teacher-insights`, `/teacher-reports`
+- Student routes: `/`, `/journal`, `/worlds`, `/engine`
+- Auth context exposes `isTeacher` and `isStudent` booleans
+
 ## Important Notes
 
 - The vite config uses `@lovable.dev/vite-tanstack-config` - do not manually add plugins that are already included
 - Frontend builds for Cloudflare Pages via `@cloudflare/vite-plugin` configured in `wrangler.jsonc`
 - AI features require a running Ollama instance (default: localhost:11434)
 - MongoDB must be running for backend to function
-- Frontend runs on port 5173 (Vite default), backend on port 5001
+- Frontend runs on port 5173 (Vite default), backend on port 5002 (configurable via server/.env)
 - TanStack Router uses file-based routing: `src/routes/*.tsx` maps to `/` routes, `src/routes/subdir/*.tsx` maps to `/subdir/`
 - MIGRATION-PLAN.md contains detailed migration history and architecture decisions

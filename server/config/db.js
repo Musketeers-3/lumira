@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 /**
  * MongoDB Database Connection
@@ -13,8 +13,8 @@ const connectDB = async () => {
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
     // In development, continue without database but log warning
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Running without database connection - some features may not work');
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Running without database connection - some features may not work");
       return null;
     }
     process.exit(1);

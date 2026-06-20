@@ -10,7 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
+import { Route as TeacherStudentsRouteImport } from './routes/teacher-students'
+import { Route as TeacherStudentPreviewRouteImport } from './routes/teacher-student-preview'
+import { Route as TeacherReportsRouteImport } from './routes/teacher-reports'
+import { Route as TeacherInsightsRouteImport } from './routes/teacher-insights'
 import { Route as TeacherDashboardRouteImport } from './routes/teacher-dashboard'
+import { Route as TeacherClassesRouteImport } from './routes/teacher-classes'
 import { Route as SkillPassportRouteImport } from './routes/skill-passport'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -28,9 +33,34 @@ const WorldsRoute = WorldsRouteImport.update({
   path: '/worlds',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherStudentsRoute = TeacherStudentsRouteImport.update({
+  id: '/teacher-students',
+  path: '/teacher-students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherStudentPreviewRoute = TeacherStudentPreviewRouteImport.update({
+  id: '/teacher-student-preview',
+  path: '/teacher-student-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherReportsRoute = TeacherReportsRouteImport.update({
+  id: '/teacher-reports',
+  path: '/teacher-reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherInsightsRoute = TeacherInsightsRouteImport.update({
+  id: '/teacher-insights',
+  path: '/teacher-insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherDashboardRoute = TeacherDashboardRouteImport.update({
   id: '/teacher-dashboard',
   path: '/teacher-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherClassesRoute = TeacherClassesRouteImport.update({
+  id: '/teacher-classes',
+  path: '/teacher-classes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SkillPassportRoute = SkillPassportRouteImport.update({
@@ -101,7 +131,12 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/teacher-classes': typeof TeacherClassesRoute
   '/teacher-dashboard': typeof TeacherDashboardRoute
+  '/teacher-insights': typeof TeacherInsightsRoute
+  '/teacher-reports': typeof TeacherReportsRoute
+  '/teacher-student-preview': typeof TeacherStudentPreviewRoute
+  '/teacher-students': typeof TeacherStudentsRoute
   '/worlds': typeof WorldsRoute
 }
 export interface FileRoutesByTo {
@@ -116,7 +151,12 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/teacher-classes': typeof TeacherClassesRoute
   '/teacher-dashboard': typeof TeacherDashboardRoute
+  '/teacher-insights': typeof TeacherInsightsRoute
+  '/teacher-reports': typeof TeacherReportsRoute
+  '/teacher-student-preview': typeof TeacherStudentPreviewRoute
+  '/teacher-students': typeof TeacherStudentsRoute
   '/worlds': typeof WorldsRoute
 }
 export interface FileRoutesById {
@@ -132,7 +172,12 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/skill-passport': typeof SkillPassportRoute
+  '/teacher-classes': typeof TeacherClassesRoute
   '/teacher-dashboard': typeof TeacherDashboardRoute
+  '/teacher-insights': typeof TeacherInsightsRoute
+  '/teacher-reports': typeof TeacherReportsRoute
+  '/teacher-student-preview': typeof TeacherStudentPreviewRoute
+  '/teacher-students': typeof TeacherStudentsRoute
   '/worlds': typeof WorldsRoute
 }
 export interface FileRouteTypes {
@@ -149,7 +194,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/skill-passport'
+    | '/teacher-classes'
     | '/teacher-dashboard'
+    | '/teacher-insights'
+    | '/teacher-reports'
+    | '/teacher-student-preview'
+    | '/teacher-students'
     | '/worlds'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -164,7 +214,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/skill-passport'
+    | '/teacher-classes'
     | '/teacher-dashboard'
+    | '/teacher-insights'
+    | '/teacher-reports'
+    | '/teacher-student-preview'
+    | '/teacher-students'
     | '/worlds'
   id:
     | '__root__'
@@ -179,7 +234,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/skill-passport'
+    | '/teacher-classes'
     | '/teacher-dashboard'
+    | '/teacher-insights'
+    | '/teacher-reports'
+    | '/teacher-student-preview'
+    | '/teacher-students'
     | '/worlds'
   fileRoutesById: FileRoutesById
 }
@@ -195,7 +255,12 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SettingsRoute: typeof SettingsRoute
   SkillPassportRoute: typeof SkillPassportRoute
+  TeacherClassesRoute: typeof TeacherClassesRoute
   TeacherDashboardRoute: typeof TeacherDashboardRoute
+  TeacherInsightsRoute: typeof TeacherInsightsRoute
+  TeacherReportsRoute: typeof TeacherReportsRoute
+  TeacherStudentPreviewRoute: typeof TeacherStudentPreviewRoute
+  TeacherStudentsRoute: typeof TeacherStudentsRoute
   WorldsRoute: typeof WorldsRoute
 }
 
@@ -208,11 +273,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorldsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher-students': {
+      id: '/teacher-students'
+      path: '/teacher-students'
+      fullPath: '/teacher-students'
+      preLoaderRoute: typeof TeacherStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher-student-preview': {
+      id: '/teacher-student-preview'
+      path: '/teacher-student-preview'
+      fullPath: '/teacher-student-preview'
+      preLoaderRoute: typeof TeacherStudentPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher-reports': {
+      id: '/teacher-reports'
+      path: '/teacher-reports'
+      fullPath: '/teacher-reports'
+      preLoaderRoute: typeof TeacherReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher-insights': {
+      id: '/teacher-insights'
+      path: '/teacher-insights'
+      fullPath: '/teacher-insights'
+      preLoaderRoute: typeof TeacherInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher-dashboard': {
       id: '/teacher-dashboard'
       path: '/teacher-dashboard'
       fullPath: '/teacher-dashboard'
       preLoaderRoute: typeof TeacherDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher-classes': {
+      id: '/teacher-classes'
+      path: '/teacher-classes'
+      fullPath: '/teacher-classes'
+      preLoaderRoute: typeof TeacherClassesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/skill-passport': {
@@ -307,7 +407,12 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SettingsRoute: SettingsRoute,
   SkillPassportRoute: SkillPassportRoute,
+  TeacherClassesRoute: TeacherClassesRoute,
   TeacherDashboardRoute: TeacherDashboardRoute,
+  TeacherInsightsRoute: TeacherInsightsRoute,
+  TeacherReportsRoute: TeacherReportsRoute,
+  TeacherStudentPreviewRoute: TeacherStudentPreviewRoute,
+  TeacherStudentsRoute: TeacherStudentsRoute,
   WorldsRoute: WorldsRoute,
 }
 export const routeTree = rootRouteImport

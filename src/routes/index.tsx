@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, Compass, Loader2, Zap, Map, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
+import { useStudentRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 import { Reveal } from "@/components/socratic/premium/Reveal";
 import { GlassPanel } from "@/components/socratic/premium/GlassPanel";
 import { PremiumButton } from "@/components/socratic/premium/PremiumButton";
@@ -65,6 +66,13 @@ function computeProgress(session: SessionRecord): number {
 }
 
 function DiscoveryHub() {
+  const { isLoading: authLoading } = useStudentRouteGuard();
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return <RouteGuardLoading />;
+  }
+
   const { fetchRecentSessions, fetchSkills } = useSessionPersistence();
 
   const { data: rawSessions, isLoading: loadingSessions } = useQuery<SessionRecord[] | null>({

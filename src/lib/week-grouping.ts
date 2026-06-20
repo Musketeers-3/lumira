@@ -172,7 +172,6 @@ export function groupSessionsByWeek(sessions: SessionEntry[]): WeekGroup[] {
 export function useWeekGrouping(sessions: SessionEntry[]): WeekGroup[] {
   return useMemo(() => {
     return groupSessionsByWeek(sessions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessions]);
 }
 

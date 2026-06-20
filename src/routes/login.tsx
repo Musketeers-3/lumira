@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useGuestRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -14,38 +15,42 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { login, user, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
+  const { isLoading: guardLoading } = useGuestRouteGuard();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect if already authenticated based on role
-  if (isAuthenticated && user) {
-    const destination = user.role === "teacher" ? "/teacher-dashboard" : "/";
-    navigate({ to: destination });
-    return null;
-  }
-
-  // Watch for user role changes and redirect accordingly
+  // Redirect after successful login based on role - must be called before early returns
   useEffect(() => {
-    if (isAuthenticated && user?.role === "teacher") {
-      navigate({ to: "/teacher-dashboard" });
+    if (isAuthenticated && user) {
+      const destination = user.role === "teacher" ? "/teacher-dashboard" : "/";
+      navigate({ to: destination });
     }
   }, [isAuthenticated, user, navigate]);
+
+  // Show loading while checking auth
+  if (guardLoading) {
+    return <RouteGuardLoading />;
+  }
+
+  // Redirect if already authenticated (handled by useGuestRouteGuard)
+  if (isAuthenticated) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       await login(email, password);
-      // Redirect will happen via useEffect when user state updates
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -59,16 +64,10 @@ function LoginPage() {
         }}
       >
         <div className="text-center mb-8">
-          <h1
-            className="text-3xl font-display"
-            style={{ color: "var(--ink-primary)" }}
-          >
+          <h1 className="text-3xl font-display" style={{ color: "var(--ink-primary)" }}>
             Welcome Back
           </h1>
-          <p
-            className="mt-2 text-sm"
-            style={{ color: "var(--ink-secondary)" }}
-          >
+          <p className="mt-2 text-sm" style={{ color: "var(--ink-secondary)" }}>
             Sign in to continue your learning journey
           </p>
         </div>
@@ -133,23 +132,20 @@ function LoginPage() {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="w-full py-3 rounded-lg text-sm font-medium transition-all"
             style={{
               background: "var(--realm-accent)",
               color: "#fff",
-              opacity: isLoading ? 0.7 : 1,
+              opacity: isSubmitting ? 0.7 : 1,
             }}
           >
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
         <div className="mt-6 text-center">
-          <p
-            className="text-sm"
-            style={{ color: "var(--ink-secondary)" }}
-          >
+          <p className="text-sm" style={{ color: "var(--ink-secondary)" }}>
             Don't have an account?{" "}
             <button
               onClick={() => navigate({ to: "/register" })}

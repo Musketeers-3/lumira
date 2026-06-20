@@ -6,8 +6,8 @@ import {
   breakthroughCelebration as apiBreakthrough,
   type SocraticContext,
   type SocraticResponse,
-  type EvaluateResponse
-} from '@/services/api/aiApi';
+  type EvaluateResponse,
+} from "@/services/api/aiApi";
 
 /**
  * Generate an historically aware Socratic response using Local AI via backend
@@ -16,14 +16,14 @@ import {
 export async function generateSocraticResponse(
   studentAnswer: string,
   context: SocraticContext,
-  realm: string // Pass down the active realm ID for localized tracking filter checks
+  realm: string, // Pass down the active realm ID for localized tracking filter checks
 ): Promise<SocraticResponse> {
   try {
     // Delegate to backend AI service
     const response = await apiSocraticResponse({
       studentAnswer,
       context,
-      realm
+      realm,
     });
     return response;
   } catch (error) {
@@ -32,7 +32,7 @@ export async function generateSocraticResponse(
       mentor_response:
         "That is an exceptional line of thought. Let's look at the parameters we have right before us. What changes if we review our assumptions?",
       question_type: "gentle_push",
-      estimated_state: "FOCUS"
+      estimated_state: "FOCUS",
     };
   }
 }
@@ -42,12 +42,12 @@ export async function generateSocraticResponse(
  */
 export async function evaluateUnderstanding(
   studentAnswer: string,
-  learningObjective: string
+  learningObjective: string,
 ): Promise<EvaluateResponse> {
   try {
     const response = await apiEvaluate({
       studentAnswer,
-      learningObjective
+      learningObjective,
     });
     return response;
   } catch (error) {
@@ -56,7 +56,7 @@ export async function evaluateUnderstanding(
       demonstrates_understanding: false,
       confidence: 0.5,
       gaps: ["Evaluation system error."],
-      strengths: []
+      strengths: [],
     };
   }
 }
@@ -66,12 +66,12 @@ export async function evaluateUnderstanding(
  */
 export async function generateBreakthroughMessage(
   insight: string,
-  context: SocraticContext
+  context: SocraticContext,
 ): Promise<string> {
   try {
     const message = await apiBreakthrough({
       insight,
-      context
+      context,
     });
     return message;
   } catch (error) {

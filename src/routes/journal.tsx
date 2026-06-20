@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo, memo } from "react";
+import { useStudentRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 import {
   Loader2,
   BookOpen,
@@ -27,9 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { evaluateAchievements } from "@/achievements";
 import { evaluateArtifacts, getPersistedArtifactIds, getEarnedArtifacts } from "@/artifacts";
-import {
-  ArtifactUnlockModal,
-} from "@/components/achievements";
+import { ArtifactUnlockModal } from "@/components/achievements";
 import { EmptyJournalState } from "@/components/journal";
 import type { BadgeMetadata } from "@/achievements/types";
 import type { ArtifactMetadata } from "@/artifacts/types";
@@ -169,9 +168,17 @@ const CollectibleItem = memo(function CollectibleItem({
   isAchievement = false,
 }: CollectibleItemProps) {
   const rarityColors: Record<string, { bg: string; border: string; text: string }> = {
-    common: { bg: "rgba(255,255,255,0.05)", border: "var(--hairline)", text: "var(--ink-tertiary)" },
+    common: {
+      bg: "rgba(255,255,255,0.05)",
+      border: "var(--hairline)",
+      text: "var(--ink-tertiary)",
+    },
     rare: { bg: "rgba(59, 158, 255, 0.15)", border: "#3B9EFF40", text: "#3B9EFF" },
-    legendary: { bg: "rgba(201, 162, 75, 0.2)", border: "var(--gold-deep)", text: "var(--gold-soft)" },
+    legendary: {
+      bg: "rgba(201, 162, 75, 0.2)",
+      border: "var(--gold-deep)",
+      text: "var(--gold-soft)",
+    },
     mastery: { bg: "rgba(184, 140, 255, 0.15)", border: "#B88CFF40", text: "#B88CFF" },
   };
 
@@ -500,6 +507,13 @@ function SessionCard({ session, onClick }: { session: SessionEntry; onClick: () 
 }
 
 function JournalPage() {
+  const { isLoading: authLoading } = useStudentRouteGuard();
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return <RouteGuardLoading />;
+  }
+
   const [selectedSession, setSelectedSession] = useState<SessionEntry | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [showDebug, setShowDebug] = useState(false);

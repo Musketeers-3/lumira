@@ -1,4 +1,4 @@
-import { register, login, getUserById } from '../services/authService.js';
+import { register, login, getUserById } from "../services/authService.js";
 
 /**
  * Auth Controller
@@ -17,14 +17,14 @@ export const registerUser = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: "Please provide email and password",
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters'
+        message: "Password must be at least 6 characters",
       });
     }
 
@@ -32,7 +32,7 @@ export const registerUser = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      data: { user, token }
+      data: { user, token },
     });
   } catch (error) {
     next(error);
@@ -51,7 +51,7 @@ export const loginUser = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: "Please provide email and password",
       });
     }
 
@@ -59,7 +59,7 @@ export const loginUser = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: { user, token }
+      data: { user, token },
     });
   } catch (error) {
     next(error);
@@ -77,7 +77,7 @@ export const getMe = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: user
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -87,5 +87,5 @@ export const getMe = async (req, res, next) => {
 export default {
   registerUser,
   loginUser,
-  getMe
+  getMe,
 };

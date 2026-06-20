@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import * as authApi from '@/services/api/authApi';
-import type { AuthUser } from '@/services/api/authApi';
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import * as authApi from "@/services/api/authApi";
+import type { AuthUser } from "@/services/api/authApi";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -8,8 +8,14 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isTeacher: boolean;
   isStudent: boolean;
+  initialCheckDone: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name?: string, role?: 'student' | 'teacher') => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name?: string,
+    role?: "student" | "teacher",
+  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -17,7 +23,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Start loading during SSR
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -30,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       } finally {
         setIsLoading(false);
+        setInitialCheckDone(true);
       }
     };
 
@@ -41,16 +49,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (response.success) {
       setUser(response.data.user);
     } else {
-      throw new Error('Login failed');
+      throw new Error("Login failed");
     }
   };
 
-  const register = async (email: string, password: string, name?: string, role?: 'student' | 'teacher') => {
+  const register = async (
+    email: string,
+    password: string,
+    name?: string,
+    role?: "student" | "teacher",
+  ) => {
     const response = await authApi.register({ email, password, name, role });
     if (response.success) {
       setUser(response.data.user);
     } else {
-      throw new Error('Registration failed');
+      throw new Error("Registration failed");
     }
   };
 
@@ -65,11 +78,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
-        isTeacher: user?.role === 'teacher',
-        isStudent: user?.role === 'student',
+        isTeacher: user?.role === "teacher",
+        isStudent: user?.role === "student",
+        initialCheckDone,
         login,
         register,
-        logout
+        logout,
       }}
     >
       {children}
@@ -80,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

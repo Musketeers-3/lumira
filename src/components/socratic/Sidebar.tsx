@@ -128,20 +128,16 @@ export function Sidebar() {
             </div>
             {TEACHER_NAV_ITEMS.map((item) => (
               <Link key={item.to} to={item.to} className="block">
-                <NavItemContent
-                  label={item.label}
-                  icon={item.icon}
-                  active={pathname === item.to}
-                />
+                <NavItemContent label={item.label} icon={item.icon} active={pathname === item.to} />
               </Link>
             ))}
             {/* Student experience link for teachers */}
             <div className="my-2 h-px" style={{ background: "var(--hairline)" }} />
-            <Link to="/" className="block">
+            <Link to="/teacher-student-preview" className="block">
               <NavItemContent
                 label="View Student Experience"
                 icon={Eye}
-                active={false}
+                active={pathname === "/teacher-student-preview"}
               />
             </Link>
           </>

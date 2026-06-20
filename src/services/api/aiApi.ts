@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import apiClient from "./apiClient";
 
 /**
  * AI API
@@ -15,8 +15,8 @@ export interface SocraticContext {
 
 export interface SocraticResponse {
   mentor_response: string;
-  question_type: 'gentle_push' | 'revealing_challenge' | 'breakthrough_confirmation';
-  estimated_state: 'FOCUS' | 'CHALLENGE' | 'CELEBRATE';
+  question_type: "gentle_push" | "revealing_challenge" | "breakthrough_confirmation";
+  estimated_state: "FOCUS" | "CHALLENGE" | "CELEBRATE";
   next_learning_prompt?: string;
 }
 
@@ -48,8 +48,8 @@ export interface BreakthroughRequestData {
  */
 export const socraticResponse = async (data: SocraticRequestData): Promise<SocraticResponse> => {
   const response = await apiClient.post<{ success: boolean; data: SocraticResponse }>(
-    '/ai/socratic',
-    data
+    "/ai/socratic",
+    data,
   );
   return response.data.data;
 };
@@ -57,12 +57,10 @@ export const socraticResponse = async (data: SocraticRequestData): Promise<Socra
 /**
  * Evaluate student understanding
  */
-export const evaluateStudent = async (
-  data: EvaluateRequestData
-): Promise<EvaluateResponse> => {
+export const evaluateStudent = async (data: EvaluateRequestData): Promise<EvaluateResponse> => {
   const response = await apiClient.post<{ success: boolean; data: EvaluateResponse }>(
-    '/ai/evaluate',
-    data
+    "/ai/evaluate",
+    data,
   );
   return response.data.data;
 };
@@ -70,12 +68,10 @@ export const evaluateStudent = async (
 /**
  * Generate breakthrough celebration message
  */
-export const breakthroughCelebration = async (
-  data: BreakthroughRequestData
-): Promise<string> => {
+export const breakthroughCelebration = async (data: BreakthroughRequestData): Promise<string> => {
   const response = await apiClient.post<{ success: boolean; data: string }>(
-    '/ai/breakthrough',
-    data
+    "/ai/breakthrough",
+    data,
   );
   return response.data.data;
 };
@@ -83,5 +79,5 @@ export const breakthroughCelebration = async (
 export default {
   socraticResponse,
   evaluateStudent,
-  breakthroughCelebration
+  breakthroughCelebration,
 };

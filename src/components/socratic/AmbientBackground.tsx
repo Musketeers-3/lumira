@@ -107,8 +107,8 @@ function PhysicsParticles() {
         <Particle
           key={i}
           style={{
-            top: `${10 + (i * 4.5) % 80}%`,
-            left: `${5 + (i * 7.3) % 90}%`,
+            top: `${10 + ((i * 4.5) % 80)}%`,
+            left: `${5 + ((i * 7.3) % 90)}%`,
             background: "var(--realm-accent)",
             opacity: 0.3 + (i % 3) * 0.15,
             boxShadow: "0 0 6px var(--realm-glow)",
@@ -139,8 +139,8 @@ function ChemistryParticles() {
           style={{
             width: 6 + (i % 3) * 4,
             height: 6 + (i % 3) * 4,
-            top: `${15 + (i * 6) % 70}%`,
-            left: `${10 + (i * 8) % 80}%`,
+            top: `${15 + ((i * 6) % 70)}%`,
+            left: `${10 + ((i * 8) % 80)}%`,
             border: "1px solid var(--realm-accent)",
             opacity: 0.2,
             animation: `breathe ${4 + i * 0.5}s ease-in-out infinite`,
@@ -161,8 +161,8 @@ function BiologyParticles() {
           style={{
             width: 4,
             height: 4,
-            top: `${20 + (i * 5.5) % 60}%`,
-            left: `${8 + (i * 9) % 85}%`,
+            top: `${20 + ((i * 5.5) % 60)}%`,
+            left: `${8 + ((i * 9) % 85)}%`,
             background: "var(--realm-accent)",
             opacity: 0.4,
             boxShadow: "0 0 10px var(--realm-glow)",
@@ -191,11 +191,12 @@ function MathParticles() {
           style={{
             width: 5,
             height: 5,
-            top: `${25 + (i * 8) % 50}%`,
-            left: `${20 + (i * 12) % 60}%`,
+            top: `${25 + ((i * 8) % 50)}%`,
+            left: `${20 + ((i * 12) % 60)}%`,
             background: "var(--gold-soft)",
             opacity: 0.35,
-            clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
+            clipPath:
+              "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
             animation: `subtle-scale ${5 + i}s ease-in-out infinite`,
           }}
         />
@@ -225,8 +226,8 @@ function HubParticles() {
         <Particle
           key={i}
           style={{
-            top: `${12 + (i * 8) % 75}%`,
-            left: `${6 + (i * 11) % 88}%`,
+            top: `${12 + ((i * 8) % 75)}%`,
+            left: `${6 + ((i * 11) % 88)}%`,
             background: i % 2 === 0 ? "var(--realm-accent)" : "var(--gold-soft)",
             opacity: 0.25,
             animation: `orb-drift ${22 + i * 3}s ease-in-out infinite`,

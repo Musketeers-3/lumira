@@ -3,8 +3,9 @@
  * Observatory-style command center for teachers to monitor student progress
  */
 
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useMemo, useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { useTeacherRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 import { useAuth } from "@/lib/auth-context";
 import {
   DashboardHeader,
@@ -129,59 +130,18 @@ function getPlaceholderData() {
 }
 
 function TeacherDashboardPage() {
-  const router = useRouter();
-  const { user, isTeacher, isAuthenticated, isLoading } = useAuth();
+  const { isLoading } = useTeacherRouteGuard();
+  const { user } = useAuth();
 
-  // DEBUG: Log auth state to diagnose role issue
-  console.log("[TeacherDashboard] AUTH DEBUG:", {
-    user,
-    role: user?.role,
-    isTeacher,
-    isAuthenticated,
-    isLoading,
-  });
-
-  // Placeholder data
+  // Placeholder data - must be called before early returns
   const { overview, classes, activities, reports } = useMemo(() => getPlaceholderData(), []);
 
-  const hasClasses = classes.length > 0;
-
-  // Client-side authorization: redirect non-teachers to home
-  // This follows the same pattern as the rest of the app - auth is checked client-side
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      // Not logged in - redirect to login
-      router.navigate({ to: "/login" });
-    } else if (!isLoading && isAuthenticated && !isTeacher) {
-      // Logged in but not a teacher - redirect to home
-      router.navigate({ to: "/" });
-    }
-  }, [isLoading, isAuthenticated, isTeacher, router]);
-
-  // Show loading while checking auth
+  // Show loading while auth is being checked
   if (isLoading) {
-    return (
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded bg-white/5" />
-          <div className="h-4 w-64 rounded bg-white/5" />
-          <div className="grid gap-4 sm:grid-cols-4">
-            <div className="h-24 rounded-xl bg-white/5" />
-            <div className="h-24 rounded-xl bg-white/5" />
-            <div className="h-24 rounded-xl bg-white/5" />
-            <div className="h-24 rounded-xl bg-white/5" />
-          </div>
-        </div>
-      </div>
-    );
+    return <RouteGuardLoading />;
   }
 
-  // Additional check: if somehow we got here and user is not a teacher, redirect
-  if (!isTeacher) {
-    // This should rarely happen since useEffect handles redirect, but as a safety net
-    router.navigate({ to: "/" });
-    return null;
-  }
+  const hasClasses = classes.length > 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">

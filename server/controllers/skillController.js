@@ -1,4 +1,4 @@
-import SkillTracking from '../models/SkillTracking.js';
+import SkillTracking from "../models/SkillTracking.js";
 
 /**
  * Skill Controller
@@ -12,12 +12,11 @@ import SkillTracking from '../models/SkillTracking.js';
  */
 export const getSkills = async (req, res, next) => {
   try {
-    const skills = await SkillTracking.find({ userId: req.user._id })
-      .sort({ createdAt: -1 });
+    const skills = await SkillTracking.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      data: skills
+      data: skills,
     });
   } catch (error) {
     next(error);
@@ -35,19 +34,19 @@ export const getSkill = async (req, res, next) => {
 
     const skill = await SkillTracking.findOne({
       userId: req.user._id,
-      skillName
+      skillName,
     });
 
     if (!skill) {
       return res.status(404).json({
         success: false,
-        message: 'Skill not found'
+        message: "Skill not found",
       });
     }
 
     res.json({
       success: true,
-      data: skill
+      data: skill,
     });
   } catch (error) {
     next(error);
@@ -61,27 +60,20 @@ export const getSkill = async (req, res, next) => {
  */
 export const updateSkill = async (req, res, next) => {
   try {
-    const {
-      skillName,
-      skillCategory,
-      proficiencyLevel,
-      masteryScore,
-      status,
-      insight,
-      rarity
-    } = req.body;
+    const { skillName, skillCategory, proficiencyLevel, masteryScore, status, insight, rarity } =
+      req.body;
 
     if (!skillName) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide skillName'
+        message: "Please provide skillName",
       });
     }
 
     // Check if skill exists
     let skill = await SkillTracking.findOne({
       userId: req.user._id,
-      skillName
+      skillName,
     });
 
     if (skill) {
@@ -94,7 +86,7 @@ export const updateSkill = async (req, res, next) => {
       if (rarity) skill.rarity = rarity;
 
       skill.lastPracticed = new Date();
-      if (status === 'unlocked' && !skill.unlockedAt) {
+      if (status === "unlocked" && !skill.unlockedAt) {
         skill.unlockedAt = new Date();
       }
 
@@ -104,20 +96,20 @@ export const updateSkill = async (req, res, next) => {
       skill = await SkillTracking.create({
         userId: req.user._id,
         skillName,
-        skillCategory: skillCategory || 'General',
+        skillCategory: skillCategory || "General",
         proficiencyLevel: proficiencyLevel || 0,
         masteryScore: masteryScore || 0,
-        status: status || 'locked',
+        status: status || "locked",
         insight,
-        rarity: rarity || 'common',
-        unlockedAt: status === 'unlocked' ? new Date() : null,
-        timesPracticed: 1
+        rarity: rarity || "common",
+        unlockedAt: status === "unlocked" ? new Date() : null,
+        timesPracticed: 1,
       });
     }
 
     res.json({
       success: true,
-      data: skill
+      data: skill,
     });
   } catch (error) {
     next(error);
@@ -131,49 +123,42 @@ export const updateSkill = async (req, res, next) => {
  */
 export const upsertSkill = async (req, res, next) => {
   try {
-    const {
-      skillName,
-      skillCategory,
-      proficiencyLevel,
-      masteryScore,
-      status,
-      insight,
-      rarity
-    } = req.body;
+    const { skillName, skillCategory, proficiencyLevel, masteryScore, status, insight, rarity } =
+      req.body;
 
     if (!skillName) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide skillName'
+        message: "Please provide skillName",
       });
     }
 
     // Find and update or create
     const updateData = {
       skillName,
-      skillCategory: skillCategory || 'General',
+      skillCategory: skillCategory || "General",
       proficiencyLevel: proficiencyLevel || 0,
       masteryScore: masteryScore || 0,
-      status: status || 'locked',
+      status: status || "locked",
       lastPracticed: new Date(),
-      timesPracticed: 1
+      timesPracticed: 1,
     };
 
     if (insight) updateData.insight = insight;
     if (rarity) updateData.rarity = rarity;
-    if (status === 'unlocked') {
+    if (status === "unlocked") {
       updateData.unlockedAt = new Date();
     }
 
     const skill = await SkillTracking.findOneAndUpdate(
       { userId: req.user._id, skillName },
       { $set: updateData },
-      { new: true, upsert: true, runValidators: true }
+      { new: true, upsert: true, runValidators: true },
     );
 
     res.json({
       success: true,
-      data: skill
+      data: skill,
     });
   } catch (error) {
     next(error);
@@ -184,5 +169,5 @@ export default {
   getSkills,
   getSkill,
   updateSkill,
-  upsertSkill
+  upsertSkill,
 };

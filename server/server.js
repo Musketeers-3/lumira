@@ -1,15 +1,15 @@
-import express from 'express';
-import cors from 'cors';
-import { config, validateEnv } from './config/env.js';
-import connectDB from './config/db.js';
-import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
+import express from "express";
+import cors from "cors";
+import { config, validateEnv } from "./config/env.js";
+import connectDB from "./config/db.js";
+import { notFound, errorHandler } from "./middlewares/errorMiddleware.js";
 
 // Import routes
-import authRoutes from './routes/authRoutes.js';
-import sessionRoutes from './routes/sessionRoutes.js';
-import skillRoutes from './routes/skillRoutes.js';
-import lessonRoutes from './routes/lessonRoutes.js';
-import aiRoutes from './routes/aiRoutes.js';
+import authRoutes from "./routes/authRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+import skillRoutes from "./routes/skillRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 /**
  * Lumira Backend Server
@@ -23,10 +23,14 @@ const app = express();
  */
 
 // CORS - allow frontend (use array for multiple origins or allow all in dev)
-app.use(cors({
-  origin: config.isDevelopment ? ['http://localhost:5173', 'http://localhost:8081', 'http://localhost:8080'] : config.frontendUrl,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: config.isDevelopment
+      ? ["http://localhost:5173", "http://localhost:8081", "http://localhost:8080"]
+      : config.frontendUrl,
+    credentials: true,
+  }),
+);
 
 // Body parser
 app.use(express.json());
@@ -37,9 +41,9 @@ app.use(express.urlencoded({ extended: true }));
  */
 try {
   validateEnv();
-  console.log('✓ Environment variables validated');
+  console.log("✓ Environment variables validated");
 } catch (error) {
-  console.error('✗ Environment validation failed:', error.message);
+  console.error("✗ Environment validation failed:", error.message);
   process.exit(1);
 }
 
@@ -51,20 +55,20 @@ connectDB();
 /**
  * API Routes
  */
-app.use('/api/auth', authRoutes);
-app.use('/api/sessions', sessionRoutes);
-app.use('/api/skills', skillRoutes);
-app.use('/api/lessons', lessonRoutes);
-app.use('/api/ai', aiRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/sessions", sessionRoutes);
+app.use("/api/skills", skillRoutes);
+app.use("/api/lessons", lessonRoutes);
+app.use("/api/ai", aiRoutes);
 
 /**
  * Health check endpoint
  */
-app.get('/api/health', (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: 'Lumira API is running',
-    timestamp: new Date().toISOString()
+    message: "Lumira API is running",
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -85,7 +89,7 @@ app.listen(PORT, () => {
 ║                                                   ║
 ║   🧙 Lumira API Server                           ║
 ║   Running on port ${PORT}                          ║
-║   Environment: ${config.isDevelopment ? 'development' : 'production'}                  ║
+║   Environment: ${config.isDevelopment ? "development" : "production"}                  ║
 ║                                                   ║
 ║   Endpoints:                                      ║
 ║   • POST /api/auth/register                      ║

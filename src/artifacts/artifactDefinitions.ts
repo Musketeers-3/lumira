@@ -32,7 +32,8 @@ const GRAVITY_COMPASS: ArtifactMetadata = {
   id: "gravity-compass",
   name: "Gravity Compass",
   icon: "🧭",
-  description: "A compass that guides through gravitational mysteries. Unlocked after 3 Physics discoveries.",
+  description:
+    "A compass that guides through gravitational mysteries. Unlocked after 3 Physics discoveries.",
   rarity: "rare",
   realm: "physics",
 };

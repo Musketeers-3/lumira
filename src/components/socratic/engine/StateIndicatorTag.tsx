@@ -42,17 +42,10 @@ export function StateIndicatorTag({ isSpeaking, isPausing }: Props) {
           }}
         />
       </span>
-      <span
-        className="font-semibold tracking-[0.28em]"
-        style={{ color: "var(--state-accent)" }}
-      >
+      <span className="font-semibold tracking-[0.28em]" style={{ color: "var(--state-accent)" }}>
         {name}
       </span>
-      <span
-        aria-hidden
-        className="h-3 w-px"
-        style={{ background: "rgba(201,162,75,0.4)" }}
-      />
+      <span aria-hidden className="h-3 w-px" style={{ background: "rgba(201,162,75,0.4)" }} />
       <span style={{ color: "var(--ink-secondary)" }}>{sub}</span>
     </div>
   );

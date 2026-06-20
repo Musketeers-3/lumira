@@ -125,12 +125,12 @@ Create `/src/services/api/`:
 
 **.env (Frontend)**
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5002/api
 ```
 
 **.env (Backend)**
 ```
-PORT=5000
+PORT=5002
 MONGODB_URI=mongodb://localhost:27017/lumira
 JWT_SECRET=your-secret-key-here
 OLLAMA_BASE_URL=http://localhost:11434

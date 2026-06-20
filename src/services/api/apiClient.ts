@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError } from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002/api";
 console.log("[API Client] Using API URL:", API_URL);
 const TOKEN_KEY = "lumira_auth_token";
 

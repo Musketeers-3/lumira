@@ -6,7 +6,12 @@
  * All artifact checks happen here.
  */
 
-import type { ArtifactEvaluationContext, ArtifactResult, ArtifactMetadata, SessionArtifactData } from "./types";
+import type {
+  ArtifactEvaluationContext,
+  ArtifactResult,
+  ArtifactMetadata,
+  SessionArtifactData,
+} from "./types";
 import { ARTIFACT_METADATA } from "./artifactDefinitions";
 
 const ARTIFACT_STORAGE_KEY = "lumira-collectible-artifacts";
@@ -48,12 +53,10 @@ export function isArtifactUnlocked(artifactId: string): boolean {
  */
 function countRealmDiscoveries(
   historicalSessions: SessionArtifactData[] | undefined,
-  realm: string
+  realm: string,
 ): number {
   if (!historicalSessions) return 0;
-  return historicalSessions.filter(
-    (s) => s.realm === realm && s.completedAt
-  ).length;
+  return historicalSessions.filter((s) => s.realm === realm && s.completedAt).length;
 }
 
 /**
@@ -113,7 +116,8 @@ export function evaluateArtifacts(context: ArtifactEvaluationContext): ArtifactR
   }
 
   // Gravity Compass - 3 Physics realm discoveries
-  const physicsCount = countRealmDiscoveries(historicalSessions, "physics") +
+  const physicsCount =
+    countRealmDiscoveries(historicalSessions, "physics") +
     (session.realm === "physics" && session.completedAt ? 1 : 0);
   if (physicsCount >= 3 && !allUnlocked.includes("gravity-compass")) {
     newlyUnlocked.push({
@@ -240,7 +244,7 @@ export function getUnlockedArtifacts(context: ArtifactEvaluationContext): Artifa
 export function getEarnedArtifacts(
   session: SessionArtifactData,
   earnedBadges: string[],
-  historicalSessions?: SessionArtifactData[]
+  historicalSessions?: SessionArtifactData[],
 ): ArtifactMetadata[] {
   const earned: ArtifactMetadata[] = [];
   const persisted = getPersistedArtifactIds();
@@ -256,7 +260,8 @@ export function getEarnedArtifacts(
   }
 
   // Gravity Compass - show if 3+ Physics discoveries
-  const physicsCount = countRealmDiscoveries(historicalSessions, "physics") +
+  const physicsCount =
+    countRealmDiscoveries(historicalSessions, "physics") +
     (session.realm === "physics" && session.completedAt ? 1 : 0);
   if (physicsCount >= 3 && persisted.includes("gravity-compass")) {
     earned.push(ARTIFACT_METADATA["gravity-compass"]);

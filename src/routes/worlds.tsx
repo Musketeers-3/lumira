@@ -1,4 +1,4 @@
-import { useState, useMemo, memo, useRef, useEffect } from "react";
+import { useState, useMemo, memo, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Lock, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { REALMS, realmFromDomain, type RealmId } from "@/lib/realms";
 import { useRealm } from "@/lib/realm-context";
 import { ArtifactScene } from "@/components/socratic/artifacts/ArtifactScene";
 import { signatureArtifactForRealm } from "@/lib/artifacts";
+import { useStudentRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 
 export const Route = createFileRoute("/worlds")({
   head: () => ({
@@ -25,6 +26,12 @@ export const Route = createFileRoute("/worlds")({
 });
 
 function WorldsPage() {
+  const { isLoading } = useStudentRouteGuard();
+
+  if (isLoading) {
+    return <RouteGuardLoading />;
+  }
+
   const { setRealm } = useRealm();
   const { fetchSkills } = useSessionPersistence();
 

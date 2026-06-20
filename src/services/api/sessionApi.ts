@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import apiClient from "./apiClient";
 
 /**
  * Session API
@@ -10,8 +10,8 @@ export interface SessionMessage {
   sessionId: string;
   mentorState: string;
   messageText: string;
-  sender: 'mentor' | 'student';
-  messageType: 'text';
+  sender: "mentor" | "student";
+  messageType: "text";
   createdAt: string;
 }
 
@@ -49,8 +49,8 @@ export interface CompleteSessionData {
 export interface SaveMessageData {
   mentorState?: string;
   messageText: string;
-  sender: 'mentor' | 'student';
-  messageType?: 'text';
+  sender: "mentor" | "student";
+  messageType?: "text";
 }
 
 /**
@@ -58,8 +58,8 @@ export interface SaveMessageData {
  */
 export const createSession = async (data: CreateSessionData): Promise<LearningSession> => {
   const response = await apiClient.post<{ success: boolean; data: LearningSession }>(
-    '/sessions',
-    data
+    "/sessions",
+    data,
   );
   return response.data.data;
 };
@@ -69,11 +69,11 @@ export const createSession = async (data: CreateSessionData): Promise<LearningSe
  */
 export const updateSession = async (
   sessionId: string,
-  data: UpdateSessionData
+  data: UpdateSessionData,
 ): Promise<LearningSession> => {
   const response = await apiClient.put<{ success: boolean; data: LearningSession }>(
     `/sessions/${sessionId}`,
-    data
+    data,
   );
   return response.data.data;
 };
@@ -83,11 +83,11 @@ export const updateSession = async (
  */
 export const completeSession = async (
   sessionId: string,
-  data: CompleteSessionData
+  data: CompleteSessionData,
 ): Promise<LearningSession> => {
   const response = await apiClient.put<{ success: boolean; data: LearningSession }>(
     `/sessions/${sessionId}/complete`,
-    data
+    data,
   );
   return response.data.data;
 };
@@ -96,9 +96,7 @@ export const completeSession = async (
  * Get all user sessions
  */
 export const getSessions = async (): Promise<LearningSession[]> => {
-  const response = await apiClient.get<{ success: boolean; data: LearningSession[] }>(
-    '/sessions'
-  );
+  const response = await apiClient.get<{ success: boolean; data: LearningSession[] }>("/sessions");
   return response.data.data;
 };
 
@@ -107,7 +105,7 @@ export const getSessions = async (): Promise<LearningSession[]> => {
  */
 export const getRecentSessions = async (limit: number = 10): Promise<LearningSession[]> => {
   const response = await apiClient.get<{ success: boolean; data: LearningSession[] }>(
-    `/sessions/recent?limit=${limit}`
+    `/sessions/recent?limit=${limit}`,
   );
   return response.data.data;
 };
@@ -117,11 +115,11 @@ export const getRecentSessions = async (limit: number = 10): Promise<LearningSes
  */
 export const saveMessage = async (
   sessionId: string,
-  data: SaveMessageData
+  data: SaveMessageData,
 ): Promise<SessionMessage> => {
   const response = await apiClient.post<{ success: boolean; data: SessionMessage }>(
     `/sessions/${sessionId}/messages`,
-    data
+    data,
   );
   return response.data.data;
 };
@@ -131,7 +129,7 @@ export const saveMessage = async (
  */
 export const getMessages = async (sessionId: string): Promise<SessionMessage[]> => {
   const response = await apiClient.get<{ success: boolean; data: SessionMessage[] }>(
-    `/sessions/${sessionId}/messages`
+    `/sessions/${sessionId}/messages`,
   );
   return response.data.data;
 };
@@ -140,9 +138,7 @@ export const getMessages = async (sessionId: string): Promise<SessionMessage[]> 
  * Delete a session
  */
 export const deleteSession = async (sessionId: string): Promise<void> => {
-  await apiClient.delete<{ success: boolean; message: string }>(
-    `/sessions/${sessionId}`
-  );
+  await apiClient.delete<{ success: boolean; message: string }>(`/sessions/${sessionId}`);
 };
 
 export default {
@@ -153,5 +149,5 @@ export default {
   getRecentSessions,
   saveMessage,
   getMessages,
-  deleteSession
+  deleteSession,
 };

@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import config from '../config/env.js';
-import User from '../models/User.js';
+import jwt from "jsonwebtoken";
+import config from "../config/env.js";
+import User from "../models/User.js";
 
 /**
  * Auth Middleware
@@ -11,58 +11,61 @@ export const protect = async (req, res, next) => {
   let token;
 
   // DEBUG: Log all auth attempts
-  console.log('[AUTH DEBUG] ============================================');
-  console.log('[AUTH DEBUG] Method:', req.method);
-  console.log('[AUTH DEBUG] URL:', req.url);
-  console.log('[AUTH DEBUG] Authorization header:', req.headers.authorization ? 'present' : 'MISSING');
-  console.log('[AUTH DEBUG] Authorization value:', req.headers.authorization);
+  console.log("[AUTH DEBUG] ============================================");
+  console.log("[AUTH DEBUG] Method:", req.method);
+  console.log("[AUTH DEBUG] URL:", req.url);
+  console.log(
+    "[AUTH DEBUG] Authorization header:",
+    req.headers.authorization ? "present" : "MISSING",
+  );
+  console.log("[AUTH DEBUG] Authorization value:", req.headers.authorization);
 
   // Check for token in Authorization header
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-    console.log('[AUTH DEBUG] Token extracted:', token ? token.substring(0, 20) + '...' : 'EMPTY');
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+    console.log("[AUTH DEBUG] Token extracted:", token ? token.substring(0, 20) + "..." : "EMPTY");
   } else {
-    console.log('[AUTH DEBUG] Token extraction: FAILED - no Bearer prefix');
+    console.log("[AUTH DEBUG] Token extraction: FAILED - no Bearer prefix");
   }
 
   if (!token) {
-    console.log('[AUTH DEBUG] Result: 401 - No token');
+    console.log("[AUTH DEBUG] Result: 401 - No token");
     return res.status(401).json({
       success: false,
-      message: 'Not authorized to access this route'
+      message: "Not authorized to access this route",
     });
   }
 
   try {
     // Verify token
-    console.log('[AUTH DEBUG] JWT Secret:', config.jwtSecret);
+    console.log("[AUTH DEBUG] JWT Secret:", config.jwtSecret);
     const decoded = jwt.verify(token, config.jwtSecret);
-    console.log('[AUTH DEBUG] JWT verified successfully');
-    console.log('[AUTH DEBUG] Decoded ID:', decoded.id);
+    console.log("[AUTH DEBUG] JWT verified successfully");
+    console.log("[AUTH DEBUG] Decoded ID:", decoded.id);
 
     // Get user from token
     req.user = await User.findById(decoded.id);
-    console.log('[AUTH DEBUG] User lookup result:', req.user ? 'FOUND' : 'NOT FOUND');
+    console.log("[AUTH DEBUG] User lookup result:", req.user ? "FOUND" : "NOT FOUND");
     if (req.user) {
-      console.log('[AUTH DEBUG] User email:', req.user.email);
+      console.log("[AUTH DEBUG] User email:", req.user.email);
     }
 
     if (!req.user) {
-      console.log('[AUTH DEBUG] Result: 401 - User not found');
+      console.log("[AUTH DEBUG] Result: 401 - User not found");
       return res.status(401).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
-    console.log('[AUTH DEBUG] Result: SUCCESS - proceeding to route');
+    console.log("[AUTH DEBUG] Result: SUCCESS - proceeding to route");
     next();
   } catch (error) {
-    console.log('[AUTH DEBUG] JWT Error:', error.message);
-    console.log('[AUTH DEBUG] Result: 401 - JWT verification failed');
+    console.log("[AUTH DEBUG] JWT Error:", error.message);
+    console.log("[AUTH DEBUG] Result: 401 - JWT verification failed");
     return res.status(401).json({
       success: false,
-      message: 'Not authorized to access this route'
+      message: "Not authorized to access this route",
     });
   }
 };
@@ -73,8 +76,8 @@ export const protect = async (req, res, next) => {
 export const optionalAuth = async (req, res, next) => {
   let token;
 
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
   }
 
   if (token) {
