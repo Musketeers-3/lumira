@@ -1,4 +1,4 @@
-import { useState, useMemo, memo, useRef } from "react";
+import { useState, useMemo, memo, useRef, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Lock, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";

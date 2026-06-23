@@ -1,9 +1,11 @@
 # Lumira MERN Migration Plan
 
 ## Overview
+
 Migrate from TanStack Start + Supabase to React (TanStack Router) + Express + MongoDB architecture.
 
 ## Current Architecture
+
 - **Frontend**: TanStack Start + TanStack Router + React 19
 - **Data Storage**: Supabase (mock fallback when unavailable)
 - **AI**: Ollama at localhost:11434
@@ -11,6 +13,7 @@ Migrate from TanStack Start + Supabase to React (TanStack Router) + Express + Mo
 - **Local**: localStorage for lesson drafts, mentor settings
 
 ## Target Architecture
+
 - **Frontend**: React + TanStack Router (keep existing)
 - **Backend**: Node.js + Express
 - **Database**: MongoDB with Mongoose
@@ -22,6 +25,7 @@ Migrate from TanStack Start + Supabase to React (TanStack Router) + Express + Mo
 ## Phase 1: Backend Creation
 
 ### 1.1 Folder Structure
+
 ```
 /server
   /config
@@ -59,28 +63,35 @@ Migrate from TanStack Start + Supabase to React (TanStack Router) + Express + Mo
 ### 1.2 MongoDB Models
 
 **User**
-- _id, email, password (hashed), name, createdAt, updatedAt
+
+- \_id, email, password (hashed), name, createdAt, updatedAt
 
 **LearningSession**
-- _id, userId, lessonId, topic, startedAt, completedAt, durationSeconds, performanceScore, stateProgression (array), messagesCount, breakthrough, createdAt
+
+- \_id, userId, lessonId, topic, startedAt, completedAt, durationSeconds, performanceScore, stateProgression (array), messagesCount, breakthrough, createdAt
 
 **SessionMessage**
-- _id, sessionId, userId, mentorState, messageText, sender, messageType, createdAt
+
+- \_id, sessionId, userId, mentorState, messageText, sender, messageType, createdAt
 
 **SkillTracking**
-- _id, userId, skillName, skillCategory, proficiencyLevel, masteryScore, lastPracticed, timesPracticed, unlockedAt, insight, status, rarity
+
+- \_id, userId, skillName, skillCategory, proficiencyLevel, masteryScore, lastPracticed, timesPracticed, unlockedAt, insight, status, rarity
 
 **LessonDraft**
-- _id, userId, title, description, topic, targetSkills, difficulty, steps, estimatedDuration, isPublished, createdAt, updatedAt
+
+- \_id, userId, title, description, topic, targetSkills, difficulty, steps, estimatedDuration, isPublished, createdAt, updatedAt
 
 ### 1.3 API Endpoints
 
 **Auth**
+
 - POST /api/auth/register - Create account
 - POST /api/auth/login - Login, get JWT
 - GET /api/auth/me - Get current user
 
 **Sessions**
+
 - POST /api/sessions - Create session
 - PUT /api/sessions/:id - Update session
 - PUT /api/sessions/:id/complete - Complete session
@@ -88,20 +99,24 @@ Migrate from TanStack Start + Supabase to React (TanStack Router) + Express + Mo
 - GET /api/sessions/recent - Get recent sessions
 
 **Messages**
+
 - POST /api/sessions/:id/messages - Save message
 - GET /api/sessions/:id/messages - Get session messages
 
 **Skills**
+
 - GET /api/skills - Get user skills
 - GET /api/skills/:skillName - Get specific skill
 - PUT /api/skills - Update skill mastery
 
 **AI**
+
 - POST /api/ai/socratic - Generate Socratic response
 - POST /api/ai/evaluate - Evaluate understanding
 - POST /api/ai/breakthrough - Generate breakthrough message
 
 **Lessons**
+
 - GET /api/lessons - Get user's lesson drafts
 - POST /api/lessons - Save lesson draft
 - PUT /api/lessons/:id - Update lesson
@@ -113,7 +128,9 @@ Migrate from TanStack Start + Supabase to React (TanStack Router) + Express + Mo
 ## Phase 2: Frontend Changes
 
 ### 2.1 New API Layer
+
 Create `/src/services/api/`:
+
 - apiClient.ts - Axios instance with JWT interceptor
 - authApi.ts - Auth endpoints
 - sessionApi.ts - Session endpoints
@@ -124,11 +141,13 @@ Create `/src/services/api/`:
 ### 2.2 Environment Files
 
 **.env (Frontend)**
+
 ```
 VITE_API_URL=http://localhost:5002/api
 ```
 
 **.env (Backend)**
+
 ```
 PORT=5002
 MONGODB_URI=mongodb://localhost:27017/lumira
@@ -140,6 +159,7 @@ OLLAMA_MODEL=qwen2:1.5b
 ### 2.3 Updated Imports
 
 Replace Supabase calls:
+
 - `learning-persistence.ts` → API calls via services
 - `supabase/client.ts` → Remove (use apiClient)
 - `ai-mentor.ts` → Call backend AI endpoints
@@ -147,7 +167,8 @@ Replace Supabase calls:
 ### 2.4 Authentication State
 
 Add context for JWT auth:
-- AuthProvider in __root.tsx
+
+- AuthProvider in \_\_root.tsx
 - Store token in localStorage
 - Attach token to all API requests
 
@@ -156,6 +177,7 @@ Add context for JWT auth:
 ## Phase 3: Migration Details
 
 ### 3.1 Auth Flow
+
 1. User registers → POST /api/auth/register
 2. User logs in → POST /api/auth/login → receives JWT
 3. JWT stored in localStorage
@@ -163,12 +185,14 @@ Add context for JWT auth:
 5. authMiddleware validates JWT on protected routes
 
 ### 3.2 AI Integration
+
 1. Frontend calls /api/ai/socratic with context
 2. Backend fetches skill history from MongoDB
 3. Backend calls Ollama with compiled prompt
 4. Backend returns response to frontend
 
 ### 3.3 Data Migration Notes
+
 - No direct migration from Supabase (fresh MongoDB)
 - Seed data can be provided for demo
 
@@ -177,6 +201,7 @@ Add context for JWT auth:
 ## File Changes Summary
 
 ### Created (Backend)
+
 1. server/package.json
 2. server/.env
 3. server/server.js
@@ -203,6 +228,7 @@ Add context for JWT auth:
 24. server/services/authService.js
 
 ### Created (Frontend)
+
 1. frontend/.env
 2. frontend/src/services/api/apiClient.ts
 3. frontend/src/services/api/authApi.ts
@@ -213,6 +239,7 @@ Add context for JWT auth:
 8. frontend/src/lib/auth-context.tsx (or update existing)
 
 ### Modified
+
 1. frontend/src/lib/learning-persistence.ts - Use API services
 2. frontend/src/lib/ai-mentor.ts - Call backend API
 3. frontend/src/lib/supabase/client.ts - Remove or keep as no-op
@@ -221,6 +248,7 @@ Add context for JWT auth:
 6. Other files that import from learning-persistence
 
 ### Deleted/Deprecated
+
 1. frontend/src/lib/supabase/client.ts (or mark deprecated)
 2. Any Supabase-specific code
 

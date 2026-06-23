@@ -33,10 +33,10 @@ const STUDENT_NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
 const TEACHER_NAV_ITEMS: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/teacher-dashboard", label: "Dashboard", icon: Telescope },
   { to: "/teacher-classes", label: "Classes", icon: GraduationCap },
+  { to: "/teacher/create-class", label: "Create Class", icon: PenLine },
   { to: "/teacher-students", label: "Students", icon: Users },
   { to: "/teacher-insights", label: "Insights", icon: Lightbulb },
   { to: "/teacher-reports", label: "Reports", icon: BarChart3 },
-  { to: "/lesson-builder", label: "Create Class", icon: PenLine },
 ];
 
 function NavItemContent({
@@ -133,7 +133,7 @@ export function Sidebar() {
             ))}
             {/* Student experience link for teachers */}
             <div className="my-2 h-px" style={{ background: "var(--hairline)" }} />
-            <Link to="/teacher-student-preview" className="block">
+            <Link to="/teacher-student-preview" search={{ classId: undefined, studentId: undefined }} className="block">
               <NavItemContent
                 label="View Student Experience"
                 icon={Eye}

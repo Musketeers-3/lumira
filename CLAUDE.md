@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Lumira is an AI-powered learning platform with a 3D mentor character. It uses a MERN stack architecture:
+
 - **Frontend**: React 19 + TanStack Router + TanStack Query + React Three Fiber (3D rendering)
 - **Backend**: Express.js + MongoDB (Mongoose ODM) + JWT authentication
 - **Deployment**: Cloudflare Pages (frontend), custom Node server (backend)
@@ -13,6 +14,7 @@ Lumira is an AI-powered learning platform with a 3D mentor character. It uses a 
 ## Commands
 
 ### Frontend Development (uses bun)
+
 ```bash
 bun run dev              # Start development server
 bun run build            # Build for production (Cloudflare Pages)
@@ -24,6 +26,7 @@ bun run generate:mentor # Generate placeholder 3D mentor GLB
 ```
 
 ### Backend Development (uses npm)
+
 ```bash
 cd server
 npm run dev          # Start with nodemon (auto-reload) on port 5002 (configurable via .env)
@@ -31,7 +34,9 @@ npm start            # Start production server (must run from server directory)
 ```
 
 ### Running Both
+
 Requires two terminals:
+
 ```bash
 # Terminal 1 - Backend (port 5002 by default, configurable via server/.env)
 cd server && npm run dev
@@ -43,6 +48,7 @@ bun run dev
 ## Architecture
 
 ### Frontend Structure (`/src`)
+
 - `routes/` - TanStack Router route definitions (file-based routing)
 - `lib/` - Core utilities and contexts:
   - `auth-context.tsx` - JWT authentication state
@@ -60,6 +66,7 @@ bun run dev
 - `services/api/` - API client layer with JWT interceptors
 
 ### Backend Structure (`/server`)
+
 - `server.js` - Express app entry point
 - `config/` - Database and environment configuration
 - `models/` - Mongoose schemas (User, LearningSession, SessionMessage, SkillTracking, LessonDraft)
@@ -69,6 +76,7 @@ bun run dev
 - `services/` - AI service (Ollama integration), auth service
 
 ### API Endpoints
+
 - `POST /api/auth/register` - Create account
 - `POST /api/auth/login` - Login, receive JWT
 - `GET /api/auth/me` - Get current user
@@ -86,16 +94,20 @@ bun run dev
 ## Key Technical Details
 
 ### Environment Variables
+
 - Frontend: `.env` with `VITE_API_URL` (defaults to `http://localhost:5002/api`)
 - Backend: `server/.env` with `PORT`, `MONGODB_URI`, `JWT_SECRET`, `OLLAMA_BASE_URL` (default: 5002)
 
 ### 3D Mentor
+
 The mentor is a GLB model rendered with React Three Fiber. Key files:
+
 - `src/lib/mentor-animation-context.tsx` - Animation state
 - `src/lib/mentor-personality.ts` - Personality traits and response patterns
 - `src/lib/mentor-memory.ts` - Conversation history
 
 The mentor asset (`public/models/mentor/lumira.glb`) uses animation clips mapped to learning states:
+
 - `idle_breathe` → IDLE state
 - `focus_listen` → FOCUS state
 - `challenge_present` → CHALLENGE state
@@ -105,18 +117,23 @@ The mentor asset (`public/models/mentor/lumira.glb`) uses animation clips mapped
 Use `bun run generate:mentor` to create a placeholder GLB; replace with a Blender-authored asset following the spec in `docs/mentor-asset-spec.md`. Full animation clip and morph target specifications are documented there.
 
 ### Authentication Flow
+
 1. User registers/logs in → receives JWT token
 2. Token stored in localStorage
 3. `apiClient.ts` attaches token to Authorization header
 4. Protected routes require valid JWT via `authMiddleware`
 
 ### Gamification System
+
 The achievement system uses client-side evaluation:
+
 - `src/artifacts/` - Defines artifact types, unlock conditions, and the evaluator
 - `src/achievements/` - UI components for badges and unlock modals
 
 ### Role-Based Access Control
+
 The app supports two user roles: `student` (default) and `teacher`. Role is set during registration and determines route access:
+
 - `src/lib/route-guards.tsx` - Provides route guards: `useTeacherRouteGuard()`, `useStudentRouteGuard()`, `useGuestRouteGuard()`
 - Teacher routes: `/teacher-dashboard`, `/teacher-classes`, `/teacher-students`, `/teacher-insights`, `/teacher-reports`
 - Student routes: `/`, `/journal`, `/worlds`, `/engine`

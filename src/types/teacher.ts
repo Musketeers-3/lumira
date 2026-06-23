@@ -13,8 +13,10 @@ export type UserRole = "student" | "teacher";
  */
 export interface ClassInfo {
   _id: string;
-  name: string;
+  className: string;
+  classCode: string;
   description?: string;
+  teacherId: string;
   studentCount: number;
   createdAt: string;
   updatedAt: string;
@@ -89,5 +91,73 @@ export interface ActivityFeedItem {
   studentName: string;
   action: string;
   details: string;
+  timestamp: string;
+}
+
+/**
+ * Analytics API Types (matching backend responses)
+ */
+
+/**
+ * Teacher dashboard data
+ */
+export interface TeacherDashboard {
+  totalClasses: number;
+  totalStudents: number;
+  activeToday: number;
+  lessonsAssigned: number;
+  lessonsCompleted: number;
+  averageMastery: number;
+  recentActivity: DashboardActivity[];
+}
+
+/**
+ * Dashboard activity feed item
+ */
+export interface DashboardActivity {
+  id: string;
+  studentId?: string;
+  studentName?: string;
+  action: string;
+  description: string;
+  timestamp: string;
+}
+
+/**
+ * Class analytics data
+ */
+export interface ClassAnalytics {
+  className: string;
+  enrolledStudents: number;
+  activeStudents: number;
+  assignedLessons: number;
+  completedLessons: number;
+  completionRate: number;
+  averageMastery: number;
+  totalLearningTime: number;
+}
+
+/**
+ * Individual student progress data
+ */
+export interface StudentProgress {
+  studentId: string;
+  name: string;
+  email: string;
+  lessonsStarted: number;
+  lessonsCompleted: number;
+  completionPercentage: number;
+  masteryScore: number;
+  totalTimeSpent: number;
+  lastActive: string | null;
+}
+
+/**
+ * Class activity feed item
+ */
+export interface ClassActivityItem {
+  id: string;
+  type: "lesson_assigned" | "lesson_started" | "lesson_completed" | "student_joined";
+  description: string;
   timestamp: string;
 }

@@ -4,6 +4,7 @@
  */
 
 import { memo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Users, ChevronRight, GraduationCap, Orbit, Eye } from "lucide-react";
 import type { ClassInfo } from "@/types/teacher";
 
@@ -19,9 +20,22 @@ const ClassCard = memo(function ClassCard({
   classInfo: ClassInfo;
   onClick?: () => void;
 }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate({
+        to: "/teacher-students",
+        search: { classId: classInfo._id },
+      });
+    }
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className="group w-full text-left rounded-xl p-5 transition-all duration-300 hover:-translate-y-1"
       style={{
         background: "var(--bg-night)",
@@ -55,7 +69,7 @@ const ClassCard = memo(function ClassCard({
                 className="text-base font-semibold font-display"
                 style={{ color: "var(--ink-primary)" }}
               >
-                {classInfo.name}
+                {classInfo.className}
               </h3>
               <p className="text-sm mt-1 line-clamp-1" style={{ color: "var(--ink-secondary)" }}>
                 {classInfo.description || "No description"}

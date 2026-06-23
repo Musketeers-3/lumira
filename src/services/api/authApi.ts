@@ -39,6 +39,7 @@ export interface AuthResponse {
  * Register a new user
  */
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
+  console.log("REGISTER PAYLOAD", data);
   const response = await apiClient.post<AuthResponse>("/auth/register", data);
   if (response.data.success) {
     setToken(response.data.data.token);

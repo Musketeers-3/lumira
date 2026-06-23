@@ -10,6 +10,8 @@ import sessionRoutes from "./routes/sessionRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
 import lessonRoutes from "./routes/lessonRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import classRoutes from "./routes/classRoutes.js";
+import teacherRoutes from "./routes/teacherRoutes.js";
 
 /**
  * Lumira Backend Server
@@ -60,6 +62,8 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/classes", classRoutes);
+app.use("/api/teacher", teacherRoutes);
 
 /**
  * Health check endpoint
@@ -99,6 +103,8 @@ app.listen(PORT, () => {
 ║   • GET  /api/skills                             ║
 ║   • POST /api/ai/socratic                        ║
 ║   • POST /api/lessons                            ║
+║   • POST /api/classes/create                    ║
+║   • GET  /api/classes/my-classes                 ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
   `);

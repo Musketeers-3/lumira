@@ -1,22 +1,163 @@
 /**
  * Teacher Student Preview Route
- * Preview the student learning experience
+ * Preview a student's learning journey
  */
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useEffect, useState, useMemo } from "react";
 import { useTeacherRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
-import { Eye, Sparkles, Compass, Map, Star, BookOpen, Play, AlertCircle } from "lucide-react";
+import { getMyClasses, getClassStudents, type ClassData, type ClassStudentData } from "@/services/api/classApi";
+import {
+  getStudentProgress,
+  getClassActivity,
+  type StudentProgress,
+  type ClassActivityItem,
+} from "@/services/api/analyticsApi";
+import { Eye, Users, Sparkles, Clock, Award, BookOpen, Activity, Mail, Calendar } from "lucide-react";
 
 export const Route = createFileRoute("/teacher-student-preview")({
   component: TeacherStudentPreviewPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    classId: search.classId as string | undefined,
+    studentId: search.studentId as string | undefined,
+  }),
 });
 
-function TeacherStudentPreviewPage() {
-  const { isLoading } = useTeacherRouteGuard();
+/**
+ * Format date
+ */
+function formatDate(dateString: string | null): string {
+  if (!dateString) return "Never";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
-  if (isLoading) {
+/**
+ * Format time
+ */
+function formatTime(seconds: number): string {
+  if (seconds === 0) return "0m";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes}m`;
+}
+
+function TeacherStudentPreviewPage() {
+  const { isLoading: isGuardLoading } = useTeacherRouteGuard();
+  const router = useRouter();
+  const search = Route.useSearch();
+
+  const [classes, setClasses] = useState<ClassData[]>([]);
+  const [students, setStudents] = useState<ClassStudentData[]>([]);
+  const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
+  const [studentActivity, setStudentActivity] = useState<ClassActivityItem[]>([]);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const selectedClassId = search.classId;
+  const selectedStudentId = search.studentId;
+
+  // Load classes
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        setIsLoadingClasses(true);
+        const data = await getMyClasses();
+        setClasses(data);
+      } catch (err) {
+        console.error("Failed to load classes:", err);
+        setError("Failed to load classes");
+      } finally {
+        setIsLoadingClasses(false);
+      }
+    };
+
+    loadClasses();
+  }, []);
+
+  // Load students when class is selected
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (!selectedClassId) {
+        setStudents([]);
+        return;
+      }
+
+      try {
+        const data = await getClassStudents(selectedClassId);
+        setStudents(data);
+      } catch (err) {
+        console.error("Failed to load students:", err);
+      }
+    };
+
+    loadStudents();
+  }, [selectedClassId]);
+
+  // Load student progress and activity
+  useEffect(() => {
+    const loadStudentData = async () => {
+      if (!selectedClassId || !selectedStudentId) {
+        setStudentProgress(null);
+        setStudentActivity([]);
+        return;
+      }
+
+      try {
+        setIsLoadingData(true);
+
+        // Get all progress for the class
+        const allProgress = await getStudentProgress(selectedClassId);
+        const progress = allProgress.find((p) => p.studentId === selectedStudentId);
+        setStudentProgress(progress || null);
+
+        // Get class activity
+        const activity = await getClassActivity(selectedClassId);
+        setStudentActivity(activity.slice(0, 10));
+      } catch (err) {
+        console.error("Failed to load student data:", err);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadStudentData();
+  }, [selectedClassId, selectedStudentId]);
+
+  // Get selected student info
+  const selectedStudent = useMemo(() => {
+    return students.find((s) => s.studentId === selectedStudentId) || null;
+  }, [students, selectedStudentId]);
+
+  // Handle class selection
+  const handleSelectClass = (classId: string) => {
+    router.navigate({
+      to: "/teacher-student-preview",
+      search: { classId, studentId: undefined },
+    });
+  };
+
+  // Handle student selection
+  const handleSelectStudent = (studentId: string) => {
+    router.navigate({
+      to: "/teacher-student-preview",
+      search: { classId: selectedClassId, studentId },
+    });
+  };
+
+  if (isGuardLoading) {
     return <RouteGuardLoading />;
   }
+
+  const isLoading = isLoadingClasses || isLoadingData;
+  const hasClasses = classes.length > 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
@@ -69,182 +210,336 @@ function TeacherStudentPreviewPage() {
                 className="mt-2 text-2xl md:text-3xl font-semibold tracking-tight lg:text-4xl font-display"
                 style={{ color: "var(--ink-primary)" }}
               >
-                View Student Experience
+                Student Preview
               </h1>
               <p
                 className="mt-2 max-w-xl text-sm md:text-base"
                 style={{ color: "var(--ink-secondary)" }}
               >
-                See what your students see. Preview the learner journey to understand how they
-                interact with Lumira.
+                View a student's learning journey. Preview their progress, activity, and achievements.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Preview Mode Card */}
-      <div
-        className="relative overflow-hidden rounded-2xl p-8"
-        style={{
-          background: "var(--bg-elevated)",
-          border: "1px solid var(--hairline)",
-        }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{
-            backgroundImage: `
-              linear-gradient(var(--hairline) 1px, transparent 1px),
-              linear-gradient(90deg, var(--hairline) 1px, transparent 1px)
-            `,
-            backgroundSize: "30px 30px",
-          }}
-        />
-
-        <div className="relative z-10">
-          {/* Coming Soon Badge */}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
           <div
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider mb-6"
+            className="h-8 w-8 animate-spin rounded-full border-2"
             style={{
-              background: "var(--gold-dim)",
-              color: "var(--gold)",
+              borderColor: "var(--gold) transparent var(--gold) transparent",
             }}
-          >
-            <Sparkles className="w-3 h-3" />
-            Coming Soon
-          </div>
+          />
+        </div>
+      )}
 
-          <h3
-            className="text-xl font-semibold font-display mb-3"
-            style={{ color: "var(--ink-primary)" }}
-          >
-            Student Preview Mode
-          </h3>
-          <p className="max-w-lg text-sm mb-8" style={{ color: "var(--ink-secondary)" }}>
-            Enter a preview mode where you can experience Lumira from a student's perspective. This
-            helps you understand the learning flow and identify any navigation issues.
-          </p>
+      {/* Error State */}
+      {error && !isLoading && (
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            background: "rgba(239,68,68,0.1)",
+            border: "1px solid rgba(239,68,68,0.3)",
+            color: "#ef4444",
+          }}
+        >
+          {error}
+        </div>
+      )}
 
-          {/* Student Navigation Preview */}
-          <div className="grid gap-4 md:grid-cols-2 max-w-2xl mx-auto">
-            <div
-              className="p-5 rounded-xl flex items-center gap-4"
-              style={{ background: "var(--bg-night)", border: "1px solid var(--hairline)" }}
-            >
-              <Compass className="w-6 h-6 shrink-0" style={{ color: "var(--gold)" }} />
-              <div>
-                <h4 className="font-medium text-sm" style={{ color: "var(--ink-primary)" }}>
-                  Discovery Hub
-                </h4>
-                <p className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
-                  Browse available lessons & worlds
-                </p>
-              </div>
-            </div>
-            <div
-              className="p-5 rounded-xl flex items-center gap-4"
-              style={{ background: "var(--bg-night)", border: "1px solid var(--hairline)" }}
-            >
-              <Map className="w-6 h-6 shrink-0" style={{ color: "var(--gold)" }} />
-              <div>
-                <h4 className="font-medium text-sm" style={{ color: "var(--ink-primary)" }}>
-                  Learning Worlds
-                </h4>
-                <p className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
-                  Navigate themed learning environments
-                </p>
-              </div>
-            </div>
-            <div
-              className="p-5 rounded-xl flex items-center gap-4"
-              style={{ background: "var(--bg-night)", border: "1px solid var(--hairline)" }}
-            >
-              <Star className="w-6 h-6 shrink-0" style={{ color: "var(--gold)" }} />
-              <div>
-                <h4 className="font-medium text-sm" style={{ color: "var(--ink-primary)" }}>
-                  Constellation
-                </h4>
-                <p className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
-                  View skill mastery & achievements
-                </p>
-              </div>
-            </div>
-            <div
-              className="p-5 rounded-xl flex items-center gap-4"
-              style={{ background: "var(--bg-night)", border: "1px solid var(--hairline)" }}
-            >
-              <BookOpen className="w-6 h-6 shrink-0" style={{ color: "var(--gold)" }} />
-              <div>
-                <h4 className="font-medium text-sm" style={{ color: "var(--ink-primary)" }}>
-                  Journal
-                </h4>
-                <p className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
-                  Track learning progress over time
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Preview Action */}
+      {/* Empty State - No Classes */}
+      {!isLoading && !error && !hasClasses && (
+        <div
+          className="relative overflow-hidden rounded-2xl p-12 text-center"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--hairline)",
+          }}
+        >
           <div
-            className="mt-8 p-4 rounded-xl flex items-center gap-4 max-w-lg mx-auto"
-            style={{ background: "var(--bg-onyx)", border: "1px solid var(--hairline)" }}
-          >
-            <AlertCircle className="w-5 h-5 shrink-0" style={{ color: "var(--gold-soft)" }} />
-            <div className="flex-1">
-              <p className="text-sm" style={{ color: "var(--ink-secondary)" }}>
-                Preview mode will launch the student interface in a read-only mode with sample data.
+            className="absolute inset-0 pointer-events-none opacity-50"
+            style={{
+              backgroundImage: `
+                linear-gradient(var(--hairline) 1px, transparent 1px),
+                linear-gradient(90deg, var(--hairline) 1px, transparent 1px)
+              `,
+              backgroundSize: "30px 30px",
+            }}
+          />
+
+          <div className="relative z-10">
+            <div
+              className="flex items-center justify-center w-20 h-20 mx-auto rounded-2xl mb-6"
+              style={{
+                background: "linear-gradient(135deg, var(--bg-onyx) 0%, var(--bg-night) 100%)",
+                border: "1px solid var(--hairline)",
+              }}
+            >
+              <Eye className="w-10 h-10" style={{ color: "var(--ink-tertiary)" }} />
+            </div>
+
+            <h3
+              className="text-xl font-semibold font-display mb-3"
+              style={{ color: "var(--ink-primary)" }}
+            >
+              No Classes Yet
+            </h3>
+            <p className="max-w-md mx-auto text-sm mb-8" style={{ color: "var(--ink-secondary)" }}>
+              Create a class and enroll students to preview their learning journeys.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Content */}
+      {!isLoading && !error && hasClasses && (
+        <>
+          {/* Selectors */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Class Selector */}
+            <div
+              className="p-4 rounded-xl"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                  Select Class
+                </span>
+              </div>
+              <select
+                value={selectedClassId || ""}
+                onChange={(e) => handleSelectClass(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{
+                  background: "var(--bg-night)",
+                  border: "1px solid var(--hairline)",
+                  color: "var(--ink-primary)",
+                }}
+              >
+                <option value="">Select a class...</option>
+                {classes.map((cls) => (
+                  <option key={cls._id} value={cls._id}>
+                    {cls.className}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Student Selector */}
+            <div
+              className="p-4 rounded-xl"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                  Select Student
+                </span>
+              </div>
+              <select
+                value={selectedStudentId || ""}
+                onChange={(e) => handleSelectStudent(e.target.value)}
+                disabled={!selectedClassId}
+                className="w-full px-3 py-2 rounded-lg text-sm disabled:opacity-50"
+                style={{
+                  background: "var(--bg-night)",
+                  border: "1px solid var(--hairline)",
+                  color: "var(--ink-primary)",
+                }}
+              >
+                <option value="">Select a student...</option>
+                {students.map((student) => (
+                  <option key={student.studentId} value={student.studentId}>
+                    {student.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* No Student Selected */}
+          {!selectedStudentId && (
+            <div
+              className="p-8 text-center rounded-xl"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+            >
+              <p style={{ color: "var(--ink-secondary)" }}>
+                Select a class and student to preview their learning journey.
               </p>
             </div>
-            <button
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 shrink-0"
-              style={{
-                background: "var(--bg-night)",
-                color: "var(--ink-tertiary)",
-                border: "1px solid var(--hairline)",
-                cursor: "not-allowed",
-                opacity: 0.6,
-              }}
-              disabled
-            >
-              <Play className="w-4 h-4" />
-              Launch Preview
-            </button>
-          </div>
+          )}
 
-          {/* Feature Preview */}
-          <div className="mt-8 pt-8 border-t" style={{ borderColor: "var(--hairline)" }}>
-            <h4
-              className="text-sm font-medium mb-4 text-center"
-              style={{ color: "var(--ink-secondary)" }}
-            >
-              Preview Includes
-            </h4>
-            <div className="flex flex-wrap justify-center gap-3">
-              {[
-                "Mentor conversations",
-                "Learning sessions",
-                "Skill tracking",
-                "Achievement system",
-                "Journal entries",
-              ].map((feature) => (
-                <span
-                  key={feature}
-                  className="px-3 py-1.5 rounded-full text-xs"
+          {/* Student Preview */}
+          {selectedStudentId && selectedStudent && studentProgress && (
+            <div className="space-y-6">
+              {/* Student Header */}
+              <div
+                className="flex items-center gap-6 p-6 rounded-xl"
+                style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+              >
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-semibold"
+                  style={{ background: "var(--gold-dim)", color: "var(--gold)" }}
+                >
+                  {selectedStudent.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold" style={{ color: "var(--ink-primary)" }}>
+                    {selectedStudent.name}
+                  </h2>
+                  <div className="flex items-center gap-4 mt-1 text-sm" style={{ color: "var(--ink-secondary)" }}>
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-4 h-4" />
+                      {selectedStudent.email}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      Joined {formatDate(selectedStudent.joinedAt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div
+                  className="p-5 rounded-xl"
+                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                    <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                      Lessons Completed
+                    </span>
+                  </div>
+                  <div className="text-2xl font-semibold" style={{ color: "var(--gold)" }}>
+                    {studentProgress.lessonsCompleted}
+                  </div>
+                </div>
+
+                <div
+                  className="p-5 rounded-xl"
+                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                    <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                      Time Spent
+                    </span>
+                  </div>
+                  <div className="text-2xl font-semibold" style={{ color: "var(--gold)" }}>
+                    {formatTime(studentProgress.totalTimeSpent)}
+                  </div>
+                </div>
+
+                <div
+                  className="p-5 rounded-xl"
+                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Award className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                    <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                      Mastery Score
+                    </span>
+                  </div>
+                  <div className="text-2xl font-semibold" style={{ color: "var(--gold)" }}>
+                    {studentProgress.masteryScore}%
+                  </div>
+                </div>
+
+                <div
+                  className="p-5 rounded-xl"
+                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                    <span className="text-xs uppercase tracking-[0.15em]" style={{ color: "var(--ink-tertiary)" }}>
+                      Last Active
+                    </span>
+                  </div>
+                  <div className="text-2xl font-semibold" style={{ color: "var(--gold)" }}>
+                    {formatDate(studentProgress.lastActive)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div
+                className="p-5 rounded-xl"
+                style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+              >
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm" style={{ color: "var(--ink-secondary)" }}>
+                    Completion Rate
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: "var(--gold)" }}>
+                    {studentProgress.completionPercentage}%
+                  </span>
+                </div>
+                <div className="w-full h-3 rounded-full" style={{ background: "var(--bg-night)" }}>
+                  <div
+                    className="h-3 rounded-full transition-all"
+                    style={{
+                      width: `${studentProgress.completionPercentage}%`,
+                      background: "linear-gradient(90deg, var(--gold-deep) 0%, var(--gold) 100%)",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{ background: "var(--bg-elevated)", border: "1px solid var(--hairline)" }}
+              >
+                <div
+                  className="p-4 text-xs uppercase tracking-[0.15em]"
                   style={{
                     background: "var(--bg-night)",
                     color: "var(--ink-tertiary)",
-                    border: "1px solid var(--hairline)",
+                    borderBottom: "1px solid var(--hairline)",
                   }}
                 >
-                  {feature}
-                </span>
-              ))}
+                  Recent Activity
+                </div>
+                <div className="divide-y" style={{ borderColor: "var(--hairline)" }}>
+                  {studentActivity.length === 0 ? (
+                    <div className="p-8 text-center" style={{ color: "var(--ink-tertiary)" }}>
+                      No recent activity
+                    </div>
+                  ) : (
+                    studentActivity.map((activity) => (
+                      <div key={activity.id} className="p-4 flex items-center gap-4">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{
+                            background: activity.type === "lesson_completed"
+                              ? "var(--gold)"
+                              : activity.type === "lesson_started"
+                              ? "#f59e0b"
+                              : "var(--ink-tertiary)",
+                          }}
+                        />
+                        <div className="flex-1">
+                          <div className="text-sm" style={{ color: "var(--ink-primary)" }}>
+                            {activity.description}
+                          </div>
+                          <div className="text-xs" style={{ color: "var(--ink-tertiary)" }}>
+                            {formatDate(activity.timestamp)}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, Compass, Loader2, Zap, Map, Star } from "lucide-react";
+import { ArrowRight, Sparkles, Compass, Loader2, Zap, Map, Star, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { useStudentRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 import { Reveal } from "@/components/socratic/premium/Reveal";
@@ -9,6 +10,7 @@ import { PremiumButton } from "@/components/socratic/premium/PremiumButton";
 import { ConstellationPreview } from "@/components/socratic/ConstellationPreview";
 import { DiscoveryCards } from "@/components/socratic/discovery";
 import { discoveryTitle, realmFromDomain } from "@/lib/realms";
+import { JoinClassModal } from "@/components/JoinClassModal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -67,6 +69,7 @@ function computeProgress(session: SessionRecord): number {
 
 function DiscoveryHub() {
   const { isLoading: authLoading } = useStudentRouteGuard();
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
   // Show loading while checking auth
   if (authLoading) {
@@ -448,8 +451,52 @@ function DiscoveryHub() {
         </Reveal>
       </div>
 
+      {/* Join Class Card */}
+      <Reveal delay={350}>
+        <GlassPanel elevated className="flex flex-col justify-between min-h-[200px] p-8 lg:p-10">
+          <div className="space-y-4">
+            <div
+              className="flex items-center gap-2.5 text-xs uppercase tracking-[0.15em]"
+              style={{ color: "var(--gold-soft)" }}
+            >
+              <Users className="h-3.5 w-3.5" />
+              Classroom
+            </div>
+            <h3
+              className="text-xl font-semibold font-display"
+              style={{ color: "var(--ink-primary)" }}
+            >
+              Join a Class
+            </h3>
+            <p
+              className="text-sm leading-relaxed max-w-md"
+              style={{ color: "var(--ink-secondary)" }}
+            >
+              Have a class code from your teacher? Enter it here to join your class and start
+              learning with your classmates.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setIsJoinModalOpen(true)}
+            className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-300 hover:scale-105 w-fit"
+            style={{
+              background: "linear-gradient(135deg, var(--gold-deep) 0%, var(--gold) 100%)",
+              color: "var(--bg-primary)",
+              boxShadow: "0 4px 20px rgba(201,162,75,0.3)",
+            }}
+          >
+            <Users className="w-4 h-4" />
+            Join Class
+          </button>
+        </GlassPanel>
+      </Reveal>
+
       {/* Discovery Cards Section */}
       <DiscoveryCards className="mt-16" />
+
+      {/* Join Class Modal */}
+      <JoinClassModal isOpen={isJoinModalOpen} onClose={() => setIsJoinModalOpen(false)} />
     </div>
   );
 }

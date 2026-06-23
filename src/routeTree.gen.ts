@@ -24,9 +24,11 @@ import { Route as LessonBuilderRouteImport } from './routes/lesson-builder'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as GatewaysRouteImport } from './routes/gateways'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as EnrolledClassesRouteImport } from './routes/enrolled-classes'
 import { Route as EngineRouteImport } from './routes/engine'
 import { Route as ArchitectureLogRouteImport } from './routes/architecture-log'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TeacherCreateClassRouteImport } from './routes/teacher/create-class'
 
 const WorldsRoute = WorldsRouteImport.update({
   id: '/worlds',
@@ -103,6 +105,11 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnrolledClassesRoute = EnrolledClassesRouteImport.update({
+  id: '/enrolled-classes',
+  path: '/enrolled-classes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EngineRoute = EngineRouteImport.update({
   id: '/engine',
   path: '/engine',
@@ -118,11 +125,17 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherCreateClassRoute = TeacherCreateClassRouteImport.update({
+  id: '/teacher/create-class',
+  path: '/teacher/create-class',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/architecture-log': typeof ArchitectureLogRoute
   '/engine': typeof EngineRoute
+  '/enrolled-classes': typeof EnrolledClassesRoute
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
   '/journal': typeof JournalRoute
@@ -138,11 +151,13 @@ export interface FileRoutesByFullPath {
   '/teacher-student-preview': typeof TeacherStudentPreviewRoute
   '/teacher-students': typeof TeacherStudentsRoute
   '/worlds': typeof WorldsRoute
+  '/teacher/create-class': typeof TeacherCreateClassRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/architecture-log': typeof ArchitectureLogRoute
   '/engine': typeof EngineRoute
+  '/enrolled-classes': typeof EnrolledClassesRoute
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
   '/journal': typeof JournalRoute
@@ -158,12 +173,14 @@ export interface FileRoutesByTo {
   '/teacher-student-preview': typeof TeacherStudentPreviewRoute
   '/teacher-students': typeof TeacherStudentsRoute
   '/worlds': typeof WorldsRoute
+  '/teacher/create-class': typeof TeacherCreateClassRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/architecture-log': typeof ArchitectureLogRoute
   '/engine': typeof EngineRoute
+  '/enrolled-classes': typeof EnrolledClassesRoute
   '/explore': typeof ExploreRoute
   '/gateways': typeof GatewaysRoute
   '/journal': typeof JournalRoute
@@ -179,6 +196,7 @@ export interface FileRoutesById {
   '/teacher-student-preview': typeof TeacherStudentPreviewRoute
   '/teacher-students': typeof TeacherStudentsRoute
   '/worlds': typeof WorldsRoute
+  '/teacher/create-class': typeof TeacherCreateClassRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -186,6 +204,7 @@ export interface FileRouteTypes {
     | '/'
     | '/architecture-log'
     | '/engine'
+    | '/enrolled-classes'
     | '/explore'
     | '/gateways'
     | '/journal'
@@ -201,11 +220,13 @@ export interface FileRouteTypes {
     | '/teacher-student-preview'
     | '/teacher-students'
     | '/worlds'
+    | '/teacher/create-class'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/architecture-log'
     | '/engine'
+    | '/enrolled-classes'
     | '/explore'
     | '/gateways'
     | '/journal'
@@ -221,11 +242,13 @@ export interface FileRouteTypes {
     | '/teacher-student-preview'
     | '/teacher-students'
     | '/worlds'
+    | '/teacher/create-class'
   id:
     | '__root__'
     | '/'
     | '/architecture-log'
     | '/engine'
+    | '/enrolled-classes'
     | '/explore'
     | '/gateways'
     | '/journal'
@@ -241,12 +264,14 @@ export interface FileRouteTypes {
     | '/teacher-student-preview'
     | '/teacher-students'
     | '/worlds'
+    | '/teacher/create-class'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArchitectureLogRoute: typeof ArchitectureLogRoute
   EngineRoute: typeof EngineRoute
+  EnrolledClassesRoute: typeof EnrolledClassesRoute
   ExploreRoute: typeof ExploreRoute
   GatewaysRoute: typeof GatewaysRoute
   JournalRoute: typeof JournalRoute
@@ -262,6 +287,7 @@ export interface RootRouteChildren {
   TeacherStudentPreviewRoute: typeof TeacherStudentPreviewRoute
   TeacherStudentsRoute: typeof TeacherStudentsRoute
   WorldsRoute: typeof WorldsRoute
+  TeacherCreateClassRoute: typeof TeacherCreateClassRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -371,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/enrolled-classes': {
+      id: '/enrolled-classes'
+      path: '/enrolled-classes'
+      fullPath: '/enrolled-classes'
+      preLoaderRoute: typeof EnrolledClassesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/engine': {
       id: '/engine'
       path: '/engine'
@@ -392,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/create-class': {
+      id: '/teacher/create-class'
+      path: '/teacher/create-class'
+      fullPath: '/teacher/create-class'
+      preLoaderRoute: typeof TeacherCreateClassRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -399,6 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArchitectureLogRoute: ArchitectureLogRoute,
   EngineRoute: EngineRoute,
+  EnrolledClassesRoute: EnrolledClassesRoute,
   ExploreRoute: ExploreRoute,
   GatewaysRoute: GatewaysRoute,
   JournalRoute: JournalRoute,
@@ -414,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherStudentPreviewRoute: TeacherStudentPreviewRoute,
   TeacherStudentsRoute: TeacherStudentsRoute,
   WorldsRoute: WorldsRoute,
+  TeacherCreateClassRoute: TeacherCreateClassRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

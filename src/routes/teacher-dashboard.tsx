@@ -4,9 +4,15 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useTeacherRouteGuard, RouteGuardLoading } from "@/lib/route-guards";
 import { useAuth } from "@/lib/auth-context";
+import { getMyClasses, type ClassData } from "@/services/api/classApi";
+import {
+  getTeacherDashboard,
+  type TeacherDashboard,
+  type ActivityFeed,
+} from "@/services/api/analyticsApi";
 import {
   DashboardHeader,
   ClassOverview,
@@ -27,138 +33,200 @@ export const Route = createFileRoute("/teacher-dashboard")({
 });
 
 /**
- * Placeholder data - will be replaced with API calls
+ * Convert dashboard activity to student activity type
  */
-function getPlaceholderData() {
-  const overview: DashboardOverview = {
-    totalClasses: 3,
-    totalStudents: 24,
-    activeToday: 8,
-    averageMastery: 67,
-  };
+function mapToStudentActivity(activities: ActivityFeed[]): StudentActivityType[] {
+  return activities.map((activity) => ({
+    _id: activity.id,
+    studentId: activity.studentId || "",
+    studentName: activity.studentName || "Unknown",
+    action: activity.action as StudentActivityType["action"],
+    description: activity.description,
+    timestamp: activity.timestamp,
+  }));
+}
 
-  const classes: ClassInfo[] = [
-    {
-      _id: "class-1",
-      name: "Introduction to Physics",
-      description: "Fundamental concepts of mechanics and waves",
-      studentCount: 12,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      _id: "class-2",
-      name: "Advanced Mathematics",
-      description: "Calculus and linear algebra foundations",
-      studentCount: 8,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      _id: "class-3",
-      name: "Chemistry Lab",
-      description: "Practical chemistry experiments and safety",
-      studentCount: 4,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
-
-  const activities: StudentActivityType[] = [
-    {
-      _id: "act-1",
-      studentId: "student-1",
-      studentName: "Alex Chen",
-      action: "breakthrough",
-      description: "Mastered the concept of gravitational forces",
-      timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    },
-    {
-      _id: "act-2",
-      studentId: "student-2",
-      studentName: "Maria Garcia",
-      action: "achievement_earned",
-      description: "Earned 'Star Born' achievement",
-      timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    },
-    {
-      _id: "act-3",
-      studentId: "student-3",
-      studentName: "James Wilson",
-      action: "session_completed",
-      description: "Completed quantum mechanics session",
-      timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    },
-    {
-      _id: "act-4",
-      studentId: "student-4",
-      studentName: "Sarah Kim",
-      action: "artifact_unlocked",
-      description: "Unlocked 'Photon Collector' artifact",
-      timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-    },
-  ];
-
-  const reports: ReportSummary[] = [
+/**
+ * Generate reports from dashboard data
+ */
+function generateReports(dashboard: TeacherDashboard): ReportSummary[] {
+  return [
     {
       id: "progress-1",
       name: "Weekly Progress",
       type: "progress",
-      studentCount: 24,
+      studentCount: dashboard.totalStudents,
     },
     {
       id: "achievements-1",
       name: "Achievement Summary",
       type: "achievements",
-      studentCount: 18,
+      studentCount: dashboard.lessonsCompleted,
     },
     {
       id: "mastery-1",
       name: "Mastery Report",
       type: "mastery",
-      studentCount: 24,
+      studentCount: dashboard.totalStudents,
     },
     {
       id: "interventions-1",
-      name: "Intervention Alerts",
-      type: "interventions",
-      studentCount: 3,
+      name: "Completion Rate",
+      type: "progress",
+      studentCount: dashboard.lessonsAssigned > 0
+        ? Math.round((dashboard.lessonsCompleted / dashboard.lessonsAssigned) * 100)
+        : 0,
     },
   ];
-
-  return { overview, classes, activities, reports };
 }
 
 function TeacherDashboardPage() {
-  const { isLoading } = useTeacherRouteGuard();
+  const { isLoading: isGuardLoading } = useTeacherRouteGuard();
   const { user } = useAuth();
 
-  // Placeholder data - must be called before early returns
-  const { overview, classes, activities, reports } = useMemo(() => getPlaceholderData(), []);
+  const [classes, setClasses] = useState<ClassData[]>([]);
+  const [dashboard, setDashboard] = useState<TeacherDashboard | null>(null);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load classes from API
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        setIsLoadingClasses(true);
+        setError(null);
+        const data = await getMyClasses();
+        setClasses(data);
+      } catch (err) {
+        console.error("Failed to load classes:", err);
+        setError("Failed to load classes");
+      } finally {
+        setIsLoadingClasses(false);
+      }
+    };
+
+    loadClasses();
+  }, []);
+
+  // Load dashboard analytics from API
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setIsLoadingDashboard(true);
+        const data = await getTeacherDashboard();
+        setDashboard(data);
+      } catch (err) {
+        console.error("Failed to load dashboard:", err);
+        // Don't set error - dashboard is optional
+      } finally {
+        setIsLoadingDashboard(false);
+      }
+    };
+
+    loadDashboard();
+  }, []);
+
+  // Convert API class data to ClassInfo type for components
+  const classInfoList: ClassInfo[] = useMemo(() => {
+    return classes.map((c) => ({
+      _id: c._id,
+      className: c.className,
+      classCode: c.classCode,
+      description: c.description,
+      teacherId: c.teacherId,
+      studentCount: c.studentCount,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+    }));
+  }, [classes]);
+
+  // Calculate overview from real dashboard data or fallback to class data
+  const overview: DashboardOverview = useMemo(() => {
+    if (dashboard) {
+      return {
+        totalClasses: dashboard.totalClasses,
+        totalStudents: dashboard.totalStudents,
+        activeToday: dashboard.activeToday,
+        averageMastery: dashboard.averageMastery,
+      };
+    }
+    // Fallback to class-based calculation
+    const totalStudents = classes.reduce((sum, c) => sum + c.studentCount, 0);
+    return {
+      totalClasses: classes.length,
+      totalStudents,
+      activeToday: 0,
+      averageMastery: 0,
+    };
+  }, [classes, dashboard]);
+
+  // Use real activities from dashboard or empty array
+  const activities: StudentActivityType[] = useMemo(() => {
+    if (dashboard?.recentActivity) {
+      return mapToStudentActivity(dashboard.recentActivity);
+    }
+    return [];
+  }, [dashboard]);
+
+  // Generate reports from dashboard data
+  const reports: ReportSummary[] = useMemo(() => {
+    if (dashboard) {
+      return generateReports(dashboard);
+    }
+    return [];
+  }, [dashboard]);
 
   // Show loading while auth is being checked
-  if (isLoading) {
+  if (isGuardLoading) {
     return <RouteGuardLoading />;
   }
 
-  const hasClasses = classes.length > 0;
+  const hasClasses = classInfoList.length > 0;
+  const isLoading = isLoadingClasses || isLoadingDashboard;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       {/* Dashboard Header */}
       <DashboardHeader teacherName={user?.name || "Teacher"} />
 
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-2"
+            style={{
+              borderColor: "var(--gold) transparent var(--gold) transparent",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !isLoading && (
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            background: "rgba(239,68,68,0.1)",
+            border: "1px solid rgba(239,68,68,0.3)",
+            color: "#ef4444",
+          }}
+        >
+          {error}
+        </div>
+      )}
+
       {/* Empty state when no classes */}
-      {!hasClasses && <EmptyClassState />}
+      {!isLoading && !error && !hasClasses && <EmptyClassState />}
 
       {/* Dashboard content when classes exist */}
-      {hasClasses && (
+      {!isLoading && !error && hasClasses && (
         <>
           {/* Learning Insights */}
           <LearningInsights overview={overview} insights={[]} />
 
           {/* Class Overview */}
-          <ClassOverview classes={classes} />
+          <ClassOverview classes={classInfoList} />
 
           {/* Two column layout: Activity + Reports */}
           <div className="grid gap-8 lg:grid-cols-2">

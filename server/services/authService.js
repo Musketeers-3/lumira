@@ -24,6 +24,8 @@ export const generateToken = (userId) => {
  * @returns {object} User and token
  */
 export const register = async ({ email, password, name, role }) => {
+  console.log("ROLE:", role);
+  console.log("EMAIL:", email);
   // Check if user already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {

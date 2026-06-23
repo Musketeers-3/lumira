@@ -12,6 +12,7 @@ import { register, login, getUserById } from "../services/authService.js";
  */
 export const registerUser = async (req, res, next) => {
   try {
+    console.log("REGISTER BODY:", req.body);
     const { email, password, name, role } = req.body;
 
     if (!email || !password) {
@@ -35,6 +36,8 @@ export const registerUser = async (req, res, next) => {
       data: { user, token },
     });
   } catch (error) {
+    console.error("REGISTER ERROR:", error);
+    console.error("REGISTER STACK:", error.stack);
     next(error);
   }
 };
